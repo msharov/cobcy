@@ -68,6 +68,8 @@ advancing		{ return (TOK_ADVANCING);	}
 after			{ return (TOK_AFTER);	}
 all			{ return (TOK_ALL);	}
 alphabetic		{ return (TOK_ALPHABETIC);	}
+alphabetic-upper        { return (TOK_ALPHABETIC_UPPER); }
+alphabetic-lower        { return (TOK_ALPHABETIC_LOWER); }
 alter			{ return (TOK_ALTER);	}
 alternate		{ return (TOK_ALTERNATE);	}
 and			{ return (TOK_AND);	}
@@ -102,6 +104,7 @@ computational		{ return (TOK_COMPUTATIONAL);	}
 compute			{ return (TOK_COMPUTE);	}
 configuration		{ return (TOK_CONFIGURATION);	}
 contains		{ return (TOK_CONTAINS);	}
+content                 { return (TOK_CONTENT);         }
 control			{ return (TOK_CONTROL);	}
 controls		{ return (TOK_CONTROLS);	}
 copy			{ return (TOK_COPY);	}
@@ -253,8 +256,8 @@ proceed			{ return (TOK_PROCEED);	}
 program			{ return (TOK_PROGRAM);	}
 program\-id		{ return (TOK_PROGRAM_ID);	}
 queue			{ return (TOK_QUEUE);	}
-quote			{ return (TOK_QUOTE);	}
-quotes			{ return (TOK_QUOTES);	}
+quote	|
+quotes			{ return (TOK_QUOTE);	}
 random			{ return (TOK_RANDOM);	}
 rd			{ return (TOK_RD);	}
 read			{ return (TOK_READ);	}
@@ -263,6 +266,7 @@ record			{ return (TOK_RECORD);	}
 records			{ return (TOK_RECORDS);	}
 redefines		{ return (TOK_REDEFINES);	}
 reel			{ return (TOK_REEL);	}
+reference               { return (TOK_REFERENCE); }
 references		{ return (TOK_REFERENCES);	}
 relative		{ return (TOK_RELATIVE);	}
 release			{ return (TOK_RELEASE);	}
@@ -374,6 +378,8 @@ zeros 			{ strcpy (StringBuffer, "_zero_var");
 ")"			{ return (TOK_RPAREN);	}
 ">"			{ return (TOK_GREATER);	}
 "<"			{ return (TOK_LESS);	}
+">="                    { return (TOK_GREATER_EQ); }
+"<="                    { return (TOK_LESS_EQ); }
 
 \n		{ ++ CurrentLine; }
 

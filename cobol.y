@@ -30,6 +30,8 @@ long int FillerIndex = 0;
 %token TOK_AFTER
 %token TOK_ALL
 %token TOK_ALPHABETIC
+%token TOK_ALPHABETIC_UPPER
+%token TOK_ALPHABETIC_LOWER
 %token TOK_ALTER
 %token TOK_ALTERNATE
 %token TOK_AND
@@ -64,6 +66,7 @@ long int FillerIndex = 0;
 %token TOK_COMPUTE
 %token TOK_CONFIGURATION
 %token TOK_CONTAINS
+%token TOK_CONTENT
 %token TOK_CONTROL
 %token TOK_CONTROLS
 %token TOK_COPY
@@ -131,6 +134,7 @@ long int FillerIndex = 0;
 %token TOK_GIVING
 %token TOK_GO
 %token TOK_GREATER
+%token TOK_GREATER_EQ
 %token TOK_GROUP
 %token TOK_HEADING
 %token TOK_HIGH_VALUE
@@ -160,6 +164,7 @@ long int FillerIndex = 0;
 %token TOK_LEFT
 %token TOK_LENGTH
 %token TOK_LESS
+%token TOK_LESS_EQ
 %token TOK_LIMIT
 %token TOK_LIMITS
 %token TOK_LINAGE
@@ -214,7 +219,6 @@ long int FillerIndex = 0;
 %token TOK_PROGRAM_ID
 %token TOK_QUEUE
 %token TOK_QUOTE
-%token TOK_QUOTES
 %token TOK_RANDOM
 %token TOK_RD
 %token TOK_READ
@@ -223,6 +227,7 @@ long int FillerIndex = 0;
 %token TOK_RECORDS
 %token TOK_REDEFINES
 %token TOK_REEL
+%token TOK_REFERENCE
 %token TOK_REFERENCES
 %token TOK_RELATIVE
 %token TOK_RELEASE
@@ -398,7 +403,7 @@ select_block:	select_statement select_block_pl
 select_block_pl:	select_block
 	|
 	;
-select_statement:	TOK_SELECT identifier TOK_ASSIGN TOK_TO identifier
+select_statement:	TOK_SELECT optional_optional identifier TOK_ASSIGN TOK_TO identifier
 			file_status_option
 			access_mode_option
 			organization_option
@@ -443,6 +448,7 @@ record_key_option:	TOK_RECORD TOK_KEY optional_is
 data_division:	TOK_DATA TOK_DIVISION TOK_PERIOD
 		file_section
 		working_storage_section
+                linkage_section
 	;
 
 file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
@@ -513,6 +519,11 @@ record_entry_block_pl:	record_entry_block
 	|
 	;
 
+linkage_section:	TOK_LINKAGE TOK_SECTION TOK_PERIOD
+				record_entry_block
+	|
+	;
+
 procedure_division:	TOK_PROCEDURE TOK_DIVISION TOK_PERIOD
 			{ StartCode(); }
 			statement_list
@@ -539,8 +550,7 @@ statement:	clause TOK_PERIOD
 
 else_list:	else_clause else_list
 	|
-	;
-
+	; 
 else_clause:	TOK_ELSE elsif_or_simple
 	;
 
@@ -554,11 +564,24 @@ elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); }
 
 boolean_list:	boolean boolean_list_pl
 	;
+
 boolean_list_pl:	logic_connector { GenConnect(); } boolean_list
 	|
 	;
-boolean:	expression optional_is relational expression	{ GenBool(); }
-	;
+
+boolean:       expression optional_is boolean2 { GenBool(); }
+        ;
+
+boolean2:           TOK_ALPHABETIC
+                 { strcpy (StringBuffer, "Alphabetic"); Push (SE_Bool); }
+        |           TOK_ALPHABETIC_UPPER
+                 { strcpy (StringBuffer, "Alphabetic-Upper"); Push (SE_Bool); }
+        |           TOK_ALPHABETIC_LOWER
+                 { strcpy (StringBuffer, "Alphabetic-Lower"); Push (SE_Bool); }
+        |           relational
+                      expression
+        ;
+                    
 
 logic_connector:	TOK_AND
 			{ strcpy (StringBuffer, "&&"); Push (SE_Connector); }
@@ -566,20 +589,29 @@ logic_connector:	TOK_AND
 			{ strcpy (StringBuffer, "||"); Push (SE_Connector); }
 	;
 
-relational:	TOK_GREATER TOK_THAN	
+relational:	TOK_GREATER optional_than
 		{ strcpy (StringBuffer, ">"); Push (SE_Bool); }
-	|	TOK_LESS TOK_THAN	
+	|	TOK_LESS optional_than	
 		{ strcpy (StringBuffer, "<"); Push (SE_Bool); }
-	|	TOK_EQUAL TOK_TO	
+	|	TOK_EQUAL optional_to
 		{ strcpy (StringBuffer, "=="); Push (SE_Bool); }
+        |       TOK_GREATER_EQ
+                { strcpy (StringBuffer, ">="); Push (SE_Bool); }
+        |       TOK_LESS_EQ 
+                { strcpy (StringBuffer, "<="); Push (SE_Bool); }
 	|	TOK_NOT reverse_relational
 	;
-reverse_relational:	TOK_GREATER TOK_THAN
+
+reverse_relational:	TOK_GREATER optional_than
 		{ strcpy (StringBuffer, "<="); Push (SE_Bool); }
-	|	TOK_LESS TOK_THAN
+	|	TOK_LESS optional_than
 		{ strcpy (StringBuffer, ">="); Push (SE_Bool); }
-	|	TOK_EQUAL TOK_TO
+	|	TOK_EQUAL optional_to
 		{ strcpy (StringBuffer, "!="); Push (SE_Bool); }
+        |       TOK_GREATER_EQ 
+                { strcpy (StringBuffer, "<"); Push (SE_Bool); }
+        |       TOK_LESS_EQ 
+                { strcpy (StringBuffer, ">"); Push (SE_Bool); }
 	;
 
 clause:		TOK_ACCEPT id_list { GenAccept(); }
@@ -602,6 +634,7 @@ clause:		TOK_ACCEPT id_list { GenAccept(); }
 	|	TOK_READ identifier { GenRead(); }
 		optional_word_record TOK_AT TOK_END compound_clause
 	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
+        |       TOK_CALL call_list using_options { NIM("CALL"); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
 	;
 
@@ -621,8 +654,9 @@ expression:	identifier
 	|	string
 	;
 
-display_args:	{ Push (SE_Mark); } display_args_marked
+display_args:	{ Push (SE_Mark); } optional_all display_args_marked
 	;
+
 display_args_marked:	display_arg display_args_pl
 	;
 display_args_pl: optional_comma	display_args_marked
@@ -632,6 +666,7 @@ display_arg:	identifier
 	|	string
 	|	integer
 	|	float
+        |       TOK_QUOTE { Push (SE_Quote); }
 	;
 
 upon_option:	TOK_UPON identifier { SetDisplayOutput(); }
@@ -692,6 +727,29 @@ write_from_clause:	TOK_FROM identifier
 		  Push (SE_Identifier); }
 	;
 
+call_list:     string
+         |     identifier
+         ;
+
+using_options: TOK_USING using_args using_identifier
+        | 
+        ;
+
+using_args:    optional_by using_by
+        |
+        ;
+
+using_by:      TOK_REFERENCE
+        |      TOK_CONTENT
+        ;
+
+using_identifier:   identifier using_inde_next
+        ;
+
+using_inde_next:     optional_comma using_identifier
+        |
+        ;
+
 id_list:	{ Push (SE_Mark); } id_list_marked
 	;
 id_list_marked: identifier id_list_pl
@@ -713,6 +771,26 @@ optional_comma:		TOK_COMMA
 optional_word_record:	TOK_RECORD
 	|
 	;
+
+optional_to:            TOK_TO
+        |
+        ;
+
+optional_all:           TOK_ALL
+        |
+        ;
+
+optional_than:          TOK_THAN
+        |
+        ;
+
+optional_optional:      TOK_OPTIONAL
+        |
+        ;
+
+optional_by:            TOK_BY
+        |
+        ;
 
 identifier:	TOK_IDENTIFIER { Push (SE_Identifier); }
 	;

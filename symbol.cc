@@ -67,21 +67,31 @@ void CobolSymbol :: SetPicture (char * NewPic)
 {
 char Expanded [500];
 int i;
+int j = 0;
+int length;
+int oldlength;
 
     ExpandPicture (NewPic, Expanded);
 
-    Picture.Size = strlen (Expanded);
+    for (i=0; i < strlen (Expanded); i++)
+if (Expanded[i] != '.' && Expanded[i] != ',' && Expanded[i] != '/' && Expanded[i] != 'b' && Expanded[i] != '0') 
+       j++;
+
+    length = j;
+
+    oldlength = strlen (Expanded); 
+    Picture.Size = length;
     Picture.Kind = PictureType::Undefined;
 
     if (Picture.Text != NULL)
        delete [] Picture.Text;
-    Picture.Text = new char [Picture.Size + 1];
+    Picture.Text = new char [oldlength + 1];
     if (Picture.Text == NULL)
        WriteError ("Out of memory allocating picture text storage");
 
     strcpy (Picture.Text, Expanded);
 
-    for (i = 0; i < Picture.Size; ++ i) {
+    for (i = 0; i < oldlength; ++ i) {
        if (Expanded[i] == 'x')
 	  Picture.Kind = PictureType::String;
        else if (Expanded[i] == 'a')
@@ -99,14 +109,15 @@ int i;
 	  // nDigitsBDP is i unless a sign was present
 	  Picture.nDigitsBDP = i - (Picture.Sign ? 1 : 0); 
 	  // Subtract DBDP from total and subtract this V
-	  Picture.nDigitsADP = Picture.Size - 
+	  Picture.nDigitsADP = oldlength - 
 			       Picture.nDigitsBDP - 1;
        }
     }
 
     switch (Picture.Kind) {
 	case PictureType::String:	
-		Picture.CSize = strlen (Expanded) + 1;
+/*		Picture.CSize = strlen (Expanded) + 1; */
+		Picture.CSize = length + 1;
 		break; 
 	case PictureType::Integer:	
 		Picture.CSize = sizeof(long int);

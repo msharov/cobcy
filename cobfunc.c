@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include "cobfunc.h"
@@ -12,6 +13,40 @@
 #ifndef min
 #   define min(a,b)	((a) < (b) ? (a) : (b))
 #endif
+
+int _alphabetic (char * str) 
+{
+  int i;
+  for (i = 0; i < strlen(str); i++)
+    if (!((str[i] >= 'A' && str[i] <= 'Z') ||
+          (str[i] >= 'a' && str[i] <= 'z') ||
+          (str[i] == ' ')))
+       return (0);
+ return (1);
+}
+
+int _alphab_up_low(char * str, int what)
+
+/* what = 1  : lowercase test
+   what = 2  : uppercase test */
+
+{
+  int i;
+  if (_alphabetic(str))
+    for (i = 0; i < strlen(str); i++)
+    {
+     if (what == 2)
+     {
+       if (islower(str[i]))
+          return (0);
+     }
+     else 
+       if (isupper(str[i]))
+          return(0);
+    }
+  else return(0);
+  return(1);
+}
 
 void _RuntimeError (char * message)
 {
@@ -57,12 +92,16 @@ char buffer[20];
 void _WriteStringVar (FILE * stream, char * var, char * pic)
 {
 int i;
-    for (i = 0; i < strlen(pic); ++ i) {
-       if (pic[i] == 'x')
-          fprintf (stream, "%c", var[i]);
-       else
-          fprintf (stream, "%c", pic[i]);
-    }
+int j;
+  for (i = 0, j = 0; i < strlen(pic); ++ i) {
+       switch (pic[i]) {
+          case 'x': fprintf (stream, "%c", var[j++]); break;
+          case 'b': fprintf (stream, " "); break;
+          case '/': fprintf (stream, "/"); break;
+          case '0': fprintf (stream, "0"); break;
+          default: fprintf (stream, "%c", pic[i]); 
+       }
+  } 
 }
 
 void _WriteIntegerVar (FILE * stream, long int var, char * pic)
@@ -86,11 +125,16 @@ int i, j = 0, nl, pl, fl = 0;
     for (i = 0; i < pl; ++ i) {
        if (pic[i] == '9') {
 	  if (fl <= nl)
-             fprintf (stream, "%c", buffer[j++]);
+             fprintf (stream, "%c", buffer[j++]); 
 	  else
              fprintf (stream, " ");
 	  -- fl;
        }
+       else if (pic[i] == '.') fprintf (stream, ".");
+       else if (pic[i] == ',') fprintf (stream, ",");
+       else if (pic[i] == '/') fprintf (stream, "/");
+       else if (pic[i] == 'b') fprintf (stream, " ");
+       else if (pic[i] == '0') fprintf (stream, "0");
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
 	     fprintf (stream, "+");
@@ -134,6 +178,11 @@ int FoundPoint = 0;
     for (i = 0; i < pl; ++ i) {
        if (pic[i] == '9')
           fprintf (stream, "%c", buffer[j++]);
+       else if (pic[i] == '.') fprintf (stream, ".");
+       else if (pic[i] == ',') fprintf (stream, ",");
+       else if (pic[i] == '/') fprintf (stream, "/");
+       else if (pic[i] == 'b') fprintf (stream, " ");
+       else if (pic[i] == '0') fprintf (stream, "0");
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
 	     fprintf (stream, "+");

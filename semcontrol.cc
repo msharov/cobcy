@@ -217,9 +217,37 @@ CobolSymbol *attrs[2];
 char prefix[80][2];
 int i;
 
-    for (i = 0; i < 3; ++ i)
-       entry[i] = SemStack.Pop();
+    for (i = 0; i < 2; ++ i)
+      entry[i] = SemStack.Pop(); 
+    
+    if ( !(strcmp(entry[0]->ident,"Alphabetic")) ||
+         !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
+         !(strcmp(entry[0]->ident,"Alphabetic-Lower")) )
+     {  
 
+       if ((attrs[0] = SymTable.Lookup (entry[1]->ident)) == NULL) {
+	  WriteError ("Unknown identifier");
+	  return;
+       }
+
+       if (attrs[0]->Picture.Kind != PictureType::String) {
+          WriteError ("Can't do alphabetic tests on non-alphabetic fields");
+          return;
+       }
+
+       if (!strcmp(entry[0]->ident,"Alphabetic"))
+         outfile << "(_alphabetic(" << entry[1]->ident << "))";
+       if (!strcmp(entry[0]->ident,"Alphabetic-Upper"))
+         outfile << "(_alphab_up_low(" << entry[1]->ident << ",2))";
+       if (!strcmp(entry[0]->ident,"Alphabetic-Lower"))
+         outfile << "(_alphab_up_low(" << entry[1]->ident << ",1))";
+
+       delete entry[0]; delete entry[1];
+     }
+    else
+  {
+    entry[2] = SemStack.Pop();
+      
     if (entry[0]->kind == SE_Identifier) {
        if ((attrs[0] = SymTable.Lookup (entry[0]->ident)) == NULL) {
 	  WriteError ("Unknown identifier");
@@ -237,9 +265,9 @@ int i;
 
     outfile << "(";
     if (entry[2]->kind == SE_Identifier)
-       outfile << prefix[1] << attrs[1]->CName;
+       outfile << prefix[1] << attrs[1]->CName; 
     else
-       PrintConstant (entry[2], outfile);
+       PrintConstant (entry[2], outfile); 
     outfile << " " << entry[1]->ident << " ";
     if (entry[0]->kind == SE_Identifier)
        outfile << prefix[0] << attrs[0]->CName;
@@ -249,6 +277,7 @@ int i;
 
     for (i = 0; i < 3; ++ i)
        delete entry[i];
+  } 
 }
 
 void GenConnect (void)

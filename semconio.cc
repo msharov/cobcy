@@ -66,6 +66,11 @@ int i, nIds;
 	  outfile << "fprintf (" << DisplayOutput;
 	  outfile << ", \"" << entry->fval << "\");\n";
        }
+       else if (entry->kind == SE_Quote) {
+          GenIndent();
+          outfile << "fprintf (" << DisplayOutput;
+          outfile << ", \"\\\"\");\n";
+       }
        else if (entry->kind == SE_String) {
           GenIndent();
 	  outfile << "fprintf (" << DisplayOutput;

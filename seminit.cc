@@ -8,6 +8,11 @@
 #include "semfile.h"
 #include "semcontrol.h"
 
+void NIM (char * str)
+{
+  outfile << "/* " << str <<  " Not implemented yet */" <<  "\n";
+}
+
 void FinishDecl (void)
 {
     CloseScopeLevels (0);

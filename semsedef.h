@@ -18,7 +18,8 @@ typedef enum {
     SE_Identifier,
     SE_Picture,
     SE_Bool,
-    SE_Connector
+    SE_Connector,
+    SE_Quote
 } StackEntryKind;
 
 typedef struct {

@@ -13,6 +13,7 @@
   void 	EndCode (void);
   void 	StartProgram (void);
   void 	EndProgram (void);
+  void  NIM (char * str);
 /*-------------------------------------------------*/
 
 #endif
