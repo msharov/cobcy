@@ -11,7 +11,7 @@
 #include <queue.h>
 #include <hash.h>
 #include <string.h>
-#include "semsedef.h"
+#include "semtypes.h"
 #include "semutil.h"
 
 #define MAX_FILENAME	30
