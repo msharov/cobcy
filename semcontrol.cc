@@ -42,7 +42,7 @@ char ErrorBuffer [80];
        NewLabel = new CobolLabel;
        NewLabel->SetName (CurEntry->ident);
        // Enter it in the table
-#if DEBUG
+#ifndef NDEBUG
        cout << "DBG: Inserting paragraph " << CurEntry->ident;
        cout << " into symbol table.\n";
 #endif
@@ -83,7 +83,7 @@ StackEntry * CurEntry;
     if ((DestLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
        DestLabel = new CobolLabel;
        DestLabel->SetName (CurEntry->ident);
-#if DEBUG
+#ifndef NDEBUG
        cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
 #endif
        DestLabel->Undeclared = TRUE;
@@ -106,7 +106,7 @@ CobolLabel * ProcAttr;
        ProcAttr = new CobolLabel;
        ProcAttr->SetName (Proc->ident);
        ProcAttr->Undeclared = TRUE;
-#if DEBUG
+#ifndef NDEBUG
        cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
 #endif
        SymTable.Insert (Proc->ident, ProcAttr);
@@ -120,7 +120,7 @@ CobolLabel * ProcAttr;
     }
 
     GenIndent();
-    ProcAttr->Write (codef);
+    ProcAttr->WriteTextStream (codef);
     codef << "();\n";
 
     if (Count->ival > 1)
@@ -235,12 +235,12 @@ int i;
 
        codef << "(";
        if (entry[2]->kind == SE_Identifier)
-	  attrs[1]->Write (codef); 
+	  attrs[1]->WriteTextStream (codef); 
        else
 	  PrintConstant (entry[2], codef); 
        codef << " " << entry[1]->ident << " ";
        if (entry[0]->kind == SE_Identifier)
-	  attrs[0]->Write (codef);
+	  attrs[0]->WriteTextStream (codef);
        else
 	  PrintConstant (entry[0], codef);
        codef << ")";
@@ -285,7 +285,7 @@ int pi = 0, nPars = 0;
     for (pi = 1; pi <= nPars; ++ pi) {
        CurLabel = TempBufQueue.Serve();
        declf << "const int _pi_";
-       CurLabel->Write (declf);
+       CurLabel->WriteTextStream (declf);
        declf << " = " << pi << ";\n";
        ParagraphList.Append (CurLabel);
     }
@@ -328,7 +328,7 @@ int pi = 0, nPars = 0;
        CurLabel = ParagraphList.Serve();
        GenIndent();
        codef << "case " << pi << ": _cpi += ";
-       CurLabel->Write (codef);
+       CurLabel->WriteTextStream (codef);
        codef << "(); break;\n";
     }
 
