@@ -37,13 +37,14 @@ protected:
 public:
 			PictureType (void);
     WORD		Set (char * NewPicture);
-    void		GenTypePrefix (ofstream& os);
-    void		GenTypeSuffix (ofstream& os);
-    void		GenReadFunction (ofstream& os);
-    void		GenWriteFunction (ofstream& os);
-    BOOL		GenCastFunction (ofstream& os, PictureType& pic);
-    virtual void	Write (ostream& os);
-    virtual void	Write (ofstream& os);
+    void		GenTypePrefix (ostream& os);
+    void		GenTypeSuffix (ostream& os);
+    void		GenReadFunction (ostream& os);
+    void		GenWriteFunction (ostream& os);
+    void		GenSignature (ostream& os);
+    BOOL		GenCastFrom (ostream& os, PictureType& pic);
+    BOOL		GenCastTo (ostream& os, PictureType& pic);
+    virtual void	WriteTextStream (ostream& os);
     inline BOOL		IsNumeric (void);
     inline WORD		GetSize (void);
     virtual	       ~PictureType (void);

@@ -31,31 +31,31 @@ CobolSymbolType CobolRecord :: Kind (void)
     return (CS_Record);
 }
 
-void CobolRecord :: GenDeclareBegin (ofstream& os)
+void CobolRecord :: GenDeclareBegin (ostream& os)
 {
     GenIndent();
     os << "struct {\n";
 }
 
-void CobolRecord :: GenDeclareEnd (ofstream& os)
+void CobolRecord :: GenDeclareEnd (ostream& os)
 {
     GenIndent();
     os << "} " << GetCName() << ";\n";
 }
 
-void CobolRecord :: GenRead (ofstream& os, char * stream)
+void CobolRecord :: GenRead (ostream& os, char * stream)
 {
 unsigned int i;
 CobolData * child;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tReading record " << *this;
     cout << " from stream " << stream << "\n";
 #endif
     ChildList.Head();
     for (i = 0; i < nChildren; ++ i) {
        child = ChildList.LookAt();
-#if DEBUG
+#ifndef NDEBUG
        cout << "\t\tReading child " << *child << "\n";
 #endif
        child->GenRead (os, stream);
@@ -63,22 +63,41 @@ CobolData * child;
     }
 }
 
-void CobolRecord :: GenWrite (ofstream& os, char * stream)
+void CobolRecord :: GenWrite (ostream& os, char * stream)
 {
 unsigned int i;
 CobolData * child;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tWriting record " << *this;
     cout << " to stream " << stream << "\n";
 #endif
     ChildList.Head();
     for (i = 0; i < nChildren; ++ i) {
        child = ChildList.LookAt();
-#if DEBUG
+#ifndef NDEBUG
        cout << "\t\tWriting child " << *child << "\n";
 #endif
        child->GenWrite (os, stream);
+       ChildList.Next();
+    }
+}
+
+void CobolRecord :: GenSignature (ostream& os)
+{
+unsigned int i;
+CobolData * child;
+
+#ifndef NDEBUG
+    cout << "\tSigning record " << *this << "\n";
+#endif
+    ChildList.Head();
+    for (i = 0; i < nChildren; ++ i) {
+       child = ChildList.LookAt();
+#ifndef NDEBUG
+       cout << "\t\tSigning child " << *child << "\n";
+#endif
+       child->GenSignature (os);
        ChildList.Next();
     }
 }

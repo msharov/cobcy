@@ -63,7 +63,7 @@ BOOL FoundPoint = FALSE;
 
     Expand (NewPicture, Expanded);
 
-    for (i = 0; i < strlen (Expanded); i++)
+    for (i = 0; i < strlen (Expanded); ++ i)
        if (!IsInSet (Expanded[i], ".,/b0")) 
           j++;
 
@@ -123,7 +123,7 @@ BOOL FoundPoint = FALSE;
     return (CSize);
 }
 
-void PictureType :: GenTypePrefix (ofstream& os)
+void PictureType :: GenTypePrefix (ostream& os)
 {
     if (Sign != PictureType::NoSign)
        os << "unsigned ";
@@ -144,14 +144,14 @@ void PictureType :: GenTypePrefix (ofstream& os)
     }
 }
 
-void PictureType :: GenTypeSuffix (ofstream& os)
+void PictureType :: GenTypeSuffix (ostream& os)
 {
     // Only strings need an array suffix.
     if (Kind == PictureType::String)
        os << " [" << Size + 1 << "]";
 }
 
-void PictureType :: GenReadFunction (ofstream& os)
+void PictureType :: GenReadFunction (ostream& os)
 {
     switch (Kind) {
        case PictureType::String: 
@@ -171,7 +171,7 @@ void PictureType :: GenReadFunction (ofstream& os)
     }
 }
 
-void PictureType :: GenWriteFunction (ofstream& os)
+void PictureType :: GenWriteFunction (ostream& os)
 {
     switch (Kind) {
        case PictureType::String: 
@@ -192,7 +192,31 @@ void PictureType :: GenWriteFunction (ofstream& os)
 }
 
 // Returns TRUE if a cast is needed, so that (...) can be written
-BOOL PictureType :: GenCastFunction (ofstream& os, PictureType& pic)
+BOOL PictureType :: GenCastFrom (ostream& os, PictureType& pic)
+{
+    if (Kind == pic.Kind)
+	return (FALSE);
+
+    if (IsNumeric() == pic.IsNumeric())
+	return (FALSE);
+
+    if (pic.IsNumeric()) {
+	if (pic.Kind == PictureType::Integer)
+	    os << "_StringToInteger";
+	else
+	    os << "_StringToFloat";
+    }
+    else {
+	if (pic.Kind == PictureType::Integer)
+	    os << "_IntegerToString";
+	else
+	    os << "_FloatToString";
+    }
+    return (TRUE);
+}
+
+// Returns TRUE if a cast is needed, so that (...) can be written
+BOOL PictureType :: GenCastTo (ostream& os, PictureType& pic)
 {
     if (Kind == pic.Kind)
        return (FALSE);
@@ -202,25 +226,35 @@ BOOL PictureType :: GenCastFunction (ofstream& os, PictureType& pic)
 
     if (IsNumeric()) {
        if (Kind == PictureType::Integer)
-	  os << "StringToInteger";
+	  os << "_IntegerToString";
        else
-	  os << "StringToFloat";
+	  os << "_FloatToString";
     }
     else {
        if (Kind == PictureType::Integer)
-	  os << "IntegerToString";
+	  os << "_StringToInteger";
        else
-	  os << "FloatToString";
+	  os << "_StringToFloat";
     }
     return (TRUE);
 }
 
-void PictureType :: Write (ostream& os)
+// Writes type character, size of field, and number of digits after d.p.
+//	Used for creation of DBF files.
+void PictureType :: GenSignature (ostream& os)
 {
-    os << Text;
+    os << " ";
+    if (IsNumeric())
+       os << "N ";
+    else
+       os << "C ";
+
+    // Fields are written in the file with all editing characters, so
+    //	the size of the field in a file is the length of the whole picture.
+    os << strlen(Text) << " " << nDigitsADP;
 }
 
-void PictureType :: Write (ofstream& os)
+void PictureType :: WriteTextStream (ostream& os)
 {
     os << Text;
 }

@@ -33,7 +33,7 @@ CobolSymbolType CobolVar :: Kind (void)
     return (CS_Variable);
 }
 
-void CobolVar :: GenDeclare (ofstream& os)
+void CobolVar :: GenDeclare (ostream& os)
 {
     GenIndent();
     Picture.GenTypePrefix (os);
@@ -42,21 +42,21 @@ void CobolVar :: GenDeclare (ofstream& os)
     os << ";\n";
 }
 
-void CobolVar :: GenRead (ofstream& os, char * stream)
+void CobolVar :: GenRead (ostream& os, char * stream)
 {
-#if DEBUG
+#ifndef NDEBUG
     cout << "\t\tReading variable " << *this;
     cout << " from stream " << stream << "\n";
 #endif
     GenIndent();
     Picture.GenReadFunction (os);
-    os << " (" << stream << ", " << *this << ", ";
+    os << " (" << stream << ", &" << *this << ", ";
     os << "\"" << Picture << "\");\n";
 }
 
-void CobolVar :: GenWrite (ofstream& os, char * stream)
+void CobolVar :: GenWrite (ostream& os, char * stream)
 {
-#if DEBUG
+#ifndef NDEBUG
     cout << "\t\tWriting variable " << *this;
     cout << " to stream " << stream << "\n";
 #endif
@@ -67,14 +67,14 @@ void CobolVar :: GenWrite (ofstream& os, char * stream)
 }
 
 // Move for two variables
-void CobolVar :: GenMove (ofstream& os, CobolVar * data)
+void CobolVar :: GenMove (ostream& os, CobolVar * data)
 {
     // Indent, as usual
     GenIndent();
 
     if (Picture.IsNumeric()) {
        os << *this << " = ";
-       if (Picture.GenCastFunction (os, data->Picture))
+       if (Picture.GenCastFrom (os, data->Picture))
 	  os << " (" << *data << ")";
        else
 	  os << *data;
@@ -82,7 +82,7 @@ void CobolVar :: GenMove (ofstream& os, CobolVar * data)
     }
     else if (!Picture.IsNumeric()) {
        os << "_AssignVarString (" << *this << ", ";
-       if (Picture.GenCastFunction (os, data->Picture))
+       if (Picture.GenCastFrom (os, data->Picture))
 	  os << " (" << *data << ")";
        else
 	  os << *data;
@@ -93,7 +93,7 @@ void CobolVar :: GenMove (ofstream& os, CobolVar * data)
        WriteError ("Incompatible types for assignment");
 }
 
-void CobolVar :: GenMove (ofstream& os, CobolConstant& data)
+void CobolVar :: GenMove (ostream& os, CobolConstant& data)
 {
     if (Picture.IsNumeric() && !data.IsNumeric()) {
        WriteError ("cannot cast constants (yet)");
@@ -110,7 +110,7 @@ void CobolVar :: GenMove (ofstream& os, CobolConstant& data)
 }
 
 // This should get both constants and variables
-void CobolVar :: GenArith (ofstream& os, Streamable * op1, 
+void CobolVar :: GenArith (ostream& os, Streamable * op1, 
 			   Streamable * op2, char opc)
 {
     if (Picture.IsNumeric()) {
@@ -142,6 +142,25 @@ void CobolVar :: GenArith (ofstream& os, Streamable * op1,
     }
     else
        WriteError ("arithmetic is for numbers");
+}
+
+void CobolVar :: GenSignature (ostream& os)
+{
+    os << " " << GetCName();
+    Picture.GenSignature (os);
+}
+
+void CobolVar :: GenCharCast (ostream& os)
+{
+PictureType CharPic;
+
+    CharPic.Set ("x(11)");	/* Generates a character picture */
+    if (IsNumeric()) {
+       	if (Picture.GenCastTo (os, CharPic))
+	    os << " (" << *this << ", \"" << Picture << "\")";
+    }
+    else
+	os << *this;
 }
 
 CobolVar :: ~CobolVar (void)

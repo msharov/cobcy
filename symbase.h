@@ -42,8 +42,8 @@ public:
     inline char *		GetFullCName (void);
     void			SetParent (char * NewParent);
     virtual CobolSymbolType	Kind (void) = 0;
-    virtual void		Write (ostream& os);
-    virtual void		Write (ofstream& os);
+    virtual void		WriteBinaryStream (ostream& os);
+    virtual void		WriteTextStream (ostream& os);
     virtual		       ~CobolSymbol (void);
 };
 

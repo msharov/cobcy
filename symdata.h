@@ -22,10 +22,11 @@ public:
     inline virtual WORD	GetDeclLevel (void);
     void		AssociateWithStream (CobolFile * NewStream);
     CobolFile *		GetStream (void);
-    virtual void	GenRead (ofstream& os, char * stream) = 0;
-    virtual void	GenWrite (ofstream& os, char * stream) = 0;
-    void		GenRead (ofstream& os);
-    void		GenWrite (ofstream& os);
+    virtual void	GenRead (ostream& os, char * stream) = 0;
+    virtual void	GenWrite (ostream& os, char * stream) = 0;
+    virtual void	GenSignature (ostream& os) = 0;
+    void		GenRead (ostream& os);
+    void		GenWrite (ostream& os);
     inline WORD		GetSize (void);
 		       ~CobolData (void);
 };

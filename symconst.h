@@ -9,7 +9,7 @@
 #include <mdefs.h>
 #include <streamab.h>
 
-#include "semsedef.h"
+#include "semtypes.h"
 
 class CobolConstant : public Streamable {
 protected:
@@ -34,9 +34,8 @@ public:
     CobolConstant&		operator= (long int ival);
     CobolConstant&		operator= (double fval);
     CobolConstant&		operator= (StackEntry * se);
-    virtual void		Write (ostream& os);
-    virtual void		Write (ofstream& os);
-    void			GenWrite (ofstream& os, char * stream);
+    virtual void		WriteTextStream (ostream& os);
+    void			GenWrite (ostream& os, char * stream);
     inline BOOL			IsNumeric (void);
     virtual		       ~CobolConstant (void);
 };

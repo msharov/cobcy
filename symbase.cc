@@ -67,12 +67,12 @@ char ErrorBuffer [80];
     }
 }
 
-void CobolSymbol :: Write (ostream& os)
+void CobolSymbol :: WriteBinaryStream (ostream& os)
 {
     os << FullCName;
 }
 
-void CobolSymbol :: Write (ofstream& os)
+void CobolSymbol :: WriteTextStream (ostream& os)
 {
     os << FullCName;
 }

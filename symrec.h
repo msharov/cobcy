@@ -20,10 +20,11 @@ public:
 				CobolRecord (void);
     void			AddChild (CobolData * NewChild);
     CobolSymbolType		Kind (void);
-    void			GenDeclareBegin (ofstream& os);
-    void			GenDeclareEnd (ofstream& os);
-    void			GenRead (ofstream& os, char * stream);
-    void			GenWrite (ofstream& os, char * stream);
+    void			GenDeclareBegin (ostream& os);
+    void			GenDeclareEnd (ostream& os);
+    void			GenRead (ostream& os, char * stream);
+    void			GenWrite (ostream& os, char * stream);
+    void			GenSignature (ostream& os);
     virtual		       ~CobolRecord (void);
 };
 

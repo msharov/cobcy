@@ -106,7 +106,7 @@ int length;
     return (*this);
 }
 
-void CobolConstant :: Write (ostream& os)
+void CobolConstant :: WriteTextStream (ostream& os)
 {
     switch (CurKind) {
        case CC_String:	os << "\"" << data.cval << "\"";	break;
@@ -117,18 +117,7 @@ void CobolConstant :: Write (ostream& os)
     }
 }
 
-void CobolConstant :: Write (ofstream& os)
-{
-    switch (CurKind) {
-       case CC_String:	os << "\"" << data.cval << "\"";	break;
-       case CC_Integer:	os << data.ival;	break;
-       case CC_Float:	os << data.fval;	break;
-       default:		WriteError ("constant type unknown for writing");
-       			break;
-    }
-}
-
-void CobolConstant :: GenWrite (ofstream& os, char * stream)
+void CobolConstant :: GenWrite (ostream& os, char * stream)
 {
     GenIndent();
     os << "fprintf (" << stream << ", \"";
