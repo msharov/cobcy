@@ -28,7 +28,7 @@ StackEntry * entry;
 CobolData * attr;
 int i, nIds;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tIn GenAccept\n";
 #endif
 
@@ -47,13 +47,13 @@ int i, nIds;
 		break;
 	     case AS_Date:
 	        GenIndent();
-	        attr->Write (codef);
+	        attr->WriteTextStream (codef);
 		codef << " = ";
 		codef << "_GetDate();\n";
 		break;
 	     case AS_Day:
 	        GenIndent();
-	        attr->Write (codef);
+	        attr->WriteTextStream (codef);
 		codef << " = ";
 		codef << "_GetDay();\n";
 		break;
@@ -62,7 +62,7 @@ int i, nIds;
 	     	break;
 	     case AS_Time:
 	        GenIndent();
-	        attr->Write (codef);
+	        attr->WriteTextStream (codef);
 		codef << " = ";
 		codef << "_GetTime();\n";
 		break;
@@ -84,12 +84,16 @@ CobolData * attr;
 CobolConstant cattr;
 int i, nIds;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tIn GenDisplay\n";
 #endif
 
     nIds = CountIdentifiers();
     ReverseIdentifiers (nIds);
+
+#ifndef NDEBUG
+    cout << "\t\t" << nIds << " things on stack\n";
+#endif
 
     for (i = 0; i < nIds; ++ i) {
        entry = SemStack.Pop();
@@ -119,7 +123,7 @@ CobolFile * OutStrSym;
     if (OutStrSym != NULL)
        strcpy (DisplayOutput, OutStrSym->GetFullCName());
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tDISPLAY output set to " << DisplayOutput << "\n";
 #endif
 
