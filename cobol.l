@@ -44,7 +44,7 @@ static char ErrorBuffer [80];
 [\t ]+		;
 
 ^[\t ]*"*"	{ BEGIN COMMENT_STATE; }
-<COMMENT_STATE>[a-z0-9\t \!@\#\$%\*\(\)_+|\-=:\";\',.\/<>\?]*\n {
+<COMMENT_STATE>.*\n {
 		  ++ CurrentLine;
 		  BEGIN INITIAL;
 		  yytext [strlen(yytext) - 1] = '\x0';	/* kill the newline */
@@ -59,7 +59,7 @@ static char ErrorBuffer [80];
 
 [0-9]+			{ ival = atol (yytext);
 			  return (TOK_INTEGER);	}
-[0-9]*\.[0-9]+		{ fval = atof (yytext);
+[0-9]+\.[0-9]+		{ fval = atof (yytext);
 			  return (TOK_FLOAT);	}
 \"[a-zA-Z0-9\t \-"\{\}\[\]\+\-_*|\\\/().,\:\';$=><!@#%"]*\"	{
 			  strcpy (StringBuffer, (char*)(yytext + 1));
@@ -162,6 +162,7 @@ down			{ return (TOK_DOWN);	}
 duplicates		{ return (TOK_DUPLICATES);	}
 dynamic			{ return (TOK_DYNAMIC);	}
 egi			{ return (TOK_EGI);	}
+elsif			{ return (TOK_ELSIF);	}
 else			{ return (TOK_ELSE);	}
 emi			{ return (TOK_EMI);	}
 enable			{ return (TOK_ENABLE);	}
