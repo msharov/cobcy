@@ -8,6 +8,9 @@
 #else
 #include "semextern.h"
 #endif
+#ifdef CAN_HAVE_STDIO
+#include <stdio.h>
+#endif
 
 CobolSymbol :: CobolSymbol (void)
 {
@@ -21,10 +24,11 @@ CobolSymbol :: CobolSymbol (void)
     Picture.nFillerZeroes = 0;
 
     nChildren = 0;
-    ParentCName[0] = '\x0';
+    ParentCobolName[0] = '\x0';
     RecordCSize = 0;
     CobolName[0] = '\x0';
     CName[0] = '\x0';
+    Prefix[0] = '\x0';
     FileName[0] = '\x0';
     FileRecordName[0] = '\x0';
     DeclLevel = 0;
@@ -34,7 +38,7 @@ CobolSymbol :: CobolSymbol (void)
 
 void CobolSymbol :: CobolToCName (char * str)
 {
-int i;
+unsigned int i;
     for (i = 0; i < strlen(str); ++ i)
        if (str[i] == '-')
 	  str[i] = '_';
@@ -43,7 +47,7 @@ int i;
 // The purpose of this function is to convert X(3) to XXX
 void CobolSymbol :: ExpandPicture (char * APic, char * Expanded)
 {
-int i, j, k;
+unsigned int i, j, k;
 char buffer[5];
 char filler;
 
@@ -77,10 +81,10 @@ char filler;
 void CobolSymbol :: SetPicture (char * NewPic)
 {
 char Expanded [500];
-int i;
+unsigned int i;
 int j = 0;
 int length;
-int oldlength;
+unsigned int oldlength;
 BOOL FoundPoint = FALSE;
 
     ExpandPicture (NewPic, Expanded);
@@ -119,7 +123,7 @@ BOOL FoundPoint = FALSE;
 	     ++ Picture.nDigitsBDP;
        }
        else if (Expanded[i] == 's')
-	  Picture.Sign = TRUE;
+	  Picture.Sign = PictureType::TrailingSign;
        else if (Expanded[i] == 'p')
 	  ++ Picture.nFillerZeroes;
        else if (Expanded[i] == 'v') {
@@ -160,6 +164,32 @@ void CobolSymbol :: AddChild (CobolSymbol * NewChild)
        RecordCSize += NewChild->RecordCSize;
     else
        RecordCSize += NewChild->Picture.CSize;
+}
+
+void CobolSymbol :: SetParent (char * NewParent)
+{
+CobolSymbol * pattr;
+char ErrorBuffer [80];
+
+    cerr << "Setting parent of " << CobolName << " to " << NewParent << "\n";
+    if (NewParent == NULL) {
+       memset (ParentCobolName, MAX_SYMBOL_LENGTH, 0);
+       memset (Prefix, MAX_PREFIX_LENGTH, 0);
+    }
+    else {
+       if ((pattr = SymTable.Lookup (NewParent)) == NULL) {
+	  sprintf (ErrorBuffer, 
+	  	   "cannot find parent %s; wanted for child support; reward", 
+		   NewParent);
+	  WriteError (ErrorBuffer);
+	  return;
+       }
+
+       memset (Prefix, 0, MAX_PREFIX_LENGTH);
+       strcat (Prefix, pattr->Prefix);
+       strcat (Prefix, pattr->CName);
+       strcat (Prefix, ".");
+    }
 }
 
 CobolSymbol :: ~CobolSymbol (void)
