@@ -26,7 +26,7 @@
 
 void FinishDecl (void)
 {
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Finishing declarations\n";
 #endif
     CloseScopeLevels (0);
@@ -37,12 +37,12 @@ void FinishDecl (void)
 void StartCode (void)
 {
     FinishDecl();
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Starting code, initializing variables\n";
 #endif
     InitializeVariables();
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Beginning first paragraph\n";
 #endif
     GenIndent();
@@ -55,7 +55,7 @@ void StartCode (void)
 
 void EndCode (void)
 {
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Finished code, genrating main()\n";
 #endif
     codef << "\n";
@@ -70,6 +70,9 @@ void EndCode (void)
     GenParagraphCalls();
     CloseSpecialFiles();
 
+    codef << "\n";
+    GenIndent();
+    codef << "return (0);\n";
     -- NestingLevel;
     GenIndent();
     codef << "}\n";
@@ -94,8 +97,9 @@ CobolFile * NewFile;
     declf << "*/\n\n";
 
 
-    codef << "#include <stdio.h>\n";
-    codef << "#include <cobfunc.h>\n";
+    codef << "#include <stdio.h>\n";	// For files and IO
+    codef << "#include <string.h>\n";	// For memset
+    codef << "#include <cobfunc.h>\n";	// For internal functions
 
     // This is the file for forward function declarations, their indices, etc.
     codef << "#include \"" << CobcyConfig.DeclFile << "\"\n\n";
@@ -119,7 +123,7 @@ CobolFile * NewFile;
     NewSymbol = new CobolVar;
     NewSymbol->SetPicture ("x(200)");
     NewSymbol->SetName ("_space_var");
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Declaring _space_var\n";
 #endif
     SymTable.Insert ("_space_var", NewSymbol);
@@ -128,7 +132,7 @@ CobolFile * NewFile;
     NewSymbol = new CobolVar;
     NewSymbol->SetPicture ("9(1)");
     NewSymbol->SetName ("_zero_var");
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Declaring _zero_var\n";
 #endif
     SymTable.Insert ("_zero_var", NewSymbol);
@@ -138,7 +142,7 @@ CobolFile * NewFile;
     NewFile->SetName ("stdout");
     NewFile->SetOrganization (ORG_Sequential);
     NewFile->SetAccessMode (AM_Sequential);
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Declaring stdout\n";
 #endif
     SymTable.Insert ("stdout", NewFile);
