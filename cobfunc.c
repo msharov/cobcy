@@ -14,14 +14,13 @@
 #   define min(a,b)	((a) < (b) ? (a) : (b))
 #endif
 
-int _alphabetic (char * str) 
+char _strbuf [201];	/* For ---toString routines. This is the buffer */
+
+int _Alphabetic (char * str) 
 {
 int i;
     for (i = 0; i < strlen(str); i++)
-       if (!((str[i] >= 'A' && str[i] <= 'Z') 
-	     || (str[i] >= 'a' && str[i] <= 'z') ||
-	     (str[i] == ' ')
-	    ))
+       if (!(isalpha (str[i]) || str[i] == ' '))
 	  return (0);
     return (1);
 }
@@ -30,20 +29,16 @@ int i;
 ** what = 1  : lowercase test
 ** what = 2  : uppercase test 
 */
-int _alphab_up_low(char * str, int what)
+int _AlphabeticCase (char * str, int what)
 {
 int i;
 
-    if (_alphabetic(str)) {
+    if (_Alphabetic (str)) {
        for (i = 0; i < strlen(str); i++) {
-	  if (what == 2) {
-	     if (islower (str[i]))
-		return (0);
-	  }
-	  else {
-	     if (isupper (str[i]))
-		return(0);
-	  }
+	  if (what == 2 && islower (str[i]))
+	     return (0);
+	  else if (what == 1 && isupper (str[i]))
+    	     return(0);
        }
     }
     else 
@@ -109,19 +104,23 @@ int j;
 
 void _WriteIntegerVar (FILE * stream, long int var, char * pic)
 {
-char wiv_buf [128];
-    _IntegerToString (wiv_buf, var, pic);
-    fprintf (stream, "%s", wiv_buf);
+    fprintf (stream, "%s", _IntegerToString (var, pic));
 }
 
-void _IntegerToString (char * string, long int var, char * pic)
+void _WriteFloatVar (FILE * stream, double var, char * pic)
 {
-char buffer[20];
+    fprintf (stream, "%s", _FloatToString (var, pic));
+}
+
+/* Result in _strbuf */
+char * _IntegerToString (long int var, char * pic)
+{
+char barenum[20];
 int i, j = 0, nl, pl, fl = 0;
 int sp = 0;
 
-    sprintf (buffer, "%lu", var);
-    nl = strlen (buffer);
+    sprintf (barenum, "%lu", var);
+    nl = strlen (barenum);
     pl = strlen (pic);
 
     /* Calculate number of filler zeroes on the left */
@@ -136,45 +135,41 @@ int sp = 0;
     for (i = 0; i < pl; ++ i) {
        if (pic[i] == '9') {
 	  if (fl <= nl)
-             string[sp++] = buffer[j++]; 
+             _strbuf[sp++] = barenum[j++]; 
 	  else
-             string[sp++] = ' ';
+             _strbuf[sp++] = ' ';
 	  -- fl;
        }
-       else if (pic[i] == '.') string[sp++] = '.';
-       else if (pic[i] == ',') string[sp++] = ',';
-       else if (pic[i] == '/') string[sp++] = '/';
-       else if (pic[i] == 'b') string[sp++] = ' ';
-       else if (pic[i] == '0') string[sp++] = '0';
+       else if (pic[i] == '.') _strbuf[sp++] = '.';
+       else if (pic[i] == ',') _strbuf[sp++] = ',';
+       else if (pic[i] == '/') _strbuf[sp++] = '/';
+       else if (pic[i] == 'b') _strbuf[sp++] = ' ';
+       else if (pic[i] == '0') _strbuf[sp++] = '0';
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
-	     string[sp++] = '+';
+	     _strbuf[sp++] = '+';
 	  else if (var < 0)
-	     string[sp++] = '-';
+	     _strbuf[sp++] = '-';
 	  else
-	     string[sp++] = ' ';
+	     _strbuf[sp++] = ' ';
        }
        else if (pic[i] == 'z' || pic[i] == '*')
-	  string[sp++] = '0';
+	  _strbuf[sp++] = '0';
        else if (pic[i] == '$')
-	  string[sp++] = '$';
+	  _strbuf[sp++] = '$';
        else
-          string[sp++] = (fl - 1 <= nl) ? pic[i] : ' ';
+          _strbuf[sp++] = (fl - 1 <= nl) ? pic[i] : ' ';
     }
-    string[sp] = '\x0';
+    _strbuf[sp] = '\x0';
+
+    return (_strbuf);
 }
 
-void _WriteFloatVar (FILE * stream, double var, char * pic)
-{
-char wfv_buf [128];
-    _FloatToString (wfv_buf, var, pic);
-    fprintf (stream, "%s", wfv_buf);
-}
-
-void _FloatToString (char * string, double var, char * pic)
+/* Result in _strbuf */
+char * _FloatToString (double var, char * pic)
 {
 char format_s [10];
-char buffer [20];
+char barenum [20];
 int fbp = 0, fap = 0, pl;
 int i, j = 0;
 int FoundPoint = 0;
@@ -195,50 +190,52 @@ int sp = 0;
     }
 
     sprintf (format_s, "%%%d.%df", fbp, fap);
-    sprintf (buffer, format_s, var);
+    sprintf (barenum, format_s, var);
     
     /*
     ** sprintf will print correct number of digits after point,
     ** but only as many as needed before the point.
     ** We thus need to reset the index variable j to the real starting point.
     */
-    j = strlen (buffer) - (fbp + 1 + fap);
+    j = strlen (barenum) - (fbp + 1 + fap);
 
     for (i = 0; i < pl; ++ i) {
        if (pic[i] == '9') {
 	  if (j >= 0)
-	     string[sp++] = buffer[j];
+	     _strbuf[sp++] = barenum[j];
 	  else
-	     string[sp++] = ' ';
+	     _strbuf[sp++] = ' ';
 	  ++ j;
        }
-       else if (pic[i] == '.') string[sp++] = '.';
-       else if (pic[i] == ',') string[sp++] = ',';
-       else if (pic[i] == '/') string[sp++] = '/';
-       else if (pic[i] == 'b') string[sp++] = ' ';
-       else if (pic[i] == '0') string[sp++] = '0';
+       else if (pic[i] == '.') _strbuf[sp++] = '.';
+       else if (pic[i] == ',') _strbuf[sp++] = ',';
+       else if (pic[i] == '/') _strbuf[sp++] = '/';
+       else if (pic[i] == 'b') _strbuf[sp++] = ' ';
+       else if (pic[i] == '0') _strbuf[sp++] = '0';
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
-	     string[sp++] = '+';
+	     _strbuf[sp++] = '+';
 	  else if (var < 0)
-	     string[sp++] = '-';
+	     _strbuf[sp++] = '-';
 	  else
-	     string[sp++] = ' ';
+	     _strbuf[sp++] = ' ';
        }
        else if (pic[i] == 'z' || pic[i] == '*') {
-	  string[sp++] = '0';
+	  _strbuf[sp++] = '0';
 	  ++ j;
        }
        else if (pic[i] == 'v') {
-	  string[sp++] = '.';
+	  _strbuf[sp++] = '.';
 	  ++ j;
        }
        else if (pic[i] == '$')
-	  string[sp++] = '$';
+	  _strbuf[sp++] = '$';
        else
-          string[sp++] = pic[i];
+          _strbuf[sp++] = pic[i];
     }
-    string[sp] = '\x0';
+    _strbuf[sp] = '\x0';
+
+    return (_strbuf);
 }
 
 void _AssignVarString (char * var1, char * var2, int p1, int p2)
@@ -254,7 +251,7 @@ void _AssignVarString (char * var1, char * var2, int p1, int p2)
        var1[p2] = ' ';
 }
 
-long int _RoundResult (double num)
+double _RoundResult (double num, char * pic)
 {
 long int tnum;
     tnum = (long int) num;
@@ -262,5 +259,64 @@ long int tnum;
        return (tnum);
     else
        return (tnum + 1);
+}
+
+void _OpenSequentialFile (FILE ** fp, char * filename, char * mode)
+{
+char ErrorBuffer[80];
+
+    if ((*fp = fopen (filename, mode)) == NULL) {
+       sprintf (ErrorBuffer, "could not open file '%s'", filename);
+       _RuntimeError (ErrorBuffer);
+    }
+}
+
+void _OpenRelativeFile (FILE ** fp, char * filename, char * mode)
+{
+char ErrorBuffer[80];
+
+    if ((*fp = fopen (filename, mode)) == NULL) {
+       sprintf (ErrorBuffer, "could not open file '%s'", filename);
+       _RuntimeError (ErrorBuffer);
+    }
+}
+
+void _OpenIndexedFile (FILE ** fpd, FILE ** fpi, char * filename, char * mode)
+{
+char ErrorBuffer[80];
+
+    if ((*fpd = fopen (filename, mode)) == NULL) {
+       sprintf (ErrorBuffer, "could not open data file '%s'", filename);
+       _RuntimeError (ErrorBuffer);
+    }
+    if ((*fpi = fopen (filename, mode)) == NULL) {
+       sprintf (ErrorBuffer, "could not open index file '%s'", filename);
+       _RuntimeError (ErrorBuffer);
+    }
+}
+
+void _CloseSequentialFile (FILE * fp)
+{
+    fclose (fp);
+}
+
+void _CloseRelativeFile (FILE * fp)
+{
+    fclose (fp);
+}
+
+void _CloseIndexedFile (FILE * fpd, FILE * fpi)
+{
+    fclose (fpd);
+    fclose (fpi);
+}
+
+void _SeekRelativeFile (FILE * fp, long int offset)
+{
+    fseek (fp, offset, SEEK_SET);
+}
+
+void _SeekIndexedFile (FILE * fpd, FILE * fpi, char * key)
+{
 }
 
