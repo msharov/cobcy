@@ -45,12 +45,15 @@ public:
     BOOL		operator== (const CDate& ToCompare);
     BOOL		operator> (const CDate& ToCompare);
     BOOL		operator< (const CDate& ToCompare);
+    BOOL		operator>= (const CDate& ToCompare);
+    BOOL		operator<= (const CDate& ToCompare);
     CDate&		operator+ (const CDate& ToAdd);
     CDate&		operator- (const CDate& ToSub);
 
     virtual void	WriteTextStream (ostream& is);
     virtual void	ReadBinaryStream (istream& is);
     virtual void	WriteBinaryStream (ostream& os);
+    virtual WORD	StreamSize (void) const;
 };
 
 #endif

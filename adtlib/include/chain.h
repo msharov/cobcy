@@ -78,8 +78,7 @@ inline BOOL Chain<ChainEl> :: IsEmpty (void) const
 {
     if (m_Head == NULL && m_Tail == NULL)
 	return (TRUE);
-    else if ((m_Head == NULL || m_Tail == NULL) && m_Head != m_Tail)
-	cout << "Chain: empty, but m_Head != m_Tail";
+    assert (!((m_Head == NULL || m_Tail == NULL) && m_Head != m_Tail));
     return (FALSE);
 }
 
@@ -121,10 +120,7 @@ template <class ChainEl>
 inline void Chain<ChainEl> :: Disconnect
 (ChainLink<ChainEl> * current)
 {
-    if (current == NULL) {
-       	cout << "Chain: Cannot disconnect nonexistant links!\n";
-       	return;
-    }		 
+    assert (current != NULL);
 
     if (current == m_Head)
        	m_Head = current->m_Next;
@@ -140,10 +136,7 @@ inline void Chain<ChainEl> :: Disconnect
     current->m_Prev = NULL;
 
     // Check for the memory error that messes up pointers
-    if ((m_Head == NULL || m_Tail == NULL) && (m_Head != m_Tail)) {
-       	cout << "Chain: m_Head != m_Tail in empty list!\n";
-       	exit(1);
-    }
+    assert (!((m_Head == NULL || m_Tail == NULL) && m_Head != m_Tail));
 }
 
 template <class ChainEl> 
@@ -151,14 +144,9 @@ inline void Chain<ChainEl> :: ConnectAfter
 (ChainLink<ChainEl> * current, ChainLink<ChainEl> * newLink)
 {
     if (current == NULL) {
-       	if (IsEmpty()) {
-            m_Head = newLink;
-            m_Tail = newLink;
-       	}
-        else {
-            cout << "ERROR: Cannot insert after nonexistant links!\n";
-            return;
-       	}
+	assert (IsEmpty());
+	m_Head = newLink;
+	m_Tail = newLink;
     }
     else {
        	newLink->m_Next = current->m_Next;
@@ -177,14 +165,9 @@ inline void Chain<ChainEl> :: ConnectBefore
 (ChainLink<ChainEl> * current, ChainLink<ChainEl> * newLink)
 {
     if (current == NULL) {
-	if (IsEmpty()) {
-	    m_Head = newLink;
-	    m_Tail = newLink;
-	}
-	else {
-	    cout << "ERROR: Cannot insert before nonexistant links!\n";
-	    return;
-	}
+	assert (IsEmpty());
+	m_Head = newLink;
+	m_Tail = newLink;
     }
     else {
 	newLink->m_Next = current;

@@ -1,6 +1,6 @@
 /* cstring.h
 **
-**	Named to avoid conflict with ANSI string.h . Stands for class String.
+**	Named to avoid conflict with ANSI string.h . Stands for class CString.
 */
 
 #ifndef __CSTRING_H
@@ -10,99 +10,123 @@
 #include <assert.h>
 #include <mdefs.h>
 #include <streamab.h>
+#include <array.h>
 
-class String : public Streamable {
+class CString : public Streamable {
 private:
     char *		m_Data;
     WORD		m_MemUsed;
     WORD		m_MemAllocated;
 
 public:
-    			String (void);
-    			String (char NewData);
-    			String (const char * NewData);
-    			String (WORD Size);
-    			String (const String& NewData);
+    			CString (void);
+    			CString (char NewData);
+    			CString (const char * NewData);
+    			CString (int Size);
+    			CString (const CString& NewData);
 
     inline WORD		Size (void) const;
     void		Resize (WORD NewSize);
-    String&		Left (WORD Count) const;
-    String&		Middle (WORD Start, WORD Count) const;
-    String&		Right (WORD Count) const;
+    CString&		Left (WORD Count) const;
+    CString&		Middle (WORD Start, WORD Count) const;
+    CString&		Right (WORD Count) const;
+
+    void		Append (WORD Num);
+    void		Append (const char * NewData, WORD DataSize);
 
     char		GetAt (WORD idx) const;
     void		SetAt (WORD idx, char Value);
     void		InsertAt (WORD idx, char ToInsert);
     void		InsertAt (WORD idx, const char * ToInsert);
-    void		InsertAt (WORD idx, const String& ToInsert);
+    void		InsertAt (WORD idx, const CString& ToInsert);
     void		DeleteAt (WORD idx, WORD Count = 1);
 
     int			Index (const char ToFind) const;
     int			Index (const char * ToFind) const;
-    int			Index (const String& ToFind) const;
+    int			Index (const CString& ToFind) const;
     inline BOOL		Contains (const char ToFind) const;
     inline BOOL		Contains (const char * ToFind) const;
-    inline BOOL		Contains (const String& ToFind) const;
+    inline BOOL		Contains (const CString& ToFind) const;
+    Array<CString>	Split (const CString& delim = " \n\t") const;
 
-    String&		operator= (const String& ToBe);
-    String&		operator= (const char ToBe);
-    String&		operator= (const char * ToBe);
-    inline BOOL		operator== (const String& ToCompare) const;
+    CString&		operator= (const CString& ToBe);
+    CString&		operator= (const char ToBe);
+    CString&		operator= (const char * ToBe);
+    inline BOOL		operator== (const CString& ToCompare) const;
+    inline BOOL		operator< (const CString& ToCompare) const;
+    inline BOOL		operator> (const CString& ToCompare) const;
     inline char&	operator[] (WORD idx);
     inline const char&	operator[] (WORD idx) const;
     inline		operator const char * (void) const;
-    String&		operator+ (const String& ToAdd);
-    String&		operator+ (const char ToAdd);
-    String&		operator+ (const char * ToAdd);
+    inline		operator char * (void);
+    CString&		operator+ (const CString& ToAdd);
+    CString&		operator+ (const char ToAdd);
+    CString&		operator+ (const char * ToAdd);
 
-    virtual	       ~String (void);
+    virtual	       ~CString (void);
 
     virtual void	ReadTextStream (istream& is);
     virtual void	ReadBinaryStream (istream& is);
     virtual void	WriteTextStream (ostream& os);
     virtual void	WriteBinaryStream (ostream& os);
+    virtual WORD	StreamSize (void) const;
 };
 
 /*-------------------------------------------------------------------------*/
 
-inline WORD String :: Size (void) const
+inline WORD CString :: Size (void) const
 {
     return (m_MemUsed);
 }
 
-inline BOOL String :: Contains (const char ToFind) const
+inline BOOL CString :: Contains (const char ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL String :: Contains (const char * ToFind) const
+inline BOOL CString :: Contains (const char * ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL String :: Contains (const String& ToFind) const
+inline BOOL CString :: Contains (const CString& ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL String :: operator== (const String& ToCompare) const
+inline BOOL CString :: operator== (const CString& ToCompare) const
 {
-    return (strcmp (m_Data, ToCompare.m_Data) == 0);
+    return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) == 0);
 }
 
-inline char& String :: operator[] (WORD idx)
+inline BOOL CString :: operator> (const CString& ToCompare) const
+{
+    return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) > 0);
+}
+
+inline BOOL CString :: operator< (const CString& ToCompare) const
+{
+    return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) < 0);
+}
+
+inline char& CString :: operator[] (WORD idx)
 {
     assert (idx < m_MemUsed);
     return (m_Data[idx]);
 }
 
-inline const char& String :: operator[] (WORD idx) const
+inline const char& CString :: operator[] (WORD idx) const
 {
     assert (idx < m_MemUsed);
     return (m_Data[idx]);
 }
 
-inline String :: operator const char * (void) const
+inline CString :: operator const char * (void) const
+{
+    return (m_Data);
+}
+
+inline CString :: operator char * (void)
 {
     return (m_Data);
 }

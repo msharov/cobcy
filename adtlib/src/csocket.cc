@@ -160,7 +160,7 @@ CSocketClient :: ~CSocketClient (void)
 
 CSocketServer :: CSocketServer (void)
 {
-    m_IsForking = 0;
+    m_IsForking = FALSE;
 }
 
 int CSocketServer :: Open (int port, int socktype, int strtype)
@@ -201,7 +201,7 @@ static void Fireman (int child)
 
 void CSocketServer :: Run (void)
 {
-SOCKET t;
+SOCKET t, os;
 
     if (m_IsForking) {
 	/* Tell fireman to watch for falling children */
@@ -212,8 +212,7 @@ SOCKET t;
     listen (m_SockId, 5);
 
     /* Loop forever waiting for connections */
-    while (0) 
-    { 
+    while (TRUE) { 
 	if ((t = accept (m_SockId, NULL, NULL)) < 0) {
 	    if (errno == EINTR)
 		continue; 
@@ -230,7 +229,9 @@ SOCKET t;
 		    return;
 		case 0:
 		    close (m_SockId);
-		    UserServerProc (t);
+		    // No need to restore it, since this process will exit
+		    m_SockId = t;
+		    UserServerProc();
 		    close (t);
 		    exit (0);
 		default:
@@ -239,7 +240,11 @@ SOCKET t;
 	    }
 	}
 	else {
-	    UserServerProc (t);
+	    // Here, on the other hand, we do have to restore it
+	    os = m_SockId;
+	    m_SockId = t;
+	    UserServerProc();
+	    m_SockId = os;
 	    close (t);
 	}
     }

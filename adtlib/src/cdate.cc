@@ -156,6 +156,26 @@ BOOL CDate :: operator< (const CDate& ToCompare)
 	return (FALSE);
 }
 
+BOOL CDate :: operator>= (const CDate& ToCompare)
+{
+    if (tm_sec >= ToCompare.tm_sec && tm_min >= ToCompare.tm_min &&
+	tm_hour >= ToCompare.tm_hour && tm_mday >= ToCompare.tm_mday &&
+	tm_mon >= ToCompare.tm_mon && tm_year >= ToCompare.tm_year)
+	return (TRUE);
+    else
+	return (FALSE);
+}
+
+BOOL CDate :: operator<= (const CDate& ToCompare)
+{
+    if (tm_sec <= ToCompare.tm_sec && tm_min <= ToCompare.tm_min &&
+	tm_hour <= ToCompare.tm_hour && tm_mday <= ToCompare.tm_mday &&
+	tm_mon <= ToCompare.tm_mon && tm_year <= ToCompare.tm_year)
+	return (TRUE);
+    else
+	return (FALSE);
+}
+
 CDate& CDate :: operator+ (const CDate& ToAdd)
 {
     tm_sec += ToAdd.tm_sec;
@@ -197,6 +217,7 @@ void CDate :: ReadBinaryStream (istream& is)
 BitArray CompactDate (50);
 
     CompactDate.ReadBinaryStream (is);
+    assert (CompactDate.Size() == 50);
     tm_sec = CompactDate.GetAt (0, 6);
     tm_min = CompactDate.GetAt (6, 12);
     tm_hour = CompactDate.GetAt (12, 17);
@@ -220,5 +241,12 @@ BitArray CompactDate (50);
     CompactDate.SetAt (38, 41, tm_wday);
     CompactDate.SetAt (41, 50, tm_yday);
     CompactDate.WriteBinaryStream (os);
+}
+
+WORD CDate :: StreamSize (void) const
+{
+BitArray CompactDate (50);
+
+    return (CompactDate.StreamSize());
 }
 

@@ -12,6 +12,7 @@
 #define __ARRAY_H
 				    
 #include <set.h>
+#include <llist.h>
 
 typedef SetSizeType 		ArraySizeType;
 
@@ -23,7 +24,12 @@ public:
     INLINE_CTOR		Array (const ArrayEl * AnArray, ArraySizeType nElem);
 
     virtual inline ArrayEl&	operator[] (ArraySizeType index) const;
-    virtual inline void		Sort (int Start = 0, int End = -1);
+    virtual inline void		InsertAt (ArraySizeType index,
+    					const ArrayEl& data);
+    virtual inline void		RemoveAt (ArraySizeType index);
+
+    virtual inline Array<ArrayEl>&	operator= (LList<ArrayEl>& ToBe);
+    virtual inline void			Sort (int Start = 0, int End = -1);
 };	
 
 /*---------------------------------------------------------------------------*/
@@ -49,7 +55,44 @@ inline Array<ArrayEl> :: Array
 template <class ArrayEl>
 inline ArrayEl& Array<ArrayEl> :: operator[] (ArraySizeType index) const
 { 
+    assert (index < m_Size);
     return (m_Data [index]);
+};
+
+template <class ArrayEl>
+inline void Array<ArrayEl> :: InsertAt 
+(ArraySizeType index, const ArrayEl& NewEl)
+{
+ArraySizeType i;
+    Resize (m_Size + 1);
+    for (i = m_Size - 1; i > index; -- i)
+	m_Data[i] = m_Data[i - 1];
+    m_Data[index] = NewEl;
+}
+
+template <class ArrayEl>
+inline void Array<ArrayEl> :: RemoveAt (ArraySizeType index)
+{
+ArraySizeType i;
+    for (i = index; i < m_Size - 1; ++ i)
+	m_Data[i] = m_Data[i + 1];
+    Resize (m_Size - 1);
+}
+
+template <class ArrayEl>
+inline Array<ArrayEl>& Array<ArrayEl> :: operator= (LList<ArrayEl>& ToBe)
+{ 
+ArraySizeType NewSize, i;
+
+    NewSize = ToBe.Size();
+    Array<ArrayEl> :: Resize (NewSize);
+    ToBe.Head();
+    for (i = 0; i < NewSize; ++ i) {
+	m_Data[i] = *(ToBe.LookAt());
+	ToBe.Next();
+    }
+
+    return (*this);
 };
 
 template <class ArrayEl>

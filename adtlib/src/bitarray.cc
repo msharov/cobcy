@@ -4,9 +4,9 @@
 */
 
 #include <bitarray.h>
-#include <endian.h>
+#include <cendian.h>
 
-BitArray :: BitArray (ArraySizeType nElem = 0)
+BitArray :: BitArray (ArraySizeType nElem)
 : Array<BYTE> (nElem / BITS_PER_BYTE + 1)
 {
     m_nBits = nElem;
@@ -24,12 +24,13 @@ BitArray :: BitArray (const BYTE * AnArray, ArraySizeType nElem)
     m_nBits = nElem * BITS_PER_BYTE;
 }
 
-const WORD BitArray :: GetAt 
+WORD BitArray :: GetAt 
 (ArraySizeType iStart, ArraySizeType iEnd) const
 {
 WORD Result = 0, Mask = 1;
 WORD i;
 
+    assert (m_nBits > 0);
     assert (iStart < iEnd && iEnd <= m_nBits);
     for (i = iStart; i < iEnd; ++ i) {
         Result |= Mask * GetAt (i);
@@ -44,6 +45,7 @@ void BitArray :: SetAt
 WORD Mask = 1;
 WORD i;
 
+    assert (m_nBits > 0);
     assert (iStart < iEnd && iEnd <= m_nBits);
     for (i = iStart; i < iEnd; ++ i) {
         SetAt (i, ((Mask & Value) != 0));

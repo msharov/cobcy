@@ -37,6 +37,7 @@ public:
     inline virtual void			ReadBinaryStream (istream& is);
     inline virtual void			WriteBinaryStream (ostream& os);
     inline virtual void			Resize (WORD h, WORD w);
+    inline virtual WORD			StreamSize (void) const;
 
     inline Array2dSizeType		Width (void) const
 						{ return (m_Width);};
@@ -92,13 +93,8 @@ template <class Array2dEl>
 inline Array2dEl * Array2d<Array2dEl> :: operator[]
 (WORD index) const
 {
-#ifdef CHECK_BOUNDS
-    if (index < m_Height)
-#endif
-	return (&m_Data [index * m_Width]);
-       
-    cerr << "Array2d: index out of range.\n";
-    exit (1);
+    assert (index < m_Height)
+    return (&m_Data [index * m_Width]);
 }
 
 template <class Array2dEl>
@@ -149,9 +145,10 @@ Array2dEl * NewData;
 Array2dSizeType row, col;
     
     NewData = new Array2dEl [h * w];
+    assert (NewData != NULL);
 
-    for (row = 0; row < m_Height; ++ row)
-	for (col = 0; col < m_Width; ++ col)
+    for (row = 0; row < min (m_Height, h); ++ row)
+	for (col = 0; col < min (m_Width, w); ++ col)
 	    NewData [row * w + col] = m_Data [row * m_Width + col];
     m_Height = h;
     m_Width = w;
@@ -159,6 +156,12 @@ Array2dSizeType row, col;
     
     delete [] m_Data;
     m_Data = NewData;
+}
+
+template <class Array2dEl>
+inline WORD Array2d<Array2dEl> :: StreamSize (void) const
+{
+    return (2 * sizeof(WORD) + Set<Array2dEl> :: StreamSize());
 }
 
 #endif

@@ -25,7 +25,7 @@ public:
     			BitArray (const BYTE * AnArray, ArraySizeType nElem);
 
     inline const BOOL		GetAt (ArraySizeType index) const;
-    const WORD			GetAt (ArraySizeType iStart, 
+    WORD			GetAt (ArraySizeType iStart, 
     					ArraySizeType iEnd) const;
     inline void			SetAt (ArraySizeType index, BOOL Value);
     void			SetAt (ArraySizeType iStart,
@@ -39,6 +39,7 @@ public:
     virtual BitArray&		operator= (const BitArray& ToBe);
     virtual void		ReadBinaryStream (istream& is);
     virtual void		WriteBinaryStream (ostream& os);
+    virtual inline WORD		StreamSize (void) const;
 };	
 
 /*--------------------------------------------------------------------------*/
@@ -76,6 +77,11 @@ inline void BitArray :: Fill (BOOL Value)
 inline ArraySizeType BitArray :: Size (void) const
 {
     return (m_nBits);
+}
+
+inline ArraySizeType BitArray :: StreamSize (void) const
+{
+    return (sizeof(WORD) + Array<BYTE> :: StreamSize());
 }
 
 #endif

@@ -12,9 +12,11 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/wait.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/wait.h>
+
+#include <mdefs.h>
 
 /* Set platform-independent types. Winsock should work with these */
 #ifndef __MSDOS__
@@ -61,16 +63,24 @@ public:
 
 class CSocketServer : public CSocket {
 private:
-    int			m_IsForking;
+    BOOL		m_IsForking;
 
 public:
 			CSocketServer (void);
     int			Open (int port, int socktype = AF_INET, 
 			      int strtype = SOCK_STREAM);
     virtual void	Run (void);
-    virtual void	UserServerProc (SOCKET s) = 0;
+    virtual void	UserServerProc (void) = 0;
+    inline void		EnableForking (void);
     virtual	       ~CSocketServer (void);
 };
+
+/*--------------------------------------------------------------------------*/
+
+inline void CSocketServer :: EnableForking (void)
+{
+    m_IsForking = TRUE;
+}
 
 #endif
 
