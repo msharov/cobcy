@@ -9,11 +9,13 @@
 #include "semextern.h"
 #endif
 #include "semdecl.h"
+#include "semfile.h"
 
 /*---------------------| Globals |------------------------------*/
   Stack<CobolSymbol> 		NestedRecordList;
   Queue<StackEntry> 		VarInit;
   CobolSymbol * 		ParentRecord = NULL;
+  extern BOOL			PrinterUsed;
 /*--------------------------------------------------------------*/
 
 void DeclareRecordLevel (void)
@@ -78,21 +80,22 @@ int i;
 
     if (ParentRecord != NULL) {
        // If the parent record is still not NULL, it is a parent of this line
-       //	Since this is a record, start a new parent scope
+       // To keep the child happy, tell it who the parent will be
+       NewSymbol->SetParent (ParentRecord->CobolName);
+
+       // Since this is a record, start a new parent scope
        if (NewSymbol->Kind == CobolSymbol::Record) {
 	  NestedRecordList.Push (ParentRecord);
 	  ParentRecord = NewSymbol;
        }
-
-       // Assign parent name to the symbol if a variable. Records are adopted
+       // Assign child to parent if a variable. Records are adopted
        //	in CloseScopeLevels when their size is known
-       else {
-          strcpy (NewSymbol->ParentCName, ParentRecord->CobolName);
+       else
           ParentRecord->AddChild (NewSymbol);
-       }
+
     }
     else {	// No parent
-       strcpy (NewSymbol->ParentCName, "");
+       NewSymbol->SetParent (NULL);
        // Skip a line if level 0 record
        codef << "\n";
 
@@ -138,7 +141,7 @@ CobolSymbol * ChildRecord;
        ChildRecord = ParentRecord;
        ParentRecord = NestedRecordList.Pop();
        if (ParentRecord != NULL) {
-          strcpy (ChildRecord->ParentCName, ParentRecord->CobolName);
+          ChildRecord->SetParent (ParentRecord->CobolName);
           ParentRecord->AddChild (ChildRecord);
        }
     }
@@ -155,7 +158,6 @@ void InitializeVariables (void)
 {
 StackEntry * VarName, * VarValue;
 CobolSymbol * attr, * ValueAttr;
-char prefix[80], ValuePrefix[80];
 
     codef << "void _SetVarValues (void)\n";
     codef << "{\n";
@@ -171,17 +173,15 @@ char prefix[80], ValuePrefix[80];
        VarName = VarInit.Serve();
        VarValue = VarInit.Serve();
        attr = SymTable.Lookup (VarName->ident);
-       BuildPrefix (VarName->ident, prefix);
        if (VarValue->kind == SE_Identifier) {
 	  ValueAttr = SymTable.Lookup (VarValue->ident);
-	  BuildPrefix (VarValue->ident, ValuePrefix);
        }
 
        GenIndent();
        if (attr->Picture.Kind == PictureType::String) {
-	  codef << "_AssignVarString (" << prefix << attr->CName << ", ";
+	  codef << "_AssignVarString (" << attr->Prefix << attr->CName << ", ";
 	  if (VarValue->kind == SE_Identifier) {
-	     codef << ValuePrefix << ValueAttr->CName;
+	     codef << ValueAttr->Prefix << ValueAttr->CName;
 	     codef << ", " << attr->Picture.Size;
 	     codef << ", " << ValueAttr->Picture.Size;
 	     codef << ");\n";
@@ -193,9 +193,9 @@ char prefix[80], ValuePrefix[80];
 	  }
        }
        else {
-	  codef << prefix << attr->CName << " = ";
+	  codef << attr->Prefix << attr->CName << " = ";
 	  if (VarValue->kind == SE_Identifier)
-	     codef << ValuePrefix << ValueAttr->CName;
+	     codef << ValueAttr->Prefix << ValueAttr->CName;
 	  else
 	     PrintConstant (VarValue, codef);
 	  codef << ";\n";
@@ -203,8 +203,40 @@ char prefix[80], ValuePrefix[80];
        delete VarName;
        delete VarValue;
     }
+
     -- NestingLevel;
     GenIndent();
     codef << "}\n\n";
+}
+
+// PRINTER IS PRINTER-DISPLAY
+void DeclareSpecialName (void)
+{
+StackEntry * SpName, * DevName;
+CobolSymbol * DevStream;
+
+    SpName = SemStack.Pop();
+    DevName = SemStack.Pop();
+
+    DevStream = new CobolSymbol;
+    DevStream->SetName (SpName->ident);
+    
+    /*
+    ** Special names declare devices, as I understand.
+    ** Since I don't have any cardreaders or magnetic tape (:)
+    ** I just pipe the output to the display.
+    ** In the future, I'll try to make device handling easier...
+    */
+    if (strcmp (DevName->ident, "printer") == 0) {
+       strcpy (DevStream->CName, PRINTER_STREAM_NAME);
+       PrinterUsed = TRUE;
+    }
+    else
+       strcpy (DevStream->CName, DISPLAY_STREAM_NAME);
+
+    SymTable.Insert (SpName->ident, DevStream);
+
+    delete DevName;
+    delete SpName;
 }
 
