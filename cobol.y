@@ -1,0 +1,733 @@
+%{
+/* cobol.y
+**
+**	Defines COBOL's grammar.
+*/
+
+#include <stdio.h>
+#include "semactions.h"
+#include "lyextern.h"
+
+extern int CurrentLine;
+extern long int ival;
+extern double fval;
+extern char StringBuffer[];
+long int FillerIndex = 0;
+#ifndef TRUE
+#define TRUE		1
+#endif
+
+%}
+%token TOK_ACCEPT
+%token TOK_ACCESS
+%token TOK_ADD
+%token TOK_ADVANCING
+%token TOK_AFTER
+%token TOK_ALL
+%token TOK_ALPHABETIC
+%token TOK_ALTER
+%token TOK_ALTERNATE
+%token TOK_AND
+%token TOK_ARE
+%token TOK_AREA
+%token TOK_AREAS
+%token TOK_ASCENDING
+%token TOK_ASSIGN
+%token TOK_AT
+%token TOK_AUTHOR
+%token TOK_BEFORE
+%token TOK_BLANK
+%token TOK_BLOCK
+%token TOK_BOTTOM
+%token TOK_BY
+%token TOK_CALL
+%token TOK_CANCEL
+%token TOK_CD
+%token TOK_CF
+%token TOK_CH
+%token TOK_CHARACTER
+%token TOK_CHARACTERS
+%token TOK_CLOCK_UNITS
+%token TOK_CLOSE
+%token TOK_COBOL
+%token TOK_CODE
+%token TOK_COLUMN
+%token TOK_COMMA
+%token TOK_COMMUNICATION
+%token TOK_COMP
+%token TOK_COMPUTATIONAL
+%token TOK_COMPUTE
+%token TOK_CONFIGURATION
+%token TOK_CONTAINS
+%token TOK_CONTROL
+%token TOK_CONTROLS
+%token TOK_COPY
+%token TOK_CORR
+%token TOK_CORRESPONDING
+%token TOK_COUNT
+%token TOK_CURRENCY
+%token TOK_DATA
+%token TOK_DATE
+%token TOK_DATE_COMPILED
+%token TOK_DATE_WRITTEN
+%token TOK_DAY
+%token TOK_DE
+%token TOK_DEBUG_CONTENTS
+%token TOK_DEBUG_ITEM
+%token TOK_DEBUG_LINE
+%token TOK_DEBUG_SUB_1
+%token TOK_DEBUG_SUB_2
+%token TOK_DEBUG_SUB_3
+%token TOK_DEBUG_NAME
+%token TOK_DEBUGGING
+%token TOK_DECIMAL_POINT
+%token TOK_DECLARATIVES
+%token TOK_DELETE
+%token TOK_DELIMITED
+%token TOK_DELIMITER
+%token TOK_DEPENDING
+%token TOK_DEPTH
+%token TOK_DESCENDING
+%token TOK_DESTINATION
+%token TOK_DETAIL
+%token TOK_DISABLE
+%token TOK_DISPLAY
+%token TOK_DIVIDE
+%token TOK_DIVISION
+%token TOK_DOWN
+%token TOK_DUPLICATES
+%token TOK_DYNAMIC
+%token TOK_EGI
+%token TOK_ELSE
+%token TOK_EMI
+%token TOK_ENABLE
+%token TOK_END
+%token TOK_END_OF_PAGE
+%token TOK_ENTER
+%token TOK_ENVIRONMENT
+%token TOK_EOP
+%token TOK_EQUAL
+%token TOK_ERROR
+%token TOK_ESI
+%token TOK_EVERY
+%token TOK_EXCEPTION
+%token TOK_EXIT
+%token TOK_EXTEND
+%token TOK_FD
+%token TOK_FILE
+%token TOK_FILE_CONTROL
+%token TOK_FILLER
+%token TOK_FINAL
+%token TOK_FIRST
+%token TOK_FOOTING
+%token TOK_FOR
+%token TOK_FROM
+%token TOK_GENERATE
+%token TOK_GIVING
+%token TOK_GO
+%token TOK_GREATER
+%token TOK_GROUP
+%token TOK_HEADING
+%token TOK_HIGH_VALUE
+%token TOK_I_O
+%token TOK_I_O_CONTROL
+%token TOK_IDENTIFICATION
+%token TOK_IF
+%token TOK_IN
+%token TOK_INDEX
+%token TOK_INDEXED
+%token TOK_INDICATE
+%token TOK_INITIAL
+%token TOK_INITIATE
+%token TOK_INPUT
+%token TOK_INPUT_OUTPUT
+%token TOK_INSPECT
+%token TOK_INSTALLATION
+%token TOK_INTO
+%token TOK_INVALID
+%token TOK_IS
+%token TOK_JUST
+%token TOK_JUSTIFIED
+%token TOK_KEY
+%token TOK_LABEL
+%token TOK_LAST
+%token TOK_LEADING
+%token TOK_LEFT
+%token TOK_LENGTH
+%token TOK_LESS
+%token TOK_LIMIT
+%token TOK_LIMITS
+%token TOK_LINAGE
+%token TOK_LINAGE_COUNTER
+%token TOK_LINE
+%token TOK_LINE_COUNTER
+%token TOK_LINES
+%token TOK_LINKAGE
+%token TOK_LOCK
+%token TOK_LOW_VALUE
+%token TOK_MEMORY
+%token TOK_MERGE
+%token TOK_MESSAGE
+%token TOK_MODE
+%token TOK_MODULES
+%token TOK_MOVE
+%token TOK_MULTIPLE
+%token TOK_MULTIPLY
+%token TOK_NEGATIVE
+%token TOK_NEXT
+%token TOK_NO
+%token TOK_NOT
+%token TOK_NUMBER
+%token TOK_NUMERIC
+%token TOK_OBJECT_COMPUTER
+%token TOK_OCCURS
+%token TOK_OF
+%token TOK_OFF
+%token TOK_OMITTED
+%token TOK_ON
+%token TOK_OPEN
+%token TOK_OPTIONAL
+%token TOK_OR
+%token TOK_ORGANIZATION
+%token TOK_OUTPUT
+%token TOK_OVERFLOW
+%token TOK_PAGE
+%token TOK_PAGE_COUNTER
+%token TOK_PERFORM
+%token TOK_PF
+%token TOK_PH
+%token TOK_PIC
+%token TOK_PICTURE
+%token TOK_PLUS
+%token TOK_POINTER
+%token TOK_POSITIVE
+%token TOK_PRINTING
+%token TOK_PROCEDURE
+%token TOK_PROCEDURES
+%token TOK_PROCEED
+%token TOK_PROGRAM
+%token TOK_PROGRAM_ID
+%token TOK_QUEUE
+%token TOK_QUOTE
+%token TOK_QUOTES
+%token TOK_RANDOM
+%token TOK_RD
+%token TOK_READ
+%token TOK_RECEIVE
+%token TOK_RECORD
+%token TOK_RECORDS
+%token TOK_REDEFINES
+%token TOK_REEL
+%token TOK_REFERENCES
+%token TOK_RELATIVE
+%token TOK_RELEASE
+%token TOK_REMAINDER
+%token TOK_REMOVAL
+%token TOK_RENAMES
+%token TOK_REPLACING
+%token TOK_REPORT
+%token TOK_REPORTING
+%token TOK_REPORTS
+%token TOK_RERUN
+%token TOK_RESERVE
+%token TOK_RESET
+%token TOK_RETURN
+%token TOK_REVERSED
+%token TOK_REWIND
+%token TOK_REWRITE
+%token TOK_RF
+%token TOK_RH
+%token TOK_RIGHT
+%token TOK_ROUNDED
+%token TOK_RUN
+%token TOK_SAME
+%token TOK_SD
+%token TOK_SEARCH
+%token TOK_SECTION
+%token TOK_SECURITY
+%token TOK_SEGMENT
+%token TOK_SEGMENT_LIMIT
+%token TOK_SELECT
+%token TOK_SEND
+%token TOK_SENTENCE
+%token TOK_SEPARATE
+%token TOK_SEQUENTIAL
+%token TOK_SET
+%token TOK_SIGN
+%token TOK_SIZE
+%token TOK_SORT
+%token TOK_SORT_MERGE
+%token TOK_SOURCE
+%token TOK_SOURCE_COMPUTER
+%token TOK_SPACE
+%token TOK_SPACES
+%token TOK_SPECIAL_NAMES
+%token TOK_STANDARD
+%token TOK_START
+%token TOK_STATUS
+%token TOK_STOP
+%token TOK_STRING
+%token TOK_SUB_QUEUE_1
+%token TOK_SUB_QUEUE_2
+%token TOK_SUB_QUEUE_3
+%token TOK_SUBTRACT
+%token TOK_SUM
+%token TOK_SUPRESS
+%token TOK_SYMBOLIC
+%token TOK_SYNC
+%token TOK_SYNCHRONIZED
+%token TOK_TABLE
+%token TOK_TALLYING
+%token TOK_TAPE
+%token TOK_TERMINAL
+%token TOK_TERMINATE
+%token TOK_TEXT
+%token TOK_THAN
+%token TOK_THROUGH
+%token TOK_THRU
+%token TOK_TIME
+%token TOK_TIMES
+%token TOK_TO
+%token TOK_TOP
+%token TOK_TRAILING
+%token TOK_TYPE
+%token TOK_UNIT
+%token TOK_UNSTRING
+%token TOK_UNTIL
+%token TOK_UP
+%token TOK_UPON
+%token TOK_USAGE
+%token TOK_USE
+%token TOK_USING
+%token TOK_VALUE
+%token TOK_VALUES
+%token TOK_VARYING
+%token TOK_WHEN
+%token TOK_WITH
+%token TOK_WORDS
+%token TOK_WORKING_STORAGE
+%token TOK_WRITE
+%token TOK_ZERO
+%token TOK_IDENTIFIER
+%token TOK_PLUS
+%token TOK_MINUS
+%token TOK_ASTERISK
+%token TOK_SLASH
+%token TOK_EQUAL
+%token TOK_DOLLAR
+%token TOK_COMMA
+%token TOK_SEMICOLON
+%token TOK_PERIOD
+%token TOK_LPAREN
+%token TOK_RPAREN
+%token TOK_GREATER
+%token TOK_LESS
+%token TOK_RPAREN
+%token TOK_INTEGER
+%token TOK_FLOAT
+%token TOK_STRING
+%token TOK_PIC_TEXT
+%%
+
+program:	{ StartProgram(); }
+		identification_division
+		environment_division
+		data_division
+		procedure_division
+		{ EndProgram(); }
+	;
+
+identification_division:	TOK_IDENTIFICATION TOK_DIVISION TOK_PERIOD
+		program_name
+	;
+
+program_name:	TOK_PROGRAM_ID TOK_PERIOD identifier TOK_PERIOD
+		{ SetProgramName(); }
+	;
+
+environment_division:	TOK_ENVIRONMENT TOK_DIVISION TOK_PERIOD
+		configuration_section
+		input_output_section
+	;
+
+configuration_section:	TOK_CONFIGURATION TOK_SECTION TOK_PERIOD
+			source_computer
+			object_computer
+			special_names
+	|
+	;
+
+source_computer:	TOK_SOURCE_COMPUTER TOK_PERIOD
+			identifier TOK_PERIOD
+			{ SetSourceComputer(); }
+	|
+	;
+
+object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD
+			identifier TOK_PERIOD
+			{ SetObjectComputer(); }
+	|
+	;
+
+special_names:		TOK_SPECIAL_NAMES TOK_PERIOD special_name_list
+	|
+	;
+special_name_list:	special_name_decl special_name_list
+	|
+	;
+special_name_decl:	identifier TOK_IS identifier TOK_PERIOD
+	;
+
+input_output_section:	TOK_INPUT_OUTPUT TOK_SECTION TOK_PERIOD
+			file_control
+	|
+	;
+
+file_control:	TOK_FILE_CONTROL TOK_PERIOD
+			select_block
+	|
+	;
+
+select_block:	select_statement select_block_pl
+	;
+select_block_pl:	select_block
+	|
+	;
+select_statement:	TOK_SELECT identifier TOK_ASSIGN TOK_TO identifier
+			file_status_option
+			access_mode_option
+			organization_option
+			TOK_PERIOD { FileDecl(); }
+	;
+
+file_status_option:	TOK_FILE TOK_STATUS optional_is 
+			identifier { SetFileStatus(); }
+	|
+	;
+access_mode_option:	TOK_ACCESS TOK_MODE optional_is access_mode
+	|
+	;
+access_mode:	TOK_SEQUENTIAL	{ SetAccessMode ("sequential"); }
+	|	TOK_RANDOM	{ SetAccessMode ("random"); }
+	|	TOK_DYNAMIC	{ SetAccessMode ("dynamic"); }
+	;
+organization_option:	TOK_ORGANIZATION optional_is organization_kind
+	|
+	;
+organization_kind:	TOK_SEQUENTIAL		
+			{ SetOrganization ("sequential"); }
+	|		TOK_LINE TOK_SEQUENTIAL
+			{ SetOrganization ("line sequential"); }
+	|		TOK_RELATIVE 
+			{ SetOrganization ("relative"); }
+			relative_key_option
+	|		TOK_INDEXED 
+			{ SetOrganization ("indexed"); }
+			record_key_option
+	|
+	;
+relative_key_option:	TOK_RELATIVE TOK_KEY optional_is 
+			identifier { SetRelativeKey(); }
+	|
+	;
+record_key_option:	TOK_RECORD TOK_KEY optional_is 
+			identifier { SetRecordKey(); }
+	|
+	;
+
+data_division:	TOK_DATA TOK_DIVISION TOK_PERIOD
+		file_section
+		working_storage_section
+	;
+
+file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
+		file_desc_block
+	|
+	;
+
+file_desc_block:	file_desc_entry file_desc_block_pl
+	;
+file_desc_block_pl:	file_desc_block
+	|
+	;
+
+file_desc_entry:	TOK_FD identifier TOK_LABEL TOK_RECORD optional_is
+			file_desc_type file_name_option
+			{ GenFileDesc(); } TOK_PERIOD
+			file_record_desc 
+	;
+file_desc_type:		TOK_STANDARD
+	|		TOK_OMITTED
+	;
+file_name_option:	TOK_VALUE optional_is
+			identifier
+	|		{ StringBuffer[0] = 0; 
+			  Push (SE_Identifier); 
+			}
+	;
+
+file_record_desc:	file_record_level file_record_desc_pl
+	;
+file_record_desc_pl:	file_record_desc
+	|
+	;
+file_record_level:	integer level_name { AssociateFileRecord(); }
+			picture TOK_PERIOD 
+			{ Push (SE_Null); DeclareRecordLevel(); }
+
+record_level:	integer level_name picture value_entry TOK_PERIOD
+		{ DeclareRecordLevel(); }
+	;
+level_name:	identifier
+	|	TOK_FILLER	
+	 	{ sprintf (StringBuffer, "filler%03d", FillerIndex);
+		  ++ FillerIndex;
+		  Push (SE_Identifier);
+		}
+	;
+picture:	TOK_PICTURE optional_is pic_text
+	|	{ Push (SE_Null); }
+	;
+
+value_entry:	TOK_VALUE optional_is value
+	|	{ Push (SE_Null); }
+	;
+value:		integer
+	|	float
+	|	string
+	|	identifier
+	;
+	
+working_storage_section:	TOK_WORKING_STORAGE TOK_SECTION TOK_PERIOD
+				record_entry_block
+	|
+	;
+record_entry_block:	record_level record_entry_block_pl
+	;
+record_entry_block_pl:	record_entry_block
+	|
+	;
+
+procedure_division:	TOK_PROCEDURE TOK_DIVISION TOK_PERIOD
+			{ StartCode(); }
+			statement_list
+			{ GenEndProc(); EndCode(); }
+	;
+
+statement_list:		statement statement_list_pl
+	;
+statement_list_pl:	statement_list
+	|
+	;
+
+statement:	clause TOK_PERIOD
+	|	{ GenEndProc(); }
+		TOK_PROCEDURE identifier 
+		{ GenStartProc(); }
+	|	identifier TOK_PERIOD { GenParagraph(); }
+	|	TOK_IF { GenStartIf(); } boolean_list 
+		{ GenEndIf(); }
+			compound_clause
+		else_list
+		TOK_PERIOD
+	;
+
+else_list:	else_clause else_list
+	|
+	;
+
+else_clause:	TOK_ELSE elsif_or_simple
+	;
+
+elsif_or_simple:	{ GenElse(); } compound_clause
+	|		TOK_IF elsif_clause
+	;
+
+elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); } 
+			compound_clause
+	;
+
+boolean_list:	boolean boolean_list_pl
+	;
+boolean_list_pl:	logic_connector { GenConnect(); } boolean_list
+	|
+	;
+boolean:	expression optional_is relational expression	{ GenBool(); }
+	;
+
+logic_connector:	TOK_AND
+			{ strcpy (StringBuffer, "&&"); Push (SE_Connector); }
+	|		TOK_OR
+			{ strcpy (StringBuffer, "||"); Push (SE_Connector); }
+	;
+
+relational:	TOK_GREATER TOK_THAN	
+		{ strcpy (StringBuffer, ">"); Push (SE_Bool); }
+	|	TOK_LESS TOK_THAN	
+		{ strcpy (StringBuffer, "<"); Push (SE_Bool); }
+	|	TOK_EQUAL TOK_TO	
+		{ strcpy (StringBuffer, "=="); Push (SE_Bool); }
+	|	TOK_NOT reverse_relational
+	;
+reverse_relational:	TOK_GREATER TOK_THAN
+		{ strcpy (StringBuffer, "<="); Push (SE_Bool); }
+	|	TOK_LESS TOK_THAN
+		{ strcpy (StringBuffer, ">="); Push (SE_Bool); }
+	|	TOK_EQUAL TOK_TO
+		{ strcpy (StringBuffer, "!="); Push (SE_Bool); }
+	;
+
+clause:		TOK_ACCEPT id_list { GenAccept(); }
+	|	TOK_DISPLAY display_args upon_option { GenDisplay(); }
+	|	TOK_MOVE expression TOK_TO id_list { GenMove(); }
+	|	TOK_ADD expression TOK_TO id_list giving_option
+		{ GenAdd(); }
+	|	TOK_SUBTRACT expression TOK_FROM id_list giving_option
+		{ GenSubtract(); }
+	|	TOK_MULTIPLY id_list TOK_BY expression giving_option
+		{ GenMultiply(); }
+	|	TOK_DIVIDE id_list divide_action_word expression 
+		giving_option round_option
+		{ GenDivide(); }
+		size_error_option
+	|	TOK_GO TOK_TO identifier { GenGoto(); } 
+	|	TOK_PERFORM identifier times_option { GenPerform(); }
+	|	TOK_OPEN open_list
+	|	TOK_CLOSE id_list close_options { GenClose(); }
+	|	TOK_READ identifier { GenRead(); }
+		optional_word_record TOK_AT TOK_END compound_clause
+	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
+	|	TOK_STOP TOK_RUN { GenStopRun(); }
+	;
+
+compound_clause:	{ BeginCompound(); }
+			clause_list
+			{ EndCompound(); }
+	;
+clause_list:	clause clause_list_pl
+	;
+clause_list_pl:	clause_list
+	|
+	;
+
+expression:	identifier
+	|	integer
+	|	float
+	|	string
+	;
+
+display_args:	{ Push (SE_Mark); } display_args_marked
+	;
+display_args_marked:	display_arg display_args_pl
+	;
+display_args_pl: optional_comma	display_args_marked
+	|
+	;
+display_arg:	identifier
+	|	string
+	|	integer
+	|	float
+	;
+
+upon_option:	TOK_UPON identifier { SetDisplayOutput(); }
+	|	{ strcpy (StringBuffer, "stdout"); 
+		  Push (SE_Identifier);
+		  SetDisplayOutput(); 
+		}
+	;
+
+giving_option:	TOK_GIVING identifier
+	|	{ Push (SE_Null); }
+	;
+
+round_option:	TOK_ROUNDED { SetResultRounding(); }
+	|
+	;
+
+size_error_option:	TOK_ON TOK_SIZE TOK_ERROR 
+			{ GenElse(); }
+			compound_clause
+	|
+	;
+
+times_option:	integer TOK_TIMES
+	|	{ ival = 1; 
+		  Push (SE_Integer);
+		}
+	;
+
+open_list:	open_entry open_list_pl
+	;
+open_list_pl:	open_list
+	|
+	;
+open_entry:	TOK_INPUT id_list open_options { GenOpen ("r"); }
+	|	TOK_OUTPUT id_list open_options { GenOpen ("w"); }
+	|	TOK_EXTEND id_list open_options { GenOpen ("a"); }
+	|	TOK_I_O id_list open_options { GenOpen ("r+"); }
+	;
+
+open_options:	TOK_REVERSED
+	|	TOK_WITH TOK_NO TOK_REWIND
+	|
+	;
+
+close_options:	TOK_UNIT close_method
+	|	TOK_REEL close_method
+	|	TOK_WITH TOK_LOCK
+	|
+	;
+
+close_method:	TOK_FOR TOK_REMOVAL
+	|	TOK_WITH TOK_NO TOK_REWIND
+	;
+
+write_from_clause:	TOK_FROM identifier
+	|	{ strcpy (StringBuffer, ""); 
+		  Push (SE_Identifier); }
+	;
+
+id_list:	{ Push (SE_Mark); } id_list_marked
+	;
+id_list_marked: identifier id_list_pl
+	;
+id_list_pl:	optional_comma id_list_marked
+	|
+	;
+
+divide_action_word:	TOK_BY
+	|		TOK_INTO
+	;
+
+optional_is:		TOK_IS
+	|
+	;
+optional_comma:		TOK_COMMA
+	|
+	;
+optional_word_record:	TOK_RECORD
+	|
+	;
+
+identifier:	TOK_IDENTIFIER { Push (SE_Identifier); }
+	;
+pic_text:	TOK_PIC_TEXT { Push (SE_Picture); }
+	;
+string:		TOK_STRING { Push (SE_String); }
+	;
+integer:	TOK_INTEGER { Push (SE_Integer); }
+	;
+float:		TOK_FLOAT { Push (SE_Float); }
+	;
+%%
+
+int yyerror (char * msg)
+{
+char ErrorBuffer [80];
+
+    sprintf (ErrorBuffer, "Line %d: %s\n\tDEBUG: yychar = %d, str = %s, ival = %ld, fval = %f\n", 
+    		CurrentLine, msg, yychar, StringBuffer, ival, fval);
+    WriteError (ErrorBuffer);
+    return (0);
+}
+
