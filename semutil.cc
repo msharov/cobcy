@@ -3,7 +3,11 @@
 **	Implements semantic utilities for COBOL compiler.
 */
 
-#include "semextern.h"		// includes semutil.h
+#ifdef __MSDOS__
+#include "semexter.h"		// includes semutil.h
+#else
+#include "semextern.h"
+#endif
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
 #endif
@@ -11,6 +15,7 @@
 extern long int ival;
 extern double fval;
 extern char StringBuffer[];
+extern SEOperatorKind opkind;
 
 BOOL ErrorFlag = FALSE;
 
@@ -23,6 +28,18 @@ void WriteError (char * str)
 void WriteWarning (char * str)
 {
     cerr << ">>> WARNING: " << str << ".\n";
+}
+
+void NIY (char * str)
+{
+    GenIndent();
+    codef << "\n/* " << str <<  " not implemented yet */" <<  "\n";
+}
+
+void Comment (char * str)
+{
+    GenIndent();
+    codef << "/* " << str << " */\n";
 }
 
 BOOL ErrorOccured (void)
@@ -42,6 +59,29 @@ void PrintConstant (StackEntry * entry, ofstream& os)
 	default:		WriteError ("Bad constant type");
 				break;
     }
+}
+
+CobolSymbol * LookupIdentifier (char * id)
+{
+CobolSymbol * sym;
+char ErrorBuffer [80];
+
+    if ((sym = SymTable.Lookup (id)) == NULL) {
+       sprintf (ErrorBuffer, "identifier '%s' is unknown", id);
+       WriteError (ErrorBuffer);
+       return (NULL);
+    }
+    return (sym);
+}
+
+void PrintIdentifier (char * id, ofstream& os)
+{
+CobolSymbol * sym;
+char SymPrefix [80];
+
+    sym = LookupIdentifier (id);
+    BuildPrefix (id, SymPrefix);
+    os << SymPrefix << sym->CName;
 }
 
 void ReadVariable (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
@@ -229,7 +269,7 @@ void GenIndent (void)
 {
 int i;
     for (i = 0; i < NestingLevel; ++ i)
-       outfile << "    ";
+       codef << "    ";
 }
 
 void Push (StackEntryKind kind)
@@ -255,10 +295,25 @@ StackEntry * NewEntry;
 	case SE_Connector:
 		strcpy (NewEntry->ident, StringBuffer);
 		break;
+	case SE_Operator:
+		NewEntry->opkind = opkind;
+		break;
 	default:		// For others, simply set the type
 		break;
     }
 
     SemStack.Push (NewEntry);
+}
+
+BOOL IsInSet (char c, char * set)
+{
+register int i, sl;
+
+    sl = strlen (set);
+    for (i = 0; i < sl; ++ i) {
+       if (c == set[i])
+	  return (TRUE);
+    }
+    return (FALSE);
 }
 
