@@ -3,10 +3,19 @@ CC	= @CC@
 AR	= @AR@
 RANLIB	= @RANLIB@
 
-#OPTIM	= -O2
-OPTIM	=
+INCDIR	= -I./adtlib/include
+LIBDIR	= -L./adtlib/lib
 
-CFLAGS	= -w $(OPTIM) -pipe -I./adtlib -DCAN_HAVE_STDIO=@can_have_stdio@
+WARN	= -w
+OPTIM	= -O6 -DNDEBUG
+
+#WARN	= -Wall
+#OPTIM	= -g
+
+DEFS	= -DCAN_HAVE_STDIO=@can_have_stdio@
+
+CFLAGS	= $(WARN) $(OPTIM) $(INCDIR) $(DEFS)
+LDFLAGS	= -s $(LIBDIR)
 
 LEX	= @LEX@
 YACC	= @YACC@
@@ -17,7 +26,6 @@ EXE	= cobcy
 SRCS	= main.cc semdecl.cc semutil.cc semarith.cc seminfo.cc \
 	seminit.cc semfile.cc semconio.cc semcontrol.cc symbase.cc \
 	symconst.cc symfile.cc sympic.cc symrec.cc symvar.cc \
-	cobol_yacc.c cobol_lex.c \
 	cobfunc.c
 OBJS	= main.o semdecl.o semutil.o semarith.o seminfo.o \
 	seminit.o semfile.o semconio.o semcontrol.o \
@@ -29,7 +37,7 @@ RCSED	= Makefile.in cobfunc.c cobfunc.h cobol.l cobol.y \
 	configure.in lyextern.h main.cc semactions.h semarith.cc \
 	semarith.h semconio.cc semconio.h semcontrol.cc semcontrol.h \
 	semdecl.cc semdecl.h semextern.h semfile.cc semfile.h \
-	seminfo.cc seminfo.h seminit.cc seminit.h semsedef.h \
+	seminfo.cc seminfo.h seminit.cc seminit.h semtypes.h \
 	semutil.cc semutil.h symbase.cc \
 	symbase.h symconst.cc symconst.h symdata.h symfile.cc \
 	symfile.h sympic.cc sympic.h symrec.cc symrec.h \
@@ -37,14 +45,21 @@ RCSED	= Makefile.in cobfunc.c cobfunc.h cobol.l cobol.y \
 
 CLIB	= libcobol.a
 COBJS	= cobfunc.o
+DBFOBJS	= dbf/dbf.o dbf/ndx.o
+
+ADTLIB	= adtlib/lib/libadt.a
 
 #############################################
 
-all:	$(EXE) $(CLIB)
+all:	$(ADTLIB) $(EXE) $(CLIB)
+
+$(ADTLIB):
+	@echo Building base classes ...
+	@make -C adtlib/src install
 
 $(EXE):	$(OBJS)
 	@echo Linking cobcy ...
-	@$(CPP) -o $(EXE) $(OBJS) $(LIBS)
+	@$(CPP) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS)
 	@strip $(EXE)
 
 cobol_lex.c:	cobol.l y.tab.h
@@ -63,9 +78,11 @@ y.tab.h:
 	@rm -f y.tab.c
 
 $(CLIB):	$(COBJS)
+	@echo Making DBF objects ...
+	@make -C dbf
 	@echo Building cobcy runtime library ...
 	@rm -f $(CLIB)
-	@$(AR) rs $(CLIB) $(COBJS)
+	@$(AR) rs $(CLIB) $(COBJS) $(DBFOBJS)
 	@$(RANLIB) $(CLIB)
 
 cobfunc.o:	cobfunc.c
@@ -92,6 +109,8 @@ revert:
 depend:
 	@echo Generating dependencies ...
 	@$(CPP) $(CFLAGS) -MM $(SRCS) > .depend
+	@make -C adtlib/src depend
+	@make -C dbf depend
 
 clean:
 	@rm -f $(OBJS) *.bak *~ y.tab.h cobol_lex.c cobol_yacc.c
@@ -100,6 +119,9 @@ clean:
 spotless: clean
 	@./cleantest
 	@rm -f $(EXE) $(CLIB)
+	@rm -f $(ADTLIB)
+	@make -C adtlib/src clean
+	@make -C dbf clean
 
 ifeq (.depend,$(wildcard .depend))
 include .depend
