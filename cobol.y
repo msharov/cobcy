@@ -124,6 +124,7 @@ long int FillerIndex = 0;
 %token TOK_DUPLICATES
 %token TOK_DYNAMIC
 %token TOK_EGI
+%token TOK_ELSIF
 %token TOK_ELSE
 %token TOK_EMI
 %token TOK_ENABLE
@@ -339,7 +340,6 @@ long int FillerIndex = 0;
 %token TOK_SUPRESS
 %token TOK_SYMBOLIC
 %token TOK_SYNC
-%token TOK_SYNCHRONIZED
 %token TOK_TABLE
 %token TOK_TALLYING
 %token TOK_TAPE
@@ -464,7 +464,9 @@ special_names:		TOK_SPECIAL_NAMES TOK_PERIOD special_name_list
 special_name_list:	special_name_decl special_name_list
 	|
 	;
-special_name_decl:	identifier TOK_IS identifier TOK_PERIOD
+special_name_decl:	identifier TOK_IS identifier 
+			{ DeclareSpecialName(); }
+			TOK_PERIOD
 	;
 
 input_output_section:	TOK_INPUT_OUTPUT TOK_SECTION TOK_PERIOD
@@ -567,15 +569,24 @@ file_record_level:	integer level_name { AssociateFileRecord(); }
 			picture TOK_PERIOD 
 			{ Push (SE_Null); DeclareRecordLevel(); }
 
-record_level:	integer level_name picture value_entry usage_option sign_option sync_option justified_option TOK_PERIOD
+record_level:	integer 
+		level_name 
+		picture 
+		value_entry 
+		usage_option 
+		sign_option 
+		sync_option 
+		justified_option 
+		TOK_PERIOD
 		{ DeclareRecordLevel(); }
 	;
 
-usage_option:          optional_usage optional_is pict_usage_args
+usage_option:          TOK_USAGE optional_is pict_usage_args
         |
         ;
 
-sign_option:		optional_sign optional_is sign_args sep_char_option { NIY("Sign is [leading/trailing]"); }
+sign_option:	optional_sign optional_is sign_args 
+		sep_char_option { NIY("Sign is [leading/trailing]"); }
         |
         ;
 
@@ -595,12 +606,9 @@ justified_just:		TOK_JUSTIFIED
 	|		TOK_JUST
 	;
 
-sync_option:		sync_synchronized left_right_option { NIY("Sync/Synchronized"); } 
+sync_option:		TOK_SYNC left_right_option 
+			{ NIY("Sync/Synchronized"); } 
 	|
-	;
-
-sync_synchronized:	TOK_SYNCHRONIZED
-	|		TOK_SYNC
 	;
 
 left_right_option:	left_right
@@ -613,7 +621,7 @@ left_right:		TOK_LEFT
 
 level_name:	identifier
 	|	TOK_FILLER	
-	 	{ sprintf (StringBuffer, "filler%03d", FillerIndex);
+	 	{ sprintf (StringBuffer, "filler%03ld", FillerIndex);
 		  ++ FillerIndex;
 		  Push (SE_Identifier);
 		}
@@ -690,19 +698,20 @@ statement:	clause TOK_PERIOD
 	|	{ GenEndProc(); }
 		TOK_PROCEDURE identifier 
 		{ GenStartProc(); }
+	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
+        |       TOK_REPLACE TOK_OFF { NIY("Replace off"); }
 	|	identifier TOK_PERIOD { GenParagraph(); }
 	;
 
-else_list:	else_clause else_list
+else_list:	TOK_ELSE compound_clause
+	|	elsif_list
 	|
 	; 
-else_clause:	TOK_ELSE elsif_or_simple
+elsif_list:	TOK_ELSIF elsif_clause elsif_list_pl
 	;
-
-elsif_or_simple:	{ GenElse(); } compound_clause
-	|		TOK_IF elsif_clause
+elsif_list_pl:	elsif_list
+	|
 	;
-
 elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); } 
 			compound_clause
 	;
@@ -735,7 +744,7 @@ not_boolean_list_pl:	logic_connector { GenConnect(); } not_boolean_list
 	|
 	;
 
-not_boolean:	optional_lparen expression optional_is boolean2 
+not_boolean:	optional_lparen expression optional_is not_boolean2 
 		optional_rparen { GenBool(); }
         ;
 
@@ -788,7 +797,10 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 		{ GenDivide(); }
 		size_error_option
 	|	TOK_COMPUTE { Push (SE_Mark); } 
-		compute_arg_list { GenCompute(); }
+		identifier round_option TOK_EQUAL 
+		{ opkind = OP_Equal; Push (SE_Operator); }
+		compute_expr_list
+		{ GenCompute(); }
 	|	TOK_GO TOK_TO identifier { GenGoto(); } 
 	|	TOK_PERFORM identifier perform_options { GenPerform(); }
 	|	TOK_OPEN open_list
@@ -799,13 +811,7 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
         |       TOK_CALL call_list using_options { NIY("CALL"); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
-        |       TOK_REPLACE TOK_OFF { NIY("Replace off"); }
-	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
-	|	TOK_IF { GenStartIf(); } boolean_list 
-		{ GenEndIf(); }
-		optional_then
-			compound_clause
-		else_list
+	|	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
 	;
 
 compound_clause:	{ BeginCompound(); }
@@ -910,10 +916,6 @@ loop_iterator:	identifier
 	|	integer
 	;
 
-compute_arg_list:	identifier round_option TOK_EQUAL 
-			{ opkind = OP_Equal; Push (SE_Operator); }
-			compute_expr_list
-	;
 compute_expr_list:	compute_expr compute_expr_list_pl
 	|		compute_term
 	;
@@ -991,9 +993,14 @@ using_by:      TOK_REFERENCE
 using_identifier:   identifier using_inde_next
         ;
 
-using_inde_next:     optional_comma using_identifier
+using_inde_next:    TOK_COMMA using_identifier
         |
         ;
+
+if_args:	optional_then if_args_2
+	;
+if_args_2:	compound_clause else_list
+	;
 
 initialize_args:	using_identifier replace_option
 	;
@@ -1062,9 +1069,6 @@ optional_file:          TOK_FILE
         |
         ;
 optional_key:           TOK_KEY
-        |
-        ;
-optional_usage:		TOK_USAGE
         |
         ;
 optional_sign:		TOK_SIGN
