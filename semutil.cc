@@ -34,7 +34,7 @@ void WriteError (char * str)
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "error: ";
     cerr << str << ".\n";
-#if DEBUG
+#ifndef NDEBUG
     PrintStack();
 #endif
     ErrorFlag = TRUE;
@@ -49,12 +49,12 @@ void WriteWarning (char * str)
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "warning: ";
     cerr << str << ".\n";
-#if DEBUG
+#ifndef NDEBUG
     PrintStack();
 #endif
 }
 
-#if DEBUG
+#ifndef NDEBUG
 void PrintStackEntry (StackEntry * se)
 {
     switch (se->kind) {
@@ -86,6 +86,7 @@ void PrintStackEntry (StackEntry * se)
 void PrintStack (void)
 {
 StackEntry * se;
+Stack<StackEntry> TempStack;
 int index = 1;
 
     cerr << "Stack:\n";
@@ -94,15 +95,21 @@ int index = 1;
        cerr << "\t" << index << ") ";
        PrintStackEntry (se);
        cerr << "\n";
-       delete se;
+       TempStack.Push (se);
     }
+    while (!TempStack.IsEmpty())
+       SemStack.Push (TempStack.Pop());
 }
 #endif
 
 void NIY (char * str)
 {
+char MessageBuf [80];
+
     GenIndent();
-    codef << "/* " << str <<  " not implemented yet */\n";
+    sprintf (MessageBuf, "%s is unimplemented", str);
+    codef << "/* " << MessageBuf << " */\n";
+    WriteWarning (MessageBuf);
 }
 
 void GenComment (char * str)
@@ -113,10 +120,15 @@ void GenComment (char * str)
 
 BOOL ErrorOccured (void)
 {
+#ifndef NDEBUG
+    cerr << "ErrorOccured: ";
+    cerr << (ErrorFlag ? "TRUE" : "FALSE");
+    cerr << "\n";
+#endif
     return (ErrorFlag);
 }
 
-void PrintConstant (StackEntry * entry, ofstream& os)
+void PrintConstant (StackEntry * entry, ostream& os)
 {
 CobolConstant ctp;	// Just to keep all the stuff in one place
     ctp = entry;
@@ -136,7 +148,7 @@ char ErrorBuffer [80];
     return (sym);
 }
 
-void PrintIdentifier (char * id, ofstream& os)
+void PrintIdentifier (char * id, ostream& os)
 {
 CobolSymbol * sym;
 

@@ -8,7 +8,7 @@
 
 #include <fstream.h>
 #include <mdefs.h>
-#include "semsedef.h"
+#include "semtypes.h"
 #include "symbase.h"
 
 /*-----------------------------------------------------------------------*/
@@ -17,15 +17,15 @@
   void	NIY (char * str);
   void  GenComment (char * str);
   BOOL	ErrorOccured (void);
-  void 	PrintConstant (StackEntry * entry, ofstream& os);
+  void 	PrintConstant (StackEntry * entry, ostream& os);
   CobolSymbol *	LookupIdentifier (char * id);
-  void	PrintIdentifier (char * id, ofstream& os);
+  void	PrintIdentifier (char * id, ostream& os);
   void 	GenIndent (void);
   WORD 	CountIdentifiers (void);
   void 	ReverseIdentifiers (WORD nIds);
   void	Push (StackEntryKind kind);
   BOOL	IsInSet (char c, char * set);
-#if DEBUG
+#ifndef NDEBUG
   void	PrintStackEntry (StackEntry * se);
   void	PrintStack (void);
 #endif
