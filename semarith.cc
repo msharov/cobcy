@@ -27,7 +27,7 @@ StackEntry ** prms, * CurEntry = NULL;
 typedef StackEntry * StackEntryPtr;
 BOOL ConstantSource = FALSE;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tIn GenMove\n";
 #endif
 
@@ -63,7 +63,7 @@ BOOL ConstantSource = FALSE;
        }
        delete CurEntry;
 
-#if DEBUG
+#ifndef NDEBUG
        if (ConstantSource)
 	  cout << "\t\tMoving " << csrc << " to " << *dest << "\n";
        else
@@ -95,7 +95,7 @@ char ErrorBuffer[80];
 typedef StackEntry * StackEntryPtr;
 BOOL ConstantSource = FALSE;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tIn GenericArithmetic " << OpName << "\n";
 #endif
 
@@ -210,7 +210,7 @@ StackEntry ** prms;
 typedef StackEntry * StackEntryPtr;
 CobolVar * dest;
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "\tIn GenCompute\n";
 #endif
 

@@ -96,7 +96,7 @@ int i;
        ParentRecord = NewRec;
 
        // Actually place the symbol in the table
-#if DEBUG
+#ifndef NDEBUG
        cout << "Declaring record " << NewSymbol.Name;
        cout << ", dl = " << NewSymbol.DeclLevel << "\n";
 #endif
@@ -131,7 +131,7 @@ int i;
        }
 
        // Actually place the symbol in the table
-#if DEBUG
+#ifndef NDEBUG
        cout << "Declaring variable " << NewSymbol.Name;
        cout << ", dl = " << NewSymbol.DeclLevel << "\n";
 #endif
@@ -148,7 +148,7 @@ CobolData * ChildRecord;
     while (!NestedRecordList.IsEmpty() && ParentRecord != NULL &&
 	   ParentRecord->GetDeclLevel() >= LastLevel) 
     {
-#if DEBUG
+#ifndef NDEBUG
        cout << "Closing record " << *ParentRecord;
        cout << ", dl = " << ParentRecord->GetDeclLevel() << "\n";
 #endif
@@ -165,7 +165,7 @@ CobolData * ChildRecord;
     //	i.e. the new record is on highest level (0). It will have parent NULL
     if (ParentRecord != NULL && ParentRecord->GetDeclLevel() >= LastLevel)
     {
-#if DEBUG
+#ifndef NDEBUG
        cout << "Closing top-level record " << *ParentRecord << "\n";
 #endif
        -- NestingLevel;
@@ -237,7 +237,7 @@ CobolFile * DevStream;
     // Declaration is here because it will not be mentioned again
     DevStream->GenDeclare (codef);
 
-#if DEBUG
+#ifndef NDEBUG
     cout << "DBG: Declaring special name " << SpName->ident << "\n";
 #endif
     SymTable.Insert (SpName->ident, DevStream);
