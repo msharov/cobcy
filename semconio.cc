@@ -12,53 +12,48 @@
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
 #endif
+#include "symdata.h"
+#include "symconst.h"
+#include "symfile.h"
+#include "semcontrol.h"
 
-/*---------------------| Globals |------------------------------*/
-  char 				DisplayOutput [80];
+/*---------------------| Globals |--------------------------------*/
+  char 				DisplayOutput [MAX_SYMBOL_LENGTH];
   AcceptSourceType		AcceptSource;
-/*--------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
 
 void GenAccept (void)
 {
 StackEntry * entry;
-CobolSymbol * attr;
-char ErrorBuffer [80];
+CobolData * attr;
 int i, nIds;
+
+#if DEBUG
+    cout << "\tIn GenAccept\n";
+#endif
 
     nIds = CountIdentifiers();
 
     for (i = 0; i < nIds; ++ i) {
        entry = SemStack.Pop();
        if (entry->kind == SE_Identifier) {
-	  attr = SymTable.Lookup (entry->ident);
-	  if (attr == NULL) {
-	     sprintf (ErrorBuffer, "Undeclared identifier %s in ACCEPT", 
-	     		entry->ident);
-	     WriteError (ErrorBuffer);
+	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
 	     return;
-	  }
-
-	  if (attr->Kind == CobolSymbol::Record && AcceptSource != AS_Console) {
-	     WriteError ("cannot accept time variables into records");
-	     return;
-	  }
 
 	  switch (AcceptSource) {
 	     case AS_Console:
-		if (attr->Kind == CobolSymbol::Record)
-		   ReadRecord (attr, codef, "stdin", FALSE);
-		else
-		   ReadVariable (attr, codef, "stdin", FALSE);
+	        attr->GenRead (codef, "stdin");
+		GenEmptyClause();
 		break;
 	     case AS_Date:
 	        GenIndent();
-	        codef << attr->Prefix << attr->CName;
+	        attr->Write (codef);
 		codef << " = ";
 		codef << "_GetDate();\n";
 		break;
 	     case AS_Day:
 	        GenIndent();
-	        codef << attr->Prefix << attr->CName;
+	        attr->Write (codef);
 		codef << " = ";
 		codef << "_GetDay();\n";
 		break;
@@ -67,7 +62,7 @@ int i, nIds;
 	     	break;
 	     case AS_Time:
 	        GenIndent();
-	        codef << attr->Prefix << attr->CName;
+	        attr->Write (codef);
 		codef << " = ";
 		codef << "_GetTime();\n";
 		break;
@@ -85,9 +80,13 @@ void SetAcceptSource (AcceptSourceType NewSrc)
 void GenDisplay (void)
 {
 StackEntry * entry;
-CobolSymbol * attr;
-char ErrorBuffer [80];
+CobolData * attr;
+CobolConstant cattr;
 int i, nIds;
+
+#if DEBUG
+    cout << "\tIn GenDisplay\n";
+#endif
 
     nIds = CountIdentifiers();
     ReverseIdentifiers (nIds);
@@ -95,42 +94,15 @@ int i, nIds;
     for (i = 0; i < nIds; ++ i) {
        entry = SemStack.Pop();
 
-       if (entry->kind == SE_Integer) {
-          GenIndent();
-	  codef << "fprintf (" << DisplayOutput;
-	  codef << ", \"" << entry->ival << "\");\n";
-       }
-       else if (entry->kind == SE_Float) {
-          GenIndent();
-	  codef << "fprintf (" << DisplayOutput;
-	  codef << ", \"" << entry->fval << "\");\n";
-       }
-       else if (entry->kind == SE_Quote) {
-          GenIndent();
-          codef << "fprintf (" << DisplayOutput;
-          codef << ", \"\\\"\");\n";
-       }
-       else if (entry->kind == SE_String) {
-          GenIndent();
-	  codef << "fprintf (" << DisplayOutput;
-	  codef << ", \"" << entry->ident << "\");\n";
-       }
-       else if (entry->kind == SE_Identifier) {
-	  attr = SymTable.Lookup (entry->ident);
-	  if (attr == NULL) {
-	     sprintf (ErrorBuffer, "Undeclared identifier %s in DISPLAY", 
-	     			entry->ident);
-	     WriteError (ErrorBuffer);
+       if (entry->kind == SE_Identifier) {
+	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
 	     return;
-	  }
-
-          
-	  if (attr->Kind == CobolSymbol::Record)
-	     PrintRecord (attr, codef, DisplayOutput, FALSE);
-	  else
-	     PrintVariable (attr, codef, DisplayOutput, FALSE);
+          attr->GenWrite (codef, DisplayOutput);   
        }
-       delete entry;
+       else {
+	  cattr = entry;
+	  cattr.GenWrite (codef, DisplayOutput);
+       }
     }
 
     GenIndent();
@@ -140,12 +112,17 @@ int i, nIds;
 void SetDisplayOutput (void)
 {
 StackEntry * OutputStream;
-CobolSymbol * OutStrSym;
+CobolFile * OutStrSym;
     
     OutputStream = SemStack.Pop();
-    OutStrSym = LookupIdentifier (OutputStream->ident);
+    OutStrSym = (CobolFile*) LookupIdentifier (OutputStream->ident);
     if (OutStrSym != NULL)
-       strcpy (DisplayOutput, OutStrSym->CName);
+       strcpy (DisplayOutput, OutStrSym->GetFullCName());
+
+#if DEBUG
+    cout << "\tDISPLAY output set to " << DisplayOutput << "\n";
+#endif
+
     delete OutputStream;
 }
 

@@ -12,15 +12,24 @@
 #include <stdio.h>
 #endif
 #include <math.h>
+#include "symvar.h"
+#include "symrec.h"
+#include "symconst.h"
 
 BOOL RoundResult = FALSE;
 
 void GenMove (void)
 {
 WORD nIds, i;
-CobolSymbol * src = NULL, * dest = NULL;
+CobolVar * src = NULL, * dest = NULL;
+CobolConstant csrc;
 StackEntry ** prms, * CurEntry = NULL;
 typedef StackEntry * StackEntryPtr;
+BOOL ConstantSource = FALSE;
+
+#if DEBUG
+    cout << "\tIn GenMove\n";
+#endif
 
     // Pop all stack entries
     nIds = CountIdentifiers();
@@ -31,80 +40,40 @@ typedef StackEntry * StackEntryPtr;
 
     // First get the value (or identifier) to assign to everything
     CurEntry = prms[0];
-    if (CurEntry->kind == SE_Identifier)
-       if ((src = LookupIdentifier (CurEntry->ident)) == NULL)
+    if (CurEntry->kind == SE_Identifier) {
+       if ((src = (CobolVar*) LookupIdentifier (CurEntry->ident)) == NULL) {
+	  delete CurEntry;
+	  delete prms[0];
+	  delete [] prms;
 	  return;
+       }
+    }
+    else {
+       csrc = CurEntry;
+       ConstantSource = TRUE;
+    }
 
     for (i = 0; i < nIds; ++ i) {
        CurEntry = prms[i + 1];
-       if ((dest = LookupIdentifier (CurEntry->ident)) == NULL)
+       if ((dest = (CobolVar*) LookupIdentifier (CurEntry->ident)) == NULL) {
+	  delete CurEntry;
+	  delete prms[0];
+	  delete [] prms;
 	  return;
+       }
        delete CurEntry;
 
-       GenIndent();
-       switch (dest->Picture.Kind) {
-	  case PictureType::String:
-	       // Numerical variables need to be printed for copying
-	       if (src != NULL) {
-		  if (src->Picture.Kind == PictureType::Integer) {
-		     codef << "_IntegerToString (_tmpbuf, ";
-		     codef << src->Prefix << src->CName << ", ";
-		     codef << src->Picture.Text << ");\n";
-		  }
-		  else if (src->Picture.Kind == PictureType::Float) {
-		     codef << "_FloatToString (_tmpbuf, ";
-		     codef << src->Prefix << src->CName << ", ";
-		     codef << src->Picture.Text << ");\n";
-		  }
-	       }
+#if DEBUG
+       if (ConstantSource)
+	  cout << "\t\tMoving " << csrc << " to " << *dest << "\n";
+       else
+	  cout << "\t\tMoving " << *src << " to " << *dest << "\n";
+#endif
 
-	       codef << "_AssignVarString (";
-	       codef << dest->Prefix << dest->CName;
-	       if (prms[0]->kind == SE_Identifier) {
-		  if (src->Picture.Kind == PictureType::String)
-		     codef << ", " << dest->Prefix << src->CName;
-		  else
-		     codef << ", _tmpbuf";
-		  codef << ", " << dest->Picture.Size;
-		  codef << ", " << src->Picture.Size;
-	       }
-	       else if (prms[0]->kind == SE_String) {
-		  codef << ", ";
-		  PrintConstant (prms[0], codef);
-		  codef << ", " << dest->Picture.Size;
-		  codef << ", 0";
-	       }
-	       else {
-		  WriteError ("Incompatible types for MOVE");
-		  break;
-	       }
-	       codef << ");\n";
-	       break;
-	  case PictureType::Integer:
-	  case PictureType::Float:
-	       codef << dest->Prefix << dest->CName;
-	       codef << " = ";
-	       if (prms[0]->kind == SE_Identifier)
-		  codef << src->Prefix << src->CName;
-	       else if (prms[0]->kind == SE_Integer ||
-			prms[0]->kind == SE_Float) 
-		  PrintConstant (prms[0], codef);
-	       else {
-		  WriteError ("Incompatible types for MOVE");
-		  break;
-	       }
-
-	       // Truncate the result to fit the picture
-	       codef << " % 1";
-	       for (i = 0; i < dest->Picture.nDigitsBDP; ++ i)
-		  codef << "0";
-
-	       codef << ";\n";
-	       break;
-	  default:
-	       WriteError ("Invalid picture type of operand");
-	       break;
-       }
+       if (ConstantSource)
+	  dest->GenMove (codef, csrc);
+       else
+	  dest->GenMove (codef, src);
     }
     delete prms[0];
     delete [] prms;
@@ -118,11 +87,17 @@ void SetResultRounding (void)
 static void GenericArithmetic (char * OpName, BOOL SourceFirst, char OpChar)
 {
 WORD nIds, i;
-CobolSymbol * src = NULL, * dest = NULL;
+CobolVar * dest = NULL;
+CobolConstant ConstSrc;
+Streamable * src1, * src2;
 StackEntry ** prms, * SrcEntry = NULL, * CurEntry = NULL, * DestEntry = NULL;
 char ErrorBuffer[80];
-BOOL ZeroDivCheck = FALSE;
 typedef StackEntry * StackEntryPtr;
+BOOL ConstantSource = FALSE;
+
+#if DEBUG
+    cout << "\tIn GenericArithmetic " << OpName << "\n";
+#endif
 
     DestEntry = SemStack.Pop();
 
@@ -143,6 +118,7 @@ typedef StackEntry * StackEntryPtr;
        return;
     }
 
+    // If giving option is present, the source is last in prms array
     prms = new StackEntryPtr [nIds];
     for (i = 0; i < nIds; ++ i)
        prms[i] = SemStack.Pop();
@@ -151,28 +127,21 @@ typedef StackEntry * StackEntryPtr;
        SrcEntry = SemStack.Pop();
 
     // First get the value (or identifier) of source
-    if (SrcEntry->kind == SE_Identifier) {
-       if ((src = SymTable.Lookup (SrcEntry->ident)) == NULL) {
-	  sprintf (ErrorBuffer, "Bad source operand %s to %s", 
-	  		SrcEntry->ident, OpName);
-	  WriteError (ErrorBuffer);
-	  return;
-       }
-
-       // Generate a check for x/0 for divide
-       if (OpChar == '/') {
-          GenIndent();
-          codef << "if (" << src->Prefix << src->CName << " != 0)\n";
-	  ZeroDivCheck = TRUE;
-          ++ NestingLevel;
-       }
+    switch (SrcEntry->kind) {
+       case SE_Identifier:
+       		src1 = (CobolVar*) LookupIdentifier (SrcEntry->ident);
+		break;
+       default:
+       		ConstSrc = SrcEntry;
+		ConstantSource = TRUE;
+       		break;
     }
 
     if (DestEntry->kind == SE_Null) {
        // Perform the operation on every dest parameter
        for (i = 0; i < nIds; ++ i) {
 	  CurEntry = prms[i];
-	  if ((dest = SymTable.Lookup (CurEntry->ident)) == NULL) {
+	  if ((dest = (CobolVar*) SymTable.Lookup (CurEntry->ident)) == NULL) {
 	     sprintf (ErrorBuffer, "Bad dest operand %s to %s", 
 			   CurEntry->ident, OpName);
 	     WriteError (ErrorBuffer);
@@ -180,50 +149,23 @@ typedef StackEntry * StackEntryPtr;
 	  }
 	  delete CurEntry;
 
-	  GenIndent();
-	  switch (dest->Picture.Kind) {
-	     case PictureType::Integer:
-	     case PictureType::Float:
-			   codef << dest->Prefix << dest->CName;
-			   codef << " " << OpChar << "= ";
-			   if (SrcEntry->kind == SE_Identifier)
-			      codef << src->Prefix << src->CName;
-			   else if (SrcEntry->kind == SE_Integer ||
-				    SrcEntry->kind == SE_Float) 
-			      PrintConstant (SrcEntry, codef);
-			   else {
-			      sprintf (ErrorBuffer, "Incompatible types to %s", 
-					    OpName);
-			      WriteError (ErrorBuffer);
-			   }
-			   codef << ";\n";
-			   break;
-	     default:
-			   sprintf (ErrorBuffer, "Bad type of operand %s in \
-			   		%s", CurEntry->ident, OpName);
-			   WriteError (ErrorBuffer);
-			   break;
-	  }
+          if (ConstantSource)
+	     dest->GenArith (codef, dest, &ConstSrc, OpChar);
+	  else
+	     dest->GenArith (codef, dest, src1, OpChar);
        }
     }
     else {
-       if ((dest = SymTable.Lookup (DestEntry->ident)) == NULL) {
+       if ((dest = (CobolVar*) SymTable.Lookup (DestEntry->ident)) == NULL) {
 	  sprintf (ErrorBuffer, "Bad dest operand %s to %s", 
 			CurEntry->ident, OpName);
 	  WriteError (ErrorBuffer);
 	  return;
        }
 
-       GenIndent();
-       codef << dest->Prefix << dest->CName << " = ";
-
-       if (RoundResult)
-	  codef << "_RoundResult (";
-
-       // Perform the operation on every dest parameter
        CurEntry = prms[0];
        if (CurEntry->kind == SE_Identifier) {
-	  if ((dest = SymTable.Lookup (CurEntry->ident)) == NULL) {
+	  if ((src2 = SymTable.Lookup (CurEntry->ident)) == NULL) {
 	     sprintf (ErrorBuffer, "Bad src operand %s to %s", 
 			   CurEntry->ident, OpName);
 	     WriteError (ErrorBuffer);
@@ -231,42 +173,10 @@ typedef StackEntry * StackEntryPtr;
 	  }
        }
 
-       switch (dest->Picture.Kind) {
-	  case PictureType::Integer:
-	  case PictureType::Float:
-	  		if (RoundResult)
-			   codef << "(double) ";
-			if (CurEntry->kind == SE_Identifier)
-			   codef << dest->Prefix << dest->CName;
-			else
-			   PrintConstant (CurEntry, codef);
-			break;
-	  default:
-			sprintf (ErrorBuffer, "Bad type of operand %s in \
-				     %s", CurEntry->ident, OpName);
-			WriteError (ErrorBuffer);
-			break;
-       }
-
-       codef << " " << OpChar << " ";
-
-       if (RoundResult)
-	  codef << "(double) ";
-       if (SrcEntry->kind == SE_Identifier)
-	  codef << src->Prefix << src->CName;
-       else
-	  PrintConstant (SrcEntry, codef);
+       dest->GenArith (codef, src2, src1, OpChar);
 
        delete CurEntry;
-
-       if (RoundResult)
-	  codef << ")";
-       codef << ";\n";
     }
-
-    // Close check for zero
-    if (ZeroDivCheck)
-       -- NestingLevel;
 
     delete SrcEntry;
     delete [] prms;
@@ -298,6 +208,11 @@ void GenCompute (void)
 int nArgs, i;
 StackEntry ** prms;
 typedef StackEntry * StackEntryPtr;
+CobolVar * dest;
+
+#if DEBUG
+    cout << "\tIn GenCompute\n";
+#endif
 
     nArgs = CountIdentifiers();
 
@@ -348,6 +263,10 @@ typedef StackEntry * StackEntryPtr;
 
     // The whole expression will be on one line...
     if (RoundResult) {
+       codef << ", ";
+       dest = (CobolVar*) LookupIdentifier (prms[0]->ident);
+       if (dest != NULL)
+	  dest->WritePicture (codef);
        codef << ")";
        RoundResult = FALSE;
     }

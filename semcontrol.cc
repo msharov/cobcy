@@ -13,6 +13,8 @@
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
 #endif
+#include "symlabel.h"
+#include "symvar.h"
 
 // This is just a very rough estimate of the maximum
 //	It will not really place the limit on how many paragraphs
@@ -21,36 +23,37 @@
 #define MAX_PARAGRAPHS		32000
 
 /*-----------------------| Globals |--------------------------*/
-  Queue<char*> 	ParagraphList;
-  char		CurParName [32] = "FirstParagraph";
-  char		CurLoopVar [32] = "";
-  int		LoopNesting = 0;
+  Queue<CobolLabel> 	ParagraphList;
+  CobolLabel *		CurPar = NULL;
+  char			CurLoopVar [32] = "";
+  int			LoopNesting = 0;
 /*------------------------------------------------------------*/
 
 void GenParagraph (void)
 {
-CobolSymbol * NewSymbol;
+CobolLabel * NewLabel;
 StackEntry * CurEntry;
 char ErrorBuffer [80];
-char ** NewParName;
 
     CurEntry = SemStack.Pop();
 
-    if ((NewSymbol = SymTable.Lookup (CurEntry->ident)) == NULL) {
+    if ((NewLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
        // Allocate new symbol table entry
-       NewSymbol = new CobolSymbol;
-       NewSymbol->SetName (CurEntry->ident);
-       // The type will be label
-       NewSymbol->Kind = CobolSymbol::Label;
+       NewLabel = new CobolLabel;
+       NewLabel->SetName (CurEntry->ident);
        // Enter it in the table
-       SymTable.Insert (CurEntry->ident, NewSymbol);
+#if DEBUG
+       cout << "DBG: Inserting paragraph " << CurEntry->ident;
+       cout << " into symbol table.\n";
+#endif
+       SymTable.Insert (CurEntry->ident, NewLabel);
     }
     else {
-       if (NewSymbol->Kind == CobolSymbol::Label && NewSymbol->Undeclared)
-	  NewSymbol->Undeclared = FALSE;
+       if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
+	  NewLabel->Undeclared = FALSE;
        else {
-	  sprintf (ErrorBuffer, "Paragraph name %s is already used", 
-	  		NewSymbol->CobolName);
+	  sprintf (ErrorBuffer, "name %s is already used", 
+	  		NewLabel->GetName());
 	  WriteError (ErrorBuffer);
 	  delete CurEntry;
 	  return;
@@ -62,84 +65,66 @@ char ** NewParName;
     GenEndProc();
 
     // Then declare a new function
-    GenIndent();
-    codef << "int " << NewSymbol->CName << " (void)\n";
-    BeginCompound();
-    codef << NewSymbol->CName << ":\n";
-
-    NewParName = new (char*);
-    *NewParName = new char [30];
-    strcpy (*NewParName, NewSymbol->CName);
-    strcpy (CurParName, NewSymbol->CName);
+    NewLabel->GenDeclare (codef);
+    // Change the current paragraph
+    CurPar = NewLabel;
 
     // Setup for insertion in main proc
-    ParagraphList.Append (NewParName);
+    ParagraphList.Append (NewLabel);
 }
 
 void GenGoto (void)
 {
-CobolSymbol * DestLabel;
+CobolLabel * DestLabel;
 StackEntry * CurEntry;
 
     CurEntry = SemStack.Pop();
 
-    if ((DestLabel = SymTable.Lookup (CurEntry->ident)) == NULL) {
-       DestLabel = new CobolSymbol;
+    if ((DestLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
+       DestLabel = new CobolLabel;
        DestLabel->SetName (CurEntry->ident);
-       DestLabel->Kind = CobolSymbol::Label;
+#if DEBUG
+       cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
+#endif
        DestLabel->Undeclared = TRUE;
        SymTable.Insert (CurEntry->ident, DestLabel);
     }
     delete (CurEntry);
 
-    GenIndent();
-    // If in jumping to the top of the current paragraph, use goto.
-    if (strcmp (DestLabel->CName, CurParName) == 0)
-       codef << "goto " << DestLabel->CName << ";\n";
-    else {
-       // Return the difference of indeces of the destination paragraph
-       //	and the current paragraph. This is done so that when
-       //	that paragraph is through, and we return here, we could
-       //	tell the main routine how many paragraphs to advance.
-       codef << "return (";
-       codef << "_pi_" << DestLabel->CName << " - ";
-       codef << "_pi_" << CurParName;
-       codef << " + " << DestLabel->CName << "());\n";
-    }
+    CurPar->GenJump (codef, DestLabel);
 }
 
 void GenPerform (void)
 {
 StackEntry * Proc, * Count;
-CobolSymbol * ProcAttr;
-char ProcName [80];
+CobolLabel * ProcAttr;
 
     Count = SemStack.Pop();
     Proc = SemStack.Pop();
 
-    if ((ProcAttr = SymTable.Lookup (Proc->ident)) == NULL) {
-       ProcAttr = new CobolSymbol;
+    if ((ProcAttr = (CobolLabel*) SymTable.Lookup (Proc->ident)) == NULL) {
+       ProcAttr = new CobolLabel;
        ProcAttr->SetName (Proc->ident);
-       ProcAttr->Kind = CobolSymbol::Label;
        ProcAttr->Undeclared = TRUE;
+#if DEBUG
+       cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
+#endif
        SymTable.Insert (Proc->ident, ProcAttr);
-       strcpy (ProcName, ProcAttr->CName);
     }
-    else
-       strcpy (ProcName, ProcAttr->CName);
 
     if (Count->ival > 1) {
        GenIndent();
        codef << "for (_index = 0; _index < " << Count->ival;
        codef << "; ++ _index)\n";
-       BeginCompound();
+       ++ NestingLevel;
     }
 
     GenIndent();
-    codef << ProcName << " ();\n";
+    ProcAttr->Write (codef);
+    codef << "();\n";
 
     if (Count->ival > 1)
-       EndCompound();
+       -- NestingLevel;
 
     // Take care of the loops generated by VARYING statements
     while (LoopNesting > 0) {
@@ -179,40 +164,7 @@ void EndCompound (void)
 
 void GenStartProc (void)
 {
-StackEntry * CurEntry;
-CobolSymbol * NewProc;
-char ErrorBuffer [80];
-
-    CurEntry = SemStack.Pop();
-
-    if ((NewProc = SymTable.Lookup (CurEntry->ident)) == NULL) {
-       // Allocate new symbol table entry
-       NewProc = new CobolSymbol;
-       NewProc->SetName (CurEntry->ident);
-       // The type will be label
-       NewProc->Kind = CobolSymbol::Label;
-       // Enter it in the table
-       SymTable.Insert (CurEntry->ident, NewProc);
-    }
-    else {
-       if (NewProc->Kind == CobolSymbol::Label && NewProc->Undeclared)
-	  NewProc->Undeclared = FALSE;
-       else {
-	  sprintf (ErrorBuffer, "Procedure name %s is already used", 
-	  		NewProc->CobolName);
-	  WriteError (ErrorBuffer);
-	  delete CurEntry;
-	  return;
-       }
-    }
-
-    GenEndProc();
-
-    GenIndent();
-    codef << "int " << NewProc->CName << " (void)\n";
-    BeginCompound();
-
-    delete CurEntry;
+    GenParagraph();
 }
 
 void GenStartIf (void)
@@ -241,69 +193,61 @@ void GenElse (void)
 void GenBool (void)
 {
 StackEntry *entry[3];
-CobolSymbol *attrs[2];
-char prefix[80][2];
+CobolVar *attrs[2];
 int i;
 
     for (i = 0; i < 2; ++ i)
-      entry[i] = SemStack.Pop(); 
+       entry[i] = SemStack.Pop(); 
     
-    if ( !(strcmp(entry[0]->ident,"Alphabetic")) ||
-         !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
-         !(strcmp(entry[0]->ident,"Alphabetic-Lower")) )
-     {  
-
-       if ((attrs[0] = SymTable.Lookup (entry[1]->ident)) == NULL) {
-	  WriteError ("Unknown identifier");
+    if (!(strcmp(entry[0]->ident,"Alphabetic")) ||
+        !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
+        !(strcmp(entry[0]->ident,"Alphabetic-Lower")) )
+    {  
+       if ((attrs[0] = (CobolVar*) LookupIdentifier (entry[1]->ident)) == NULL)
 	  return;
-       }
 
-       if (attrs[0]->Picture.Kind != PictureType::String) {
-          WriteError ("Can't do alphabetic tests on non-alphabetic fields");
+       if (attrs[0]->IsNumeric()) {
+          WriteError ("cannot do alphabetic tests on non-strings");
           return;
        }
 
        if (!strcmp(entry[0]->ident,"Alphabetic"))
-         codef << "(_alphabetic(" << entry[1]->ident << "))";
+	  codef << "(_Alphabetic (" << entry[1]->ident << "))";
        if (!strcmp(entry[0]->ident,"Alphabetic-Upper"))
-         codef << "(_alphab_up_low(" << entry[1]->ident << ",2))";
+	  codef << "(_AlphabeticCase (" << entry[1]->ident << ",2))";
        if (!strcmp(entry[0]->ident,"Alphabetic-Lower"))
-         codef << "(_alphab_up_low(" << entry[1]->ident << ",1))";
+	  codef << "(_AlphabeticCase (" << entry[1]->ident << ",1))";
 
-       delete entry[0]; delete entry[1];
-     }
-    else
-  {
-    entry[2] = SemStack.Pop();
-      
-    if (entry[0]->kind == SE_Identifier) {
-       if ((attrs[0] = SymTable.Lookup (entry[0]->ident)) == NULL) {
-	  WriteError ("Unknown identifier");
-	  return;
-       }
+       delete entry[0]; 
+       delete entry[1];
     }
-    if (entry[2]->kind == SE_Identifier) {
-       if ((attrs[1] = SymTable.Lookup (entry[2]->ident)) == NULL) {
-	  WriteError ("Unknown identifier");
-	  return;
-       }
-    }
+    else {
+       entry[2] = SemStack.Pop();
+	 
+       if (entry[0]->kind == SE_Identifier)
+	  if ((attrs[0] = (CobolVar*) 
+	   		  LookupIdentifier (entry[0]->ident)) == NULL)
+	     return;
+       if (entry[2]->kind == SE_Identifier)
+	  if ((attrs[1] = (CobolVar*) 
+	   		  LookupIdentifier (entry[2]->ident)) == NULL)
+	     return;
 
-    codef << "(";
-    if (entry[2]->kind == SE_Identifier)
-       codef << prefix[1] << attrs[1]->CName; 
-    else
-       PrintConstant (entry[2], codef); 
-    codef << " " << entry[1]->ident << " ";
-    if (entry[0]->kind == SE_Identifier)
-       codef << prefix[0] << attrs[0]->CName;
-    else
-       PrintConstant (entry[0], codef);
-    codef << ")";
+       codef << "(";
+       if (entry[2]->kind == SE_Identifier)
+	  attrs[1]->Write (codef); 
+       else
+	  PrintConstant (entry[2], codef); 
+       codef << " " << entry[1]->ident << " ";
+       if (entry[0]->kind == SE_Identifier)
+	  attrs[0]->Write (codef);
+       else
+	  PrintConstant (entry[0], codef);
+       codef << ")";
 
-    for (i = 0; i < 3; ++ i)
-       delete entry[i];
-  } 
+       for (i = 0; i < 3; ++ i)
+	  delete entry[i];
+    } 
 }
 
 void GenConnect (void)
@@ -328,8 +272,8 @@ void GenStopRun (void)
 
 void GenParagraphCalls (void)
 {
-char ** CurName;
-Queue<char*> TempBufQueue;
+CobolLabel * CurLabel;
+Queue<CobolLabel> TempBufQueue;
 int pi = 0, nPars = 0;
 
     // First count the paragraphs
@@ -339,9 +283,11 @@ int pi = 0, nPars = 0;
     }
     // Now make the references, restoring ParagraphList for further analysis
     for (pi = 1; pi <= nPars; ++ pi) {
-       CurName = TempBufQueue.Serve();
-       declf << "const int _pi_" << *CurName << " = " << pi << ";\n";
-       ParagraphList.Append (CurName);
+       CurLabel = TempBufQueue.Serve();
+       declf << "const int _pi_";
+       CurLabel->Write (declf);
+       declf << " = " << pi << ";\n";
+       ParagraphList.Append (CurLabel);
     }
 
     // The calling structure is basically a while loop with a switch statement
@@ -379,11 +325,11 @@ int pi = 0, nPars = 0;
     pi = 0;
     while (!ParagraphList.IsEmpty()) {
        ++ pi;
-       CurName = ParagraphList.Serve();
+       CurLabel = ParagraphList.Serve();
        GenIndent();
-       codef << "case " << pi << ": _cpi += " << *CurName << "(); break;\n";
-       delete [] *CurName;
-       delete CurName;
+       codef << "case " << pi << ": _cpi += ";
+       CurLabel->Write (codef);
+       codef << "(); break;\n";
     }
 
     // This should never happen, but if it does, quit gracefully
@@ -486,5 +432,12 @@ StackEntry * incr;
     //	innermost loop (the procedure call)
 
     delete (incr);
+}
+
+void GenEmptyClause (void)
+{
+    GenIndent();
+    GenIndent();
+    codef << ";\n";
 }
 

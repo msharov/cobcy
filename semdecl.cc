@@ -10,102 +10,42 @@
 #endif
 #include "semdecl.h"
 #include "semfile.h"
+#include "symrec.h"
+#include "symvar.h"
+#include "symconst.h"
 
 /*---------------------| Globals |------------------------------*/
-  Stack<CobolSymbol> 		NestedRecordList;
+  Stack<CobolRecord> 		NestedRecordList;
   Queue<StackEntry> 		VarInit;
-  CobolSymbol * 		ParentRecord = NULL;
-  extern BOOL			PrinterUsed;
+  CobolRecord * 		ParentRecord = NULL;
+  extern Queue<CobolFile>	SFQueue;
 /*--------------------------------------------------------------*/
 
 void DeclareRecordLevel (void)
 {
-enum {RecFirst, RecValue = RecFirst, RecPicture, RecName, RecLevel, RecLast};
+enum {
+    RecFirst, 
+    RecValue = RecFirst, 
+    RecPicture, 
+    RecName, 
+    RecLevel, 
+    RecLast
+};
 typedef StackEntry * StackEntryPtr;
 StackEntryPtr entry[4];
-CobolSymbol * NewSymbol;
+BOOL NoPicture = FALSE;
+CobolRecord * NewRec;
+CobolVar * NewVar;
+struct {
+    char	Name [STACK_IDENT_LENGTH];
+    char	Picture [STACK_IDENT_LENGTH];
+    int		DeclLevel;
+} NewSymbol;
 int i;
 
     // Pop the entries off the stack. There are 4 of them.
     for (i = RecFirst; i < RecLast; ++ i)
        entry[i] = SemStack.Pop();
-
-    // Allocate new symbol table entry
-    NewSymbol = new CobolSymbol;
-    NewSymbol->SetName (entry [RecName]->ident);
-    // Set declaration level which is important for determining nesting
-    NewSymbol->DeclLevel = entry [RecLevel]->ival;
-
-    // Close all finished parent records
-    CloseScopeLevels (NewSymbol->DeclLevel);
-
-    // Establish whether the line is a record or a variable:
-    //	criteria is the presence of a picture field.
-    if (entry [RecPicture]->kind == SE_Null) {
-       // Since the record line may require previous record to be closed
-       NewSymbol->Kind = CobolSymbol::Record;
-
-       // Generate the actual field declaration
-       //	Note that this is done before incrementing nesting level
-       GenIndent();
-       codef << "struct {\n";
-
-       // Record always increases nesting level
-       ++ NestingLevel;
-    }
-    else {
-       // Variable setup is trivial
-       NewSymbol->Kind = CobolSymbol::Variable;
-       NewSymbol->SetPicture (entry [RecPicture]->ident);
-
-       // Generate the actual field declaration
-       GenIndent();
-       if (NewSymbol->Picture.Kind == PictureType::String) {
-	  codef << "char " << NewSymbol->CName;
-	  codef << " [" << NewSymbol->Picture.Size + 1 << "];\n";
-       }
-       else if (NewSymbol->Picture.Kind == PictureType::Float) {
-	  if (NewSymbol->Picture.Sign)
-	     codef << "unsigned ";
-	  codef << "double " << NewSymbol->CName;
-	  codef << ";\n";
-       }
-       else {
-	  if (NewSymbol->Picture.Sign)
-	     codef << "unsigned ";
-	  codef << "long int " << NewSymbol->CName;
-	  codef << ";\n";
-       }
-    }
-
-    if (ParentRecord != NULL) {
-       // If the parent record is still not NULL, it is a parent of this line
-       // To keep the child happy, tell it who the parent will be
-       NewSymbol->SetParent (ParentRecord->CobolName);
-
-       // Since this is a record, start a new parent scope
-       if (NewSymbol->Kind == CobolSymbol::Record) {
-	  NestedRecordList.Push (ParentRecord);
-	  ParentRecord = NewSymbol;
-       }
-       // Assign child to parent if a variable. Records are adopted
-       //	in CloseScopeLevels when their size is known
-       else
-          ParentRecord->AddChild (NewSymbol);
-
-    }
-    else {	// No parent
-       NewSymbol->SetParent (NULL);
-       // Skip a line if level 0 record
-       codef << "\n";
-
-       // No parent = NewSymbol is the new parent
-       if (NewSymbol->Kind == CobolSymbol::Record) 
-	  ParentRecord = NewSymbol;
-    }
-
-    // Actually place the symbol in the table
-    SymTable.Insert (NewSymbol->CobolName, NewSymbol);
 
     // If a default value was given, append the name and the value
     //	to the variable initialization queue, which will be processed
@@ -115,41 +55,121 @@ int i;
        VarInit.Append (entry [RecValue]);
     }
 
-    // Deallocate all records
-    for (i = RecFirst; i < RecLast; ++ i) {
-       if (entry[i] != NULL) {
-	  // Except for the name and value that were appended to the queue
-	  if ((i == RecName || i == RecValue) && 
-	      entry [RecValue]->kind == SE_Null)
-	     delete (entry[i]);
+    // Save other variables so that the stack entries can be disposed of ...
+    NewSymbol.DeclLevel = entry [RecLevel]->ival;
+    strcpy (NewSymbol.Name, entry [RecName]->ident);
+    if (entry[RecPicture]->kind != SE_Null)
+       strcpy (NewSymbol.Picture, entry [RecPicture]->ident);
+    else
+       NoPicture = TRUE;
+
+    // ... and dispose of them here. Name and value were appended to 
+    //	variable init queue so only delete these
+    delete entry[RecPicture];
+    delete entry[RecLevel];
+
+    // Establish whether the line is a record or a variable:
+    //	criteria is the presence of a picture field.
+    if (NoPicture) {
+       NewRec = new CobolRecord;
+       NewRec->SetName (NewSymbol.Name);
+       NewRec->SetDeclLevel (NewSymbol.DeclLevel);
+
+       // Close all finished parent records
+       CloseScopeLevels (NewSymbol.DeclLevel);
+
+       // Try setting the parent now.
+       if (ParentRecord != NULL) {
+	  // If the parent record is still not NULL, it is a parent of this 
+	  // line. To keep the child happy, tell it who the parent will be.
+	  NewRec->SetParent (ParentRecord->GetName());
+	  // Since this is a record, start a new parent scope
+	  NestedRecordList.Push (ParentRecord);
        }
+       else {	// No parent = I am parent
+	  ParentRecord = NewRec;
+	  NewRec->SetParent (NULL);
+	  // Skip a line if level 0 record
+	  codef << "\n";
+       }
+       // A record will always open a new scope
+       ParentRecord = NewRec;
+
+       // Actually place the symbol in the table
+#if DEBUG
+       cout << "Declaring record " << NewSymbol.Name;
+       cout << ", dl = " << NewSymbol.DeclLevel << "\n";
+#endif
+       SymTable.Insert (NewSymbol.Name, NewRec);
+
+       // Generate the actual field declaration
+       NewRec->GenDeclareBegin (codef);
+       // Record always increases nesting level
+       ++ NestingLevel;
+    }
+    else {
+       NewVar = new CobolVar;
+       NewVar->SetName (NewSymbol.Name);
+       NewVar->SetDeclLevel (NewSymbol.DeclLevel);
+       NewVar->SetPicture (NewSymbol.Picture);
+
+       // Close all finished parent records
+       CloseScopeLevels (NewSymbol.DeclLevel);
+
+       // Generate the actual field declaration
+       NewVar->GenDeclare (codef);
+
+       // If parent is not nobody, tell it about it
+       if (ParentRecord != NULL) {
+	  // Adopt this variable.
+	  NewVar->SetParent (ParentRecord->GetName());
+          ParentRecord->AddChild (NewVar);
+       }
+       else {
+	  NewVar->SetParent (NULL);
+	  codef << "\n";	// Skip a line if level 0 variable
+       }
+
+       // Actually place the symbol in the table
+#if DEBUG
+       cout << "Declaring variable " << NewSymbol.Name;
+       cout << ", dl = " << NewSymbol.DeclLevel << "\n";
+#endif
+       SymTable.Insert (NewSymbol.Name, NewVar);
     }
 }
 
-void CloseScopeLevels (unsigned int LastLevel)
+void CloseScopeLevels (WORD LastLevel)
 {
-CobolSymbol * ChildRecord;
+CobolData * ChildRecord;
 
     // Check if a record before us was finished by checking
     //	the declaration number. If it is less, the record is done.
     while (!NestedRecordList.IsEmpty() && ParentRecord != NULL &&
-	   ParentRecord->DeclLevel >= LastLevel) 
+	   ParentRecord->GetDeclLevel() >= LastLevel) 
     {
+#if DEBUG
+       cout << "Closing record " << *ParentRecord;
+       cout << ", dl = " << ParentRecord->GetDeclLevel() << "\n";
+#endif
        -- NestingLevel;
-       GenIndent();
-       codef << "} " << ParentRecord->CName << ";\n";
+       ParentRecord->GenDeclareEnd (codef);
        ChildRecord = ParentRecord;
        ParentRecord = NestedRecordList.Pop();
        if (ParentRecord != NULL) {
-          ChildRecord->SetParent (ParentRecord->CobolName);
+          ChildRecord->SetParent (ParentRecord->GetName());
           ParentRecord->AddChild (ChildRecord);
        }
     }
-    if (ParentRecord != NULL && ParentRecord->DeclLevel >= LastLevel)
+    // This happens if the queue is empty, but still not leveled
+    //	i.e. the new record is on highest level (0). It will have parent NULL
+    if (ParentRecord != NULL && ParentRecord->GetDeclLevel() >= LastLevel)
     {
+#if DEBUG
+       cout << "Closing top-level record " << *ParentRecord << "\n";
+#endif
        -- NestingLevel;
-       GenIndent();
-       codef << "} " << ParentRecord->CName << ";\n";
+       ParentRecord->GenDeclareEnd (codef);
        ParentRecord = NULL;
     }
 }
@@ -157,7 +177,9 @@ CobolSymbol * ChildRecord;
 void InitializeVariables (void)
 {
 StackEntry * VarName, * VarValue;
-CobolSymbol * attr, * ValueAttr;
+CobolVar * attr;
+CobolVar * ValueAttr;
+CobolConstant ValueConst;
 
     codef << "void _SetVarValues (void)\n";
     codef << "{\n";
@@ -172,33 +194,14 @@ CobolSymbol * attr, * ValueAttr;
     while (!VarInit.IsEmpty()) {
        VarName = VarInit.Serve();
        VarValue = VarInit.Serve();
-       attr = SymTable.Lookup (VarName->ident);
+       attr = (CobolVar*) SymTable.Lookup (VarName->ident);
        if (VarValue->kind == SE_Identifier) {
-	  ValueAttr = SymTable.Lookup (VarValue->ident);
-       }
-
-       GenIndent();
-       if (attr->Picture.Kind == PictureType::String) {
-	  codef << "_AssignVarString (" << attr->Prefix << attr->CName << ", ";
-	  if (VarValue->kind == SE_Identifier) {
-	     codef << ValueAttr->Prefix << ValueAttr->CName;
-	     codef << ", " << attr->Picture.Size;
-	     codef << ", " << ValueAttr->Picture.Size;
-	     codef << ");\n";
-	  }
-	  else {
-	     PrintConstant (VarValue, codef);
-	     codef << ", " << attr->Picture.Size;
-	     codef << ", 0);\n";
-	  }
+	  ValueAttr = (CobolVar*) SymTable.Lookup (VarValue->ident);
+	  attr->GenMove (codef, ValueAttr);
        }
        else {
-	  codef << attr->Prefix << attr->CName << " = ";
-	  if (VarValue->kind == SE_Identifier)
-	     codef << ValueAttr->Prefix << ValueAttr->CName;
-	  else
-	     PrintConstant (VarValue, codef);
-	  codef << ";\n";
+	  ValueConst = VarValue;
+	  attr->GenMove (codef, ValueConst);
        }
        delete VarName;
        delete VarValue;
@@ -213,28 +216,32 @@ CobolSymbol * attr, * ValueAttr;
 void DeclareSpecialName (void)
 {
 StackEntry * SpName, * DevName;
-CobolSymbol * DevStream;
+CobolFile * DevStream;
 
     SpName = SemStack.Pop();
     DevName = SemStack.Pop();
 
-    DevStream = new CobolSymbol;
+    DevStream = new CobolFile;
     DevStream->SetName (SpName->ident);
-    
-    /*
-    ** Special names declare devices, as I understand.
-    ** Since I don't have any cardreaders or magnetic tape (:)
-    ** I just pipe the output to the display.
-    ** In the future, I'll try to make device handling easier...
-    */
+
     if (strcmp (DevName->ident, "printer") == 0) {
-       strcpy (DevStream->CName, PRINTER_STREAM_NAME);
-       PrinterUsed = TRUE;
+       DevStream->SetFilename (PRINTER_SPOOL_FILE);
+       DevStream->SetFlushCommand (PRINTER_COMMAND);
+       DevStream->SetOrganization (ORG_Sequential);
+       DevStream->SetAccessMode (AM_Sequential);
+       DevStream->SetUnlinkOnClose (TRUE);
     }
     else
-       strcpy (DevStream->CName, DISPLAY_STREAM_NAME);
+       DevStream->SetFilename (DevName->ident);
+    
+    // Declaration is here because it will not be mentioned again
+    DevStream->GenDeclare (codef);
 
+#if DEBUG
+    cout << "DBG: Declaring special name " << SpName->ident << "\n";
+#endif
     SymTable.Insert (SpName->ident, DevStream);
+    SFQueue.Append (DevStream);
 
     delete DevName;
     delete SpName;

@@ -17,75 +17,91 @@
 #include <unistd.h>
 #endif
 #endif
+#include "symfile.h"
+#include "semdecl.h"	// for CloseScopeLevels
+#include "symdata.h"
 
 /*---------------------| Globals |------------------------------*/
-  CobolSymbol * 		FileToAssociate = NULL;
-  Queue<CobolSymbol>		FDInit;
-  BOOL				PrinterUsed = FALSE;
+  CobolFile * 			FileToAssociate = NULL;
+  Queue<CobolFile>		FDInit;
+  Queue<CobolFile>		SFQueue;
 /*--------------------------------------------------------------*/
 
 void FileDecl (void)
 {
 StackEntry * CurEntry;
-CobolSymbol * NewFD;
+CobolFile * NewFD;
 
-    NewFD = new CobolSymbol;
     CurEntry = SemStack.Pop();	// Pop file name
-    strcpy (NewFD->FileName, CurEntry->ident);
+    NewFD = new CobolFile;
 
-    // Printer is a special case: spool and print on close
-    if (strcmp (NewFD->FileName, "printer") == 0) {
-       strcpy (NewFD->FileName, PRINTER_SPOOL_FILE);
-       PrinterUsed = TRUE;
+    // Printer is a special file: spool and print on close
+    if (strcmp (CurEntry->ident, "printer") == 0) {
+       NewFD->SetFilename (PRINTER_SPOOL_FILE);
+       NewFD->SetFlushCommand (PRINTER_COMMAND);
+       NewFD->SetOrganization (ORG_Sequential);
+       NewFD->SetAccessMode (AM_Sequential);
+       NewFD->SetUnlinkOnClose (TRUE);
     }
+    else
+       NewFD->SetFilename (CurEntry->ident);
+
     delete (CurEntry);
 
-    CurEntry = SemStack.Pop();	// Pop file descriptor name
-    NewFD->Kind = CobolSymbol::FileDesc;
+    // Pop file descriptor name
+    CurEntry = SemStack.Pop();
     NewFD->SetName (CurEntry->ident);
+    SymTable.Insert (CurEntry->ident, NewFD);
     delete (CurEntry);
-
-    SymTable.Insert (NewFD->CobolName, NewFD);
 }
 
 void GenFileDesc (void)
 {
 StackEntry * CurEntry, * FileNameEntry;
-CobolSymbol * NewFD;
+CobolFile * NewFD;
 
     FileNameEntry = SemStack.Pop();
     CurEntry = SemStack.Pop();
-    if ((NewFD = SymTable.Lookup (CurEntry->ident)) == NULL) {
+    if ((NewFD = (CobolFile*) SymTable.Lookup (CurEntry->ident)) == NULL) {
        WriteError ("Cannot create unselected file descriptor");
        delete (CurEntry);
        return;
     }
+#if DEBUG
+    cout << "Declaring new file descriptor " << CurEntry->ident << "\n";
+#endif
     delete (CurEntry);
 
     if (strlen (FileNameEntry->ident) > 0)
-       strcpy (NewFD->FileName, FileNameEntry->ident);
+       NewFD->SetFilename (FileNameEntry->ident);
     delete (FileNameEntry);
 
     FDInit.Append (NewFD);
 
-    if (FileToAssociate == NULL)
-       FileToAssociate = NewFD;
-    else
+    if (FileToAssociate != NULL)
        WriteError ("No record found for file descriptor");
+    FileToAssociate = NewFD;
 
     CloseScopeLevels (0);
     codef << "\n";
-    GenIndent();
-    codef << "FILE * " << NewFD->CName << ";\n";
+    NewFD->GenDeclare (codef);
 }
 
 void AssociateFileRecord (void)
 {
 StackEntry * CurEntry;
+
     if (FileToAssociate != NULL) {
        CurEntry = SemStack.Pop();
-       strcpy (FileToAssociate->FileRecordName, CurEntry->ident);
+#if DEBUG
+       cout << "\tAssociating record " << CurEntry->ident;
+       cout << " to " << *FileToAssociate << "\n";
+#endif
+       FileToAssociate->SetRecord (CurEntry->ident);
+       // Only associate the first record. All the others are not associated.
        FileToAssociate = NULL;
+       // Push it back for further declaration. The record is not
+       //	fully defined at this point.
        SemStack.Push (CurEntry);
     }
 }
@@ -93,157 +109,143 @@ StackEntry * CurEntry;
 void GenOpen (char * mode)
 {
 StackEntry *entry;
-CobolSymbol *fattr;
+CobolFile *fattr;
+OpenModeType nmode;
 int nIds, i;
+
+    if (strcmp (mode, "input") == 0)
+       nmode = OM_Input;
+    else if (strcmp (mode, "output") == 0)
+       nmode = OM_Output;
+    else if (strcmp (mode, "io") == 0)
+       nmode = OM_InputOutput;
+    else if (strcmp (mode, "extend") == 0)
+       nmode = OM_Extend;
+    else {
+       WriteError ("internal: bad file mode");
+       return;
+    }
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
        entry = SemStack.Pop();
-       if ((fattr = SymTable.Lookup (entry->ident)) == NULL) {
+       if ((fattr = (CobolFile*) SymTable.Lookup (entry->ident)) == NULL) {
 	  WriteError ("Unknown file descriptor");
 	  delete entry;
 	  return;
        }
        delete entry;
-
-       // Printer file is a special file; it is opened in the init routine
-       if (strcmp (fattr->CName, PRINTER_STREAM_NAME) != 0) {
-	  GenIndent();
-	  codef << fattr->CName << " = fopen (\"" << fattr->FileName;
-	  codef << "\", \"" << mode << "b\");\n";
-       }
+       
+#if DEBUG
+       cout << "\tOpening file " << *fattr << " for " << mode << "\n";
+#endif
+       fattr->GenOpen (codef, nmode);
     }
 }
 
 void GenClose (void)
 {
 StackEntry *entry;
-CobolSymbol *fattr;
+CobolFile *fattr;
 int nIds, i;
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
        entry = SemStack.Pop();
-       if ((fattr = SymTable.Lookup (entry->ident)) == NULL) {
+       if ((fattr = (CobolFile*) SymTable.Lookup (entry->ident)) == NULL) {
 	  WriteError ("Unknown file descriptor");
           delete entry;
 	  return;
        }
        delete entry;
-
-       GenIndent();
-       // Printer file is only closed in the end; here just flush it
-       if (strcmp (fattr->CName, PRINTER_STREAM_NAME) != 0)
-	  codef << "fclose (" << fattr->CName << ");\n";
-       else
-	  FlushPrinterOutput();
+#if DEBUG
+       cout << "\tClosing file " << *fattr << "\n";
+#endif
+       fattr->GenClose (codef);
     }
 }
 
-void GenSeek (CobolSymbol * RecFile)
+void GenSeek (CobolFile * RecFile)
 {
-    // For random-access files, position file pointer before read
-    //	based on the given key.
-    if (RecFile->FileAccessMode == CobolSymbol::AM_Random) {
-       GenIndent();
-       codef << "fseek (" << RecFile->CName << ", ";
-
-       // Only relative files are supported now.
-       if (RecFile->FileOrganization == CobolSymbol::ORG_Relative) {
-          // offset = record_size * key
-          codef << RecFile->RecordCSize << " * ";
-	  PrintIdentifier (RecFile->FileRelativeKey, codef);
-	  codef << ", SEEK_SET";
-       }
-       else
-	  codef << "0, SEEK_CUR";
-       codef << ");\n";
-    }
+    RecFile->GenSeek (codef);
 }
 
 void GenRead (void)
 {
 StackEntry * entry;
-CobolSymbol * RecFile, * Rec;
+CobolSymbol * ToRead;
+CobolFile * DestStream;
 
     entry = SemStack.Pop();
 
-    if ((RecFile = SymTable.Lookup (entry->ident)) == NULL) {
-       WriteError ("Invalid filename to READ");
+    if ((ToRead = LookupIdentifier (entry->ident)) == NULL) {
        delete entry;
        return;
     }
     delete entry;
 
-    if ((Rec = SymTable.Lookup (RecFile->FileRecordName)) == NULL) {
-       WriteError ("The given file is not associated with a record");
-       return;
-    }
-
-    GenSeek (RecFile);
-
-    if (Rec->Kind == CobolSymbol::Record)
-       ReadRecord (Rec, codef, RecFile->CName);
+    if (ToRead->Kind() == CS_Record || ToRead->Kind() == CS_Variable)
+       DestStream = ((CobolData*) ToRead)->GetStream();
+    else if (ToRead->Kind() == CS_FileDesc)
+       DestStream = (CobolFile*) ToRead;
     else
-       ReadVariable (Rec, codef, RecFile->CName);
+       WriteError ("cannot read into that");
 
-    GenStartIf();
-    codef << "feof (" << RecFile->CName << ")";
-    GenEndIf();
+    DestStream->GenReadData (codef);
+    DestStream->GenReadEnd (codef);
+
+    DestStream->GenEOFCheck (codef);
 }
 
 void GenWrite (void)
 {
-StackEntry * entry;
-CobolSymbol * RecFile, * DataRec = NULL, * Rec;
+StackEntry * FileEntry, * SrcEntry;
+CobolSymbol * ToWrite;
+CobolData * ToWriteFrom;
+CobolFile * DestStream;
 
-    // A null entry signifies omission of the optional source record.
-    entry = SemStack.Pop();
-    if (strcmp (entry->ident, "") != 0) {
-       if ((DataRec = SymTable.Lookup (entry->ident)) == NULL) {
-	  WriteError ("Invalid source record to WRITE");
-	  delete entry;
-	  return;
-       }
-    }
-    delete entry;
+    SrcEntry = SemStack.Pop();
+    FileEntry = SemStack.Pop();
 
-    entry = SemStack.Pop();
-    if ((Rec = SymTable.Lookup (entry->ident)) == NULL) {
-       WriteError ("Invalid file record to WRITE");
-       delete entry;
+    if ((ToWrite = LookupIdentifier (FileEntry->ident)) == NULL) {
+       delete FileEntry;
+       delete SrcEntry;
        return;
     }
-    delete entry;
+    delete FileEntry;
 
-    if ((RecFile = SymTable.Lookup (Rec->FileName)) == NULL) {
-       WriteError ("The given record is not associated with a file");
-       return;
-    }
+    ToWriteFrom = (CobolData*) SymTable.Lookup (SrcEntry->ident);
+    delete SrcEntry;
 
-    // If optional source record is not specified, write file record.
-    if (DataRec == NULL)
-       DataRec = Rec;
-
-    GenSeek (RecFile);
-
-    if (DataRec->Kind == CobolSymbol::Record)
-       PrintRecord (DataRec, codef, RecFile->CName);
+#if DEBUG
+    cout << "\tWriting record ";
+    if (ToWriteFrom != NULL)
+       cout << *ToWriteFrom;
     else
-       PrintVariable (DataRec, codef, RecFile->CName);
+       cout << *ToWrite;
+    cout << " to file found using " << *ToWrite << "\n";
+#endif
+
+    // Now, the first argument to write can either be a file descriptor,
+    //	or the record associated with that file descriptor
+    //	The criteria is the Kind function, overloaded from CobolSymbol
+    if (ToWrite->Kind() == CS_Record || ToWrite->Kind() == CS_Variable)
+       DestStream = ((CobolData*) ToWrite)->GetStream();
+    else if (ToWrite->Kind() == CS_FileDesc)
+       DestStream = (CobolFile*) ToWrite;
+    else
+       WriteError ("cannot write that");
+
+    DestStream->GenWriteData (codef, (CobolData*) ToWriteFrom);
+    DestStream->GenWriteEnd (codef);
 }
 
 void AssociateRecordsWithFD (void)
 {
-CobolSymbol * FDName, * FDRec;
-
+CobolFile * FD;
     while (!FDInit.IsEmpty()) {
-       FDName = FDInit.Serve();
-       if ((FDRec = SymTable.Lookup (FDName->FileRecordName)) == NULL) {
-	  WriteError ("Associated record is invalid");
-	  continue;
-       }
-       strcpy (FDRec->FileName, FDName->CobolName);
+       FD = FDInit.Serve();
+       FD->AssociateRecord();
     }
 }
 
@@ -252,7 +254,7 @@ void SetFileStatus (void)
 StackEntry * CurEntry;
     if (FileToAssociate != NULL) {
        CurEntry = SemStack.Pop();
-       strcpy (FileToAssociate->FileStatusVar, CurEntry->ident);
+       FileToAssociate->SetStatusVar (CurEntry->ident);
        delete CurEntry;
     }
 }
@@ -261,11 +263,11 @@ void SetAccessMode (char * mode)
 {
     if (FileToAssociate != NULL) {
        if (strcmp (mode, "sequential") == 0)
-          FileToAssociate->FileAccessMode = CobolSymbol::AM_Sequential;
+          FileToAssociate->SetAccessMode (AM_Sequential);
        else if (strcmp (mode, "random") == 0)
-          FileToAssociate->FileAccessMode = CobolSymbol::AM_Random;
+          FileToAssociate->SetAccessMode (AM_Random);
        else if (strcmp (mode, "dynamic") == 0)
-          FileToAssociate->FileAccessMode = CobolSymbol::AM_Dynamic;
+          FileToAssociate->SetAccessMode (AM_Dynamic);
        else
 	  WriteError ("Invalid access mode");
     }
@@ -275,13 +277,13 @@ void SetOrganization (char * org)
 {
     if (FileToAssociate != NULL) {
        if (strcmp (org, "sequential") == 0)
-          FileToAssociate->FileOrganization = CobolSymbol::ORG_Sequential;
+          FileToAssociate->SetOrganization (ORG_Sequential);
        else if (strcmp (org, "line sequential") == 0)
-          FileToAssociate->FileOrganization = CobolSymbol::ORG_Line_sequential;
+          FileToAssociate->SetOrganization (ORG_Line_sequential);
        else if (strcmp (org, "relative") == 0)
-          FileToAssociate->FileOrganization = CobolSymbol::ORG_Relative;
+          FileToAssociate->SetOrganization (ORG_Relative);
        else if (strcmp (org, "indexed") == 0)
-          FileToAssociate->FileOrganization = CobolSymbol::ORG_Indexed;
+          FileToAssociate->SetOrganization (ORG_Indexed);
        else
 	  WriteError ("Invalid organization");
     }
@@ -292,7 +294,7 @@ void SetRelativeKey (void)
 StackEntry * CurEntry;
     if (FileToAssociate != NULL) {
        CurEntry = SemStack.Pop();
-       strcpy (FileToAssociate->FileRecordName, CurEntry->ident);
+       FileToAssociate->SetKey (CurEntry->ident);
        FileToAssociate = NULL;
        SemStack.Push (CurEntry);
        delete CurEntry;
@@ -304,7 +306,7 @@ void SetRecordKey (void)
 StackEntry * CurEntry;
     if (FileToAssociate != NULL) {
        CurEntry = SemStack.Pop();
-       strcpy (FileToAssociate->FileRecordName, CurEntry->ident);
+       FileToAssociate->SetKey (CurEntry->ident);
        delete CurEntry;
     }
 }
@@ -312,46 +314,33 @@ StackEntry * CurEntry;
 // Printer spool for example...
 void OpenSpecialFiles (void)
 {
-    if (PrinterUsed) {
-       GenIndent();
-       codef << PRINTER_STREAM_NAME;
-       codef << " = fopen (";
-       codef << "\"" << PRINTER_SPOOL_FILE << "\"";
-       codef << ", \"wb\");\n";
-       codef << "\n";
+CobolFile * sf;
+Queue<CobolFile> TempQ;
+
+#if DEBUG
+    cout << "DBG: Opening special files\n";
+#endif
+
+    while (!SFQueue.IsEmpty()) {
+       sf = SFQueue.Serve();
+       sf->GenOpen (codef, OM_Output);
+       TempQ.Append (sf);
     }
+    while (!TempQ.IsEmpty())
+       SFQueue.Append (TempQ.Serve());	// For closing
 }
 
 void CloseSpecialFiles (void)
 {
-    if (PrinterUsed) {
-       codef << "\n";
-       GenIndent();
-       codef << "fflush (" << PRINTER_STREAM_NAME << ");\n";
-       GenIndent();
-       codef << "fclose (" << PRINTER_STREAM_NAME << ");\n";
+CobolFile * sf;
 
-       // Shove spool output to printer
-       GenIndent();
-       codef << "system (\"" << PRINTER_COMMAND;
-       codef << " " << PRINTER_SPOOL_FILE << "\");\n";
-       
-       // Remove the spool file
-       GenIndent();
-       codef << "unlink (\"" << PRINTER_SPOOL_FILE << "\");\n";
-    }
-}
+#if DEBUG
+    cout << "DBG: Closing special files\n";
+#endif
 
-void FlushPrinterOutput (void)
-{
-    if (PrinterUsed) {
-       GenIndent();
-       codef << "fflush (" << PRINTER_STREAM_NAME << ");\n";
-
-       // Shove spool output to printer
-       GenIndent();
-       codef << "system (\"" << PRINTER_COMMAND;
-       codef << " " << PRINTER_SPOOL_FILE << "\");\n";
+    while (!SFQueue.IsEmpty()) {
+       sf = SFQueue.Serve();
+       sf->GenClose (codef);
     }
 }
 

@@ -11,7 +11,6 @@
 #include <queue.h>
 #include <hash.h>
 #include <string.h>
-#include "symbol.h"
 #include "semsedef.h"
 #include "semutil.h"
 

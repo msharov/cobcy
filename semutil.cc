@@ -11,47 +11,101 @@
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
 #endif
+#include "symbase.h"
+#include "symconst.h"
+#include "symlabel.h"
 
 extern long int ival;
 extern double fval;
 extern char StringBuffer[];
 extern SEOperatorKind opkind;
 extern int CurrentLine;
-extern char CurParName[];
+extern CobolLabel * CurPar;
 extern BOOL CodeBegan;
 
 BOOL ErrorFlag = FALSE;
 
 void WriteError (char * str)
 {
-    if (CodeBegan) {
+    if (CodeBegan && CurPar != NULL) {
        cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
-       cerr << "in paragraph " << CurParName << ":\n";
+       cerr << "in paragraph " << *CurPar << ":\n";
     }
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "error: ";
     cerr << str << ".\n";
+#if DEBUG
+    PrintStack();
+#endif
     ErrorFlag = TRUE;
 }
 
 void WriteWarning (char * str)
 {
-    if (CodeBegan) {
+    if (CodeBegan && CurPar != NULL) {
        cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
-       cerr << "in paragraph " << CurParName << ":\n";
+       cerr << "in paragraph " << *CurPar << ":\n";
     }
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "warning: ";
     cerr << str << ".\n";
+#if DEBUG
+    PrintStack();
+#endif
 }
+
+#if DEBUG
+void PrintStackEntry (StackEntry * se)
+{
+    switch (se->kind) {
+	case SE_Error: 	cerr << "error token"; 	break;
+	case SE_Mark: 	cerr << "mark"; 		break;
+	case SE_Null:	cerr << "null";		break;
+	case SE_Integer:
+			cerr << "integer " << se->ival;
+			break;
+	case SE_Float:
+			cerr << "float " << se->fval;
+			break;
+	case SE_String: 
+			cerr << "string " << se->ident;
+			break;
+	case SE_Identifier:
+			cerr << "identifier " << se->ident;
+			break;
+	case SE_Picture:
+			cerr << "picture [" << se->ident << "]";	
+			break;
+	case SE_Bool:		cerr << "boolean";	break;
+	case SE_Connector:	cerr << "connector";	break;
+	case SE_Operator:	cerr << "operator";	break;
+	case SE_Quote:		cerr << "quote";	break;
+    }
+}
+
+void PrintStack (void)
+{
+StackEntry * se;
+int index = 1;
+
+    cerr << "Stack:\n";
+    while (!SemStack.IsEmpty()) {
+       se = SemStack.Pop();
+       cerr << "\t" << index << ") ";
+       PrintStackEntry (se);
+       cerr << "\n";
+       delete se;
+    }
+}
+#endif
 
 void NIY (char * str)
 {
     GenIndent();
-    codef << "\n/* " << str <<  " not implemented yet */" <<  "\n";
+    codef << "/* " << str <<  " not implemented yet */\n";
 }
 
-void Comment (char * str)
+void GenComment (char * str)
 {
     GenIndent();
     codef << "/* " << str << " */\n";
@@ -64,16 +118,9 @@ BOOL ErrorOccured (void)
 
 void PrintConstant (StackEntry * entry, ofstream& os)
 {
-    switch (entry->kind) {
-        case SE_String:		os << "\"" << entry->ident << "\"";
-				break;
-        case SE_Integer:	os << entry->ival;
-				break;
-        case SE_Float:		os << entry->fval;
-				break;
-	default:		WriteError ("Bad constant type");
-				break;
-    }
+CobolConstant ctp;	// Just to keep all the stuff in one place
+    ctp = entry;
+    os << ctp;
 }
 
 CobolSymbol * LookupIdentifier (char * id)
@@ -94,113 +141,7 @@ void PrintIdentifier (char * id, ofstream& os)
 CobolSymbol * sym;
 
     sym = LookupIdentifier (id);
-    os << sym->Prefix << sym->CName;
-}
-
-void ReadVariable (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
-{
-    GenIndent();
-    switch (attr->Picture.Kind) {
-       case PictureType::String: 
-			  os << "_ReadStringVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Integer: 
-			  os << "_ReadIntegerVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Float: 
-			  os << "_ReadFloatVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Undefined:	
-			  WriteError ("Undefined picture type");
-			  break;
-       default:		  WriteError ("Invalid picture type");
-			  break;
-    }
-    os << attr->Prefix << attr->CName;
-    os << ", \"" << attr->Picture.Text << "\");\n";
-
-    if (nl) {
-       GenIndent();
-       os << "fgetc (" << stream << ");\n";	// Newline
-    }
-}
-
-void PrintVariable (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
-{
-    GenIndent();
-    switch (attr->Picture.Kind) {
-       case PictureType::String: 
-			  os << "_WriteStringVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Integer: 
-			  os << "_WriteIntegerVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Float: 
-			  os << "_WriteFloatVar (";
-			  os << stream << ", ";
-			  break;
-       case PictureType::Undefined:	
-			  WriteError ("Undefined picture type");
-			  break;
-       default:		  WriteError ("Invalid picture type");
-			  break;
-    }
-    os << attr->Prefix << attr->CName;
-    os << ", \"" << attr->Picture.Text << "\");\n";
-
-    if (nl) {
-       GenIndent();
-       os << "fprintf (" << stream << ", \"\\n\");\n";
-    }
-}
-
-void ReadRecord (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
-{
-unsigned int i;
-CobolSymbol * child;
-
-    attr->ChildList.Head();
-    for (i = 0; i < attr->nChildren; ++ i) {
-       child = attr->ChildList.LookAt();
-       
-       if (child->Kind == CobolSymbol::Record)
-	  ReadRecord (child, os, stream, FALSE);
-       else
-	  ReadVariable (child, os, stream, FALSE);
-
-       attr->ChildList.Next();
-    }
-    if (nl) {
-       GenIndent();
-       os << "fgetc (" << stream << ");\n";	// Newline
-    }
-}
-
-void PrintRecord (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
-{
-unsigned int i;
-CobolSymbol * child;
-
-    attr->ChildList.Head();
-    for (i = 0; i < attr->nChildren; ++ i) {
-       child = attr->ChildList.LookAt();
-       
-       if (child->Kind == CobolSymbol::Record)
-	  PrintRecord (child, os, stream, FALSE);
-       else
-	  PrintVariable (child, os, stream, FALSE);
-
-       attr->ChildList.Next();
-    }
-    if (nl) {
-       GenIndent();
-       os << "fprintf (" << stream << ", \"\\n\");\n";
-    }
+    os << *sym;
 }
 
 WORD CountIdentifiers (void)

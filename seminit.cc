@@ -12,9 +12,9 @@
 #endif
 #include "semdecl.h"
 #include "semfile.h"
+#include "symfile.h"
+#include "symvar.h"
 
-/*--------------------------------------------------*/
-  extern char CurParName[];
 /*--------------------------------------------------*/
   ofstream 			codef;
   ofstream 			declf;
@@ -26,6 +26,9 @@
 
 void FinishDecl (void)
 {
+#if DEBUG
+    cout << "DBG: Finishing declarations\n";
+#endif
     CloseScopeLevels (0);
     AssociateRecordsWithFD();
     codef << "\n";
@@ -34,13 +37,16 @@ void FinishDecl (void)
 void StartCode (void)
 {
     FinishDecl();
+#if DEBUG
+    cout << "DBG: Starting code, initializing variables\n";
+#endif
     InitializeVariables();
 
-    // This needs to be initialized for gotos
-    strcpy (CurParName, "_FirstParagraph");
-
+#if DEBUG
+    cout << "DBG: Beginning first paragraph\n";
+#endif
     GenIndent();
-    codef << "int _FirstParagraph ()\n";
+    codef << "int _FirstParagraph (void)\n";
     codef << "{\n";
     ++ NestingLevel;
 
@@ -49,6 +55,9 @@ void StartCode (void)
 
 void EndCode (void)
 {
+#if DEBUG
+    cout << "DBG: Finished code, genrating main()\n";
+#endif
     codef << "\n";
     codef << "int main ()\n";
     codef << "{\n";
@@ -68,7 +77,8 @@ void EndCode (void)
 
 void StartProgram (void)
 {
-CobolSymbol * NewSymbol;
+CobolVar * NewSymbol;
+CobolFile * NewFile;
 
     codef.open (CobcyConfig.CodeFile);
     declf.open (CobcyConfig.DeclFile);
@@ -85,17 +95,14 @@ CobolSymbol * NewSymbol;
 
 
     codef << "#include <stdio.h>\n";
-    codef << "#include \"cobfunc.h\"\n";
+    codef << "#include <cobfunc.h>\n";
 
     // This is the file for forward function declarations, their indices, etc.
     codef << "#include \"" << CobcyConfig.DeclFile << "\"\n\n";
 
     codef << "char _space_var [201];\n";
-    codef << "char _tmpbuf [201];\n";	// For MOVEs
     codef << "long int _zero_var = 0;\n";
     codef << "long int _index = 0;\n";	// Loop iterator
-    codef << "/* Special files' descriptors */\n";
-    codef << "FILE * " << PRINTER_STREAM_NAME << ";\n";
     codef << "\n";
 
     // First paragraph's index is defined in the source file, since
@@ -109,23 +116,32 @@ CobolSymbol * NewSymbol;
     SymTable.Clear();
 
     // Space filler variable
-    NewSymbol = new CobolSymbol;
-    NewSymbol->Kind = CobolSymbol::Variable;
+    NewSymbol = new CobolVar;
     NewSymbol->SetPicture ("x(200)");
     NewSymbol->SetName ("_space_var");
-    SymTable.Insert (NewSymbol->CobolName, NewSymbol);
+#if DEBUG
+    cout << "DBG: Declaring _space_var\n";
+#endif
+    SymTable.Insert ("_space_var", NewSymbol);
 
     // Zero filler variable
-    NewSymbol = new CobolSymbol;
-    NewSymbol->Kind = CobolSymbol::Variable;
+    NewSymbol = new CobolVar;
     NewSymbol->SetPicture ("9(1)");
     NewSymbol->SetName ("_zero_var");
-    SymTable.Insert (NewSymbol->CobolName, NewSymbol);
+#if DEBUG
+    cout << "DBG: Declaring _zero_var\n";
+#endif
+    SymTable.Insert ("_zero_var", NewSymbol);
 
     // Default output stream
-    NewSymbol = new CobolSymbol;
-    NewSymbol->SetName ("stdout");
-    SymTable.Insert (NewSymbol->CobolName, NewSymbol);
+    NewFile = new CobolFile;
+    NewFile->SetName ("stdout");
+    NewFile->SetOrganization (ORG_Sequential);
+    NewFile->SetAccessMode (AM_Sequential);
+#if DEBUG
+    cout << "DBG: Declaring stdout\n";
+#endif
+    SymTable.Insert ("stdout", NewFile);
 }
 
 void EndProgram (void)

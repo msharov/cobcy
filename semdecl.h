@@ -6,11 +6,13 @@
 #ifndef __SEMDECL_H
 #define __SEMDECL_H
 
+#include <mdefs.h>
+
 #define STACK_IDENT_LENGTH	50
 
 /*------------------------------------------------*/
   void 	DeclareRecordLevel (void);
-  void 	CloseScopeLevels (unsigned int LastLevel);
+  void 	CloseScopeLevels (WORD LastLevel);
   void 	InitializeVariables (void);
   void	DeclareSpecialName (void);
 /*------------------------------------------------*/
