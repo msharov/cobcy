@@ -29,12 +29,17 @@ long int FillerIndex = 0;
 %token TOK_ADVANCING
 %token TOK_AFTER
 %token TOK_ALL
+%token TOK_ALPHABET
 %token TOK_ALPHABETIC
-%token TOK_ALPHABETIC_UPPER
 %token TOK_ALPHABETIC_LOWER
+%token TOK_ALPHABETIC_UPPER
+%token TOK_ALPHANUMERIC
+%token TOK_ALPHANUMERIC_EDITED
+%token TOK_ALSO
 %token TOK_ALTER
 %token TOK_ALTERNATE
 %token TOK_AND
+%token TOK_ANY
 %token TOK_ARE
 %token TOK_AREA
 %token TOK_AREAS
@@ -43,6 +48,7 @@ long int FillerIndex = 0;
 %token TOK_AT
 %token TOK_AUTHOR
 %token TOK_BEFORE
+%token TOK_BINARY
 %token TOK_BLANK
 %token TOK_BLOCK
 %token TOK_BOTTOM
@@ -54,12 +60,16 @@ long int FillerIndex = 0;
 %token TOK_CH
 %token TOK_CHARACTER
 %token TOK_CHARACTERS
+%token TOK_CLASS
 %token TOK_CLOCK_UNITS
 %token TOK_CLOSE
 %token TOK_COBOL
 %token TOK_CODE
+%token TOK_CODE_SET
+%token TOK_COLLATING
 %token TOK_COLUMN
 %token TOK_COMMA
+%token TOK_COMMON
 %token TOK_COMMUNICATION
 %token TOK_COMP
 %token TOK_COMPUTATIONAL
@@ -67,6 +77,7 @@ long int FillerIndex = 0;
 %token TOK_CONFIGURATION
 %token TOK_CONTAINS
 %token TOK_CONTENT
+%token TOK_CONTINUE
 %token TOK_CONTROL
 %token TOK_CONTROLS
 %token TOK_COPY
@@ -79,14 +90,15 @@ long int FillerIndex = 0;
 %token TOK_DATE_COMPILED
 %token TOK_DATE_WRITTEN
 %token TOK_DAY
+%token TOK_DAY_OF_WEEK
 %token TOK_DE
 %token TOK_DEBUG_CONTENTS
 %token TOK_DEBUG_ITEM
 %token TOK_DEBUG_LINE
+%token TOK_DEBUG_NAME
 %token TOK_DEBUG_SUB_1
 %token TOK_DEBUG_SUB_2
 %token TOK_DEBUG_SUB_3
-%token TOK_DEBUG_NAME
 %token TOK_DEBUGGING
 %token TOK_DECIMAL_POINT
 %token TOK_DECLARATIVES
@@ -110,17 +122,39 @@ long int FillerIndex = 0;
 %token TOK_EMI
 %token TOK_ENABLE
 %token TOK_END
+%token TOK_END_ADD
+%token TOK_END_CALL
+%token TOK_END_COMPUTE
+%token TOK_END_DELETE
+%token TOK_END_DIVIDE
+%token TOK_END_EVALUATE
+%token TOK_END_IF
+%token TOK_END_MULTIPLY
 %token TOK_END_OF_PAGE
+%token TOK_END_PERFORM
+%token TOK_END_READ
+%token TOK_END_RECEIVE
+%token TOK_END_RETURN
+%token TOK_END_REWRITE
+%token TOK_END_SEARCH
+%token TOK_END_START
+%token TOK_END_STRING
+%token TOK_END_SUBTRACT
+%token TOK_END_UNSTRING
+%token TOK_END_WRITE
 %token TOK_ENTER
 %token TOK_ENVIRONMENT
 %token TOK_EOP
 %token TOK_EQUAL
 %token TOK_ERROR
 %token TOK_ESI
+%token TOK_EVALUATE
 %token TOK_EVERY
 %token TOK_EXCEPTION
 %token TOK_EXIT
 %token TOK_EXTEND
+%token TOK_EXTERNAL
+%token TOK_FALSE
 %token TOK_FD
 %token TOK_FILE
 %token TOK_FILE_CONTROL
@@ -132,6 +166,7 @@ long int FillerIndex = 0;
 %token TOK_FROM
 %token TOK_GENERATE
 %token TOK_GIVING
+%token TOK_GLOBAL
 %token TOK_GO
 %token TOK_GREATER
 %token TOK_GREATER_EQ
@@ -147,6 +182,7 @@ long int FillerIndex = 0;
 %token TOK_INDEXED
 %token TOK_INDICATE
 %token TOK_INITIAL
+%token TOK_INITIALIZE
 %token TOK_INITIATE
 %token TOK_INPUT
 %token TOK_INPUT_OUTPUT
@@ -183,12 +219,14 @@ long int FillerIndex = 0;
 %token TOK_MOVE
 %token TOK_MULTIPLE
 %token TOK_MULTIPLY
+%token TOK_NATIVE
 %token TOK_NEGATIVE
 %token TOK_NEXT
 %token TOK_NO
 %token TOK_NOT
 %token TOK_NUMBER
 %token TOK_NUMERIC
+%token TOK_NUMERIC_EDITED
 %token TOK_OBJECT_COMPUTER
 %token TOK_OCCURS
 %token TOK_OF
@@ -198,9 +236,13 @@ long int FillerIndex = 0;
 %token TOK_OPEN
 %token TOK_OPTIONAL
 %token TOK_OR
+%token TOK_ORDER
 %token TOK_ORGANIZATION
+%token TOK_OTHER
 %token TOK_OUTPUT
 %token TOK_OVERFLOW
+%token TOK_PACKED_DECIMAL
+%token TOK_PADDING
 %token TOK_PAGE
 %token TOK_PAGE_COUNTER
 %token TOK_PERFORM
@@ -210,6 +252,7 @@ long int FillerIndex = 0;
 %token TOK_PICTURE
 %token TOK_PLUS
 %token TOK_POINTER
+%token TOK_POSITION
 %token TOK_POSITIVE
 %token TOK_PRINTING
 %token TOK_PROCEDURE
@@ -217,6 +260,7 @@ long int FillerIndex = 0;
 %token TOK_PROCEED
 %token TOK_PROGRAM
 %token TOK_PROGRAM_ID
+%token TOK_PURGE
 %token TOK_QUEUE
 %token TOK_QUOTE
 %token TOK_RANDOM
@@ -234,6 +278,7 @@ long int FillerIndex = 0;
 %token TOK_REMAINDER
 %token TOK_REMOVAL
 %token TOK_RENAMES
+%token TOK_REPLACE
 %token TOK_REPLACING
 %token TOK_REPORT
 %token TOK_REPORTING
@@ -261,6 +306,7 @@ long int FillerIndex = 0;
 %token TOK_SEND
 %token TOK_SENTENCE
 %token TOK_SEPARATE
+%token TOK_SEQUENCE
 %token TOK_SEQUENTIAL
 %token TOK_SET
 %token TOK_SIGN
@@ -273,6 +319,8 @@ long int FillerIndex = 0;
 %token TOK_SPACES
 %token TOK_SPECIAL_NAMES
 %token TOK_STANDARD
+%token TOK_STANDARD_1
+%token TOK_STANDARD_2
 %token TOK_START
 %token TOK_STATUS
 %token TOK_STOP
@@ -291,8 +339,10 @@ long int FillerIndex = 0;
 %token TOK_TAPE
 %token TOK_TERMINAL
 %token TOK_TERMINATE
+%token TOK_TEST
 %token TOK_TEXT
 %token TOK_THAN
+%token TOK_THEN
 %token TOK_THROUGH
 %token TOK_THRU
 %token TOK_TIME
@@ -300,6 +350,7 @@ long int FillerIndex = 0;
 %token TOK_TO
 %token TOK_TOP
 %token TOK_TRAILING
+%token TOK_TRUE
 %token TOK_TYPE
 %token TOK_UNIT
 %token TOK_UNSTRING
@@ -351,8 +402,16 @@ identification_division:	TOK_IDENTIFICATION TOK_DIVISION TOK_PERIOD
 		program_name
 	;
 
-program_name:	TOK_PROGRAM_ID TOK_PERIOD identifier TOK_PERIOD
+program_name:	TOK_PROGRAM_ID TOK_PERIOD identifier prg_name_option TOK_PERIOD
 		{ SetProgramName(); }
+	;
+
+prg_name_option:	optional_is common_initial optional_program
+        |
+        ;
+
+common_initial:		TOK_COMMON
+	|		TOK_INITIAL
 	;
 
 environment_division:	TOK_ENVIRONMENT TOK_DIVISION TOK_PERIOD
@@ -368,16 +427,30 @@ configuration_section:	TOK_CONFIGURATION TOK_SECTION TOK_PERIOD
 	;
 
 source_computer:	TOK_SOURCE_COMPUTER TOK_PERIOD
-			identifier TOK_PERIOD
+			identifier source_debug_option TOK_PERIOD
 			{ SetSourceComputer(); }
 	|
 	;
 
-object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD
-			identifier TOK_PERIOD
+source_debug_option:	optional_with TOK_DEBUGGING TOK_MODE
+	|
+	;
+
+object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD 
+			identifier memory_option TOK_PERIOD
 			{ SetObjectComputer(); }
 	|
 	;
+
+memory_option:		TOK_MEMORY optional_size integer memsize_args
+                        { Comment("Memory size is obsolete and ignored"); }
+        |
+        ;
+
+memsize_args:		TOK_WORDS
+	|		TOK_CHARACTERS
+	|		TOK_MODULES
+        ;
 
 special_names:		TOK_SPECIAL_NAMES TOK_PERIOD special_name_list
 	|
@@ -403,18 +476,18 @@ select_block:	select_statement select_block_pl
 select_block_pl:	select_block
 	|
 	;
-select_statement:	TOK_SELECT optional_optional identifier TOK_ASSIGN TOK_TO identifier
+select_statement:	TOK_SELECT optional_optional identifier TOK_ASSIGN optional_to identifier
 			file_status_option
 			access_mode_option
 			organization_option
 			TOK_PERIOD { FileDecl(); }
 	;
 
-file_status_option:	TOK_FILE TOK_STATUS optional_is 
+file_status_option:	optional_file TOK_STATUS optional_is 
 			identifier { SetFileStatus(); }
 	|
 	;
-access_mode_option:	TOK_ACCESS TOK_MODE optional_is access_mode
+access_mode_option:	TOK_ACCESS optional_mode optional_is access_mode
 	|
 	;
 access_mode:	TOK_SEQUENTIAL	{ SetAccessMode ("sequential"); }
@@ -436,7 +509,7 @@ organization_kind:	TOK_SEQUENTIAL
 			record_key_option
 	|
 	;
-relative_key_option:	TOK_RELATIVE TOK_KEY optional_is 
+relative_key_option:	TOK_RELATIVE optional_key optional_is 
 			identifier { SetRelativeKey(); }
 	|
 	;
@@ -449,6 +522,8 @@ data_division:	TOK_DATA TOK_DIVISION TOK_PERIOD
 		file_section
 		working_storage_section
                 linkage_section
+                communication_section
+                report_section
 	;
 
 file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
@@ -486,9 +561,50 @@ file_record_level:	integer level_name { AssociateFileRecord(); }
 			picture TOK_PERIOD 
 			{ Push (SE_Null); DeclareRecordLevel(); }
 
-record_level:	integer level_name picture value_entry TOK_PERIOD
+record_level:	integer level_name picture value_entry usage_option sign_option sync_option justified_option TOK_PERIOD
 		{ DeclareRecordLevel(); }
 	;
+
+usage_option:          optional_usage optional_is pict_usage_args
+        |
+        ;
+
+sign_option:		optional_sign optional_is sign_args sep_char_option { NIY("Sign is [leading/trailing]"); }
+        |
+        ;
+
+sign_args:		TOK_LEADING
+        |		TOK_TRAILING
+	;
+
+sep_char_option:	TOK_SEPARATE optional_character
+        |
+        ;
+
+justified_option:	justified_just optional_right { NIY("Just/Justified"); }
+	|
+	;
+
+justified_just:		TOK_JUSTIFIED
+	|		TOK_JUST
+	;
+
+sync_option:		sync_synchronized left_right_option { NIY("Sync/Synchronized"); } 
+	|
+	;
+
+sync_synchronized:	TOK_SYNCHRONIZED
+	|		TOK_SYNC
+	;
+
+left_right_option:	left_right
+	|
+	;
+
+left_right:		TOK_LEFT
+	|		TOK_RIGHT
+	;
+
 level_name:	identifier
 	|	TOK_FILLER	
 	 	{ sprintf (StringBuffer, "filler%03d", FillerIndex);
@@ -499,6 +615,20 @@ level_name:	identifier
 picture:	TOK_PICTURE optional_is pic_text
 	|	{ Push (SE_Null); }
 	;
+
+pict_usage_args:    TOK_BINARY
+                    { NIY("Usage is binary"); }
+        |           TOK_COMPUTATIONAL
+                    { NIY("Usage is computational"); }
+        |           TOK_COMP
+                    { NIY("Usage is comp"); }
+        |           TOK_DISPLAY
+                    { NIY("Usage is display"); }
+        |           TOK_INDEX
+                    { NIY("Usage is index"); }
+        |           TOK_PACKED_DECIMAL
+                    { NIY("Usage is packed-decimal"); }
+        ;
 
 value_entry:	TOK_VALUE optional_is value
 	|	{ Push (SE_Null); }
@@ -524,10 +654,24 @@ linkage_section:	TOK_LINKAGE TOK_SECTION TOK_PERIOD
 	|
 	;
 
-procedure_division:	TOK_PROCEDURE TOK_DIVISION TOK_PERIOD
+communication_section:  TOK_COMMUNICATION TOK_SECTION TOK_PERIOD
+                          { NIY("Communication Section"); }
+        |
+        ;
+
+report_section:         TOK_REPORT TOK_SECTION TOK_PERIOD
+                          { NIY("Report Section"); }
+        |
+        ;
+
+procedure_division:	TOK_PROCEDURE TOK_DIVISION using_option TOK_PERIOD
 			{ StartCode(); }
 			statement_list
 			{ GenEndProc(); EndCode(); }
+	;
+
+using_option:	TOK_USING using_identifier
+	|
 	;
 
 statement_list:		statement statement_list_pl
@@ -614,7 +758,7 @@ reverse_relational:	TOK_GREATER optional_than
                 { strcpy (StringBuffer, ">"); Push (SE_Bool); }
 	;
 
-clause:		TOK_ACCEPT id_list { GenAccept(); }
+clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 	|	TOK_DISPLAY display_args upon_option { GenDisplay(); }
 	|	TOK_MOVE expression TOK_TO id_list { GenMove(); }
 	|	TOK_ADD expression TOK_TO id_list giving_option
@@ -634,8 +778,11 @@ clause:		TOK_ACCEPT id_list { GenAccept(); }
 	|	TOK_READ identifier { GenRead(); }
 		optional_word_record TOK_AT TOK_END compound_clause
 	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
-        |       TOK_CALL call_list using_options { NIM("CALL"); }
+        |       TOK_CALL call_list using_options { NIY("CALL"); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
+        |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
+        |       TOK_REPLACE TOK_OFF { NIY("Replace off"); }
+	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
 	;
 
 compound_clause:	{ BeginCompound(); }
@@ -653,6 +800,20 @@ expression:	identifier
 	|	float
 	|	string
 	;
+
+accept_option:  TOK_FROM from_arg
+        |
+        ;
+
+from_arg:       TOK_DATE
+                { NIY("Accept from date"); }
+        |       TOK_DAY
+                { NIY("Accept from day"); }
+        |       TOK_DAY_OF_WEEK
+                { NIY("Accept from day-of-week"); }
+        |       TOK_TIME
+                { NIY("Accept from time"); }
+        ;
 
 display_args:	{ Push (SE_Mark); } optional_all display_args_marked
 	;
@@ -750,6 +911,27 @@ using_inde_next:     optional_comma using_identifier
         |
         ;
 
+initialize_args:	using_identifier replace_option
+	;
+
+replace_option:		TOK_REPLACING replace_next
+	|
+	;
+
+replace_next:		replace_what optional_data TOK_BY value replace_next_pl
+        ;
+
+replace_next_pl:	optional_comma replace_next	
+        |
+	;
+
+replace_what:	TOK_ALPHABETIC
+	|	TOK_ALPHANUMERIC
+	|	TOK_NUMERIC
+	|	TOK_ALPHANUMERIC_EDITED
+	|	TOK_NUMERIC_EDITED
+	;
+
 id_list:	{ Push (SE_Mark); } id_list_marked
 	;
 id_list_marked: identifier id_list_pl
@@ -791,6 +973,50 @@ optional_optional:      TOK_OPTIONAL
 optional_by:            TOK_BY
         |
         ;
+
+optional_mode:          TOK_MODE
+        |
+        ;
+
+optional_file:          TOK_FILE
+        |
+        ;
+
+optional_key:           TOK_KEY
+        |
+        ;
+
+optional_usage:		TOK_USAGE
+        |
+        ;
+
+optional_sign:		TOK_SIGN
+	|
+	;
+
+optional_character:	TOK_CHARACTER
+        |
+        ;
+
+optional_size:		TOK_SIZE
+	|
+	;
+
+optional_program:	TOK_PROGRAM
+	|
+	;
+
+optional_with:		TOK_WITH
+	|
+	;
+
+optional_right:		TOK_RIGHT
+	|
+	;
+
+optional_data:		TOK_DATA
+	|
+	;
 
 identifier:	TOK_IDENTIFIER { Push (SE_Identifier); }
 	;

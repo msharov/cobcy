@@ -10,7 +10,7 @@
 
 /*------------------------------------------------*/
   void 	DeclareRecordLevel (void);
-  void 	CloseScopeLevels (int LastLevel);
+  void 	CloseScopeLevels (unsigned int LastLevel);
   void 	InitializeVariables (void);
 /*------------------------------------------------*/
 

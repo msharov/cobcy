@@ -13,7 +13,8 @@
   void 	EndCode (void);
   void 	StartProgram (void);
   void 	EndProgram (void);
-  void  NIM (char * str);
+  void  NIY (char * str);
+  void  Comment (char * str);
 /*-------------------------------------------------*/
 
 #endif

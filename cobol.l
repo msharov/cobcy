@@ -67,12 +67,17 @@ add			{ return (TOK_ADD);	}
 advancing		{ return (TOK_ADVANCING);	}
 after			{ return (TOK_AFTER);	}
 all			{ return (TOK_ALL);	}
+alphabet		{ return (TOK_ALPHABET);	}
 alphabetic		{ return (TOK_ALPHABETIC);	}
-alphabetic-upper        { return (TOK_ALPHABETIC_UPPER); }
 alphabetic-lower        { return (TOK_ALPHABETIC_LOWER); }
+alphabetic-upper        { return (TOK_ALPHABETIC_UPPER); }
+alphanumeric		{ return (TOK_ALPHANUMERIC);	}
+alphanumeric-edited	{ return (TOK_ALPHANUMERIC_EDITED);	}
+also			{ return (TOK_ALSO);	}
 alter			{ return (TOK_ALTER);	}
 alternate		{ return (TOK_ALTERNATE);	}
 and			{ return (TOK_AND);	}
+any			{ return (TOK_ANY);	}
 are			{ return (TOK_ARE);	}
 area			{ return (TOK_AREA);	}
 areas			{ return (TOK_AREAS);	}
@@ -81,6 +86,7 @@ assign			{ return (TOK_ASSIGN);	}
 at			{ return (TOK_AT);	}
 author			{ return (TOK_AUTHOR);	}
 before			{ return (TOK_BEFORE);	}
+binary			{ return (TOK_BINARY);  }
 blank			{ return (TOK_BLANK);	}
 block			{ return (TOK_BLOCK);	}
 bottom			{ return (TOK_BOTTOM);	}
@@ -92,12 +98,16 @@ cf			{ return (TOK_CF);	}
 ch			{ return (TOK_CH);	}
 character		{ return (TOK_CHARACTER);	}
 characters		{ return (TOK_CHARACTERS);	}
+class			{ return (TOK_CLASS);		}
 clock-units		{ return (TOK_CLOCK_UNITS);	}
 close			{ return (TOK_CLOSE);	}
 cobol			{ return (TOK_COBOL);	}
 code			{ return (TOK_CODE);	}
+code-set		{ return (TOK_CODE_SET);	}
+collating		{ return (TOK_COLLATING);	}
 column			{ return (TOK_COLUMN);	}
 comma			{ return (TOK_COMMA);	}
+common			{ return (TOK_COMMON);	}
 communication		{ return (TOK_COMMUNICATION);	}
 comp			{ return (TOK_COMP);	}
 computational		{ return (TOK_COMPUTATIONAL);	}
@@ -105,6 +115,7 @@ compute			{ return (TOK_COMPUTE);	}
 configuration		{ return (TOK_CONFIGURATION);	}
 contains		{ return (TOK_CONTAINS);	}
 content                 { return (TOK_CONTENT);         }
+continue		{ return (TOK_CONTINUE);	}
 control			{ return (TOK_CONTROL);	}
 controls		{ return (TOK_CONTROLS);	}
 copy			{ return (TOK_COPY);	}
@@ -117,14 +128,15 @@ date			{ return (TOK_DATE);	}
 date-compiled		{ return (TOK_DATE_COMPILED);	}
 date-written		{ return (TOK_DATE_WRITTEN);	}
 day			{ return (TOK_DAY);	}
+day-of-week		{ return (TOK_DAY_OF_WEEK);	}
 de			{ return (TOK_DE);	}
 debug-contents		{ return (TOK_DEBUG_CONTENTS);	}
 debug-item		{ return (TOK_DEBUG_ITEM);	}
 debug-line		{ return (TOK_DEBUG_LINE);	}
+debug-name		{ return (TOK_DEBUG_NAME);	}
 debug-sub-1		{ return (TOK_DEBUG_SUB_1);	}
 debug-sub-2		{ return (TOK_DEBUG_SUB_2);	}
 debug-sub-3		{ return (TOK_DEBUG_SUB_3);	}
-debug-name		{ return (TOK_DEBUG_NAME);	}
 debugging		{ return (TOK_DEBUGGING);	}
 decimal-point		{ return (TOK_DECIMAL_POINT);	}
 declaratives		{ return (TOK_DECLARATIVES);	}
@@ -148,17 +160,39 @@ else			{ return (TOK_ELSE);	}
 emi			{ return (TOK_EMI);	}
 enable			{ return (TOK_ENABLE);	}
 end			{ return (TOK_END);	}
+end-add			{ return (TOK_END_ADD);	}
+end-call		{ return (TOK_END_CALL); 	}
+end-compute		{ return (TOK_END_COMPUTE);	}
+end-delete		{ return (TOK_END_DELETE);	}
+end-divide		{ return (TOK_END_DIVIDE);	}
+end-evaluate		{ return (TOK_END_EVALUATE);	}
+end-if			{ return (TOK_END_IF);		}
+end-multiply		{ return (TOK_END_MULTIPLY);	}
 end-of-page		{ return (TOK_END_OF_PAGE);	}
+end-perform		{ return (TOK_END_PERFORM);	}
+end-read		{ return (TOK_END_READ);	}
+end-receive		{ return (TOK_END_RECEIVE);	}
+end-return		{ return (TOK_END_RETURN);	}
+end-rewrite		{ return (TOK_END_REWRITE);	}
+end-search		{ return (TOK_END_SEARCH);	}
+end-start		{ return (TOK_END_START);	}
+end-string		{ return (TOK_END_STRING);	}
+end-subtract		{ return (TOK_END_SUBTRACT);	}
+end-unstring		{ return (TOK_END_UNSTRING);	}
+end-write		{ return (TOK_END_WRITE);	}
 enter			{ return (TOK_ENTER);	}
 environment		{ return (TOK_ENVIRONMENT);	}
 eop			{ return (TOK_EOP);	}
 equal			{ return (TOK_EQUAL);	}
 error			{ return (TOK_ERROR);	}
 esi			{ return (TOK_ESI);	}
+evaluate		{ return (TOK_EVALUATE);	}
 every			{ return (TOK_EVERY);	}
 exception		{ return (TOK_EXCEPTION);	}
 exit			{ return (TOK_EXIT);	}
 extend			{ return (TOK_EXTEND);	}
+external		{ return (TOK_EXTERNAL);	}
+false			{ return (TOK_FALSE);	}
 fd			{ return (TOK_FD);	}
 file			{ return (TOK_FILE);	}
 file-control		{ return (TOK_FILE_CONTROL);	}
@@ -170,6 +204,7 @@ for			{ return (TOK_FOR);	}
 from			{ return (TOK_FROM);	}
 generate		{ return (TOK_GENERATE);	}
 giving			{ return (TOK_GIVING);	}
+global			{ return (TOK_GLOBAL);	}
 go			{ return (TOK_GO);	}
 greater			{ return (TOK_GREATER);	}
 group			{ return (TOK_GROUP);	}
@@ -185,6 +220,7 @@ index			{ return (TOK_INDEX);	}
 indexed			{ return (TOK_INDEXED);	}
 indicate		{ return (TOK_INDICATE);	}
 initial			{ return (TOK_INITIAL);	}
+initialize		{ return (TOK_INITIALIZE);	}
 initiate		{ return (TOK_INITIATE);	}
 input			{ return (TOK_INPUT);	}
 input-output		{ return (TOK_INPUT_OUTPUT);	}
@@ -221,12 +257,14 @@ modules			{ return (TOK_MODULES);	}
 move			{ return (TOK_MOVE);	}
 multiple		{ return (TOK_MULTIPLE);	}
 multiply		{ return (TOK_MULTIPLY);	}
+native			{ return (TOK_NATIVE);	}
 negative		{ return (TOK_NEGATIVE);	}
 next			{ return (TOK_NEXT);	}
 no			{ return (TOK_NO);	}
 not			{ return (TOK_NOT);	}
 number			{ return (TOK_NUMBER);	}
 numeric			{ return (TOK_NUMERIC);	}
+numeric-edited		{ return (TOK_NUMERIC_EDITED);	}
 object-computer		{ return (TOK_OBJECT_COMPUTER);	}
 occurs			{ return (TOK_OCCURS);	}
 of			{ return (TOK_OF);	}
@@ -236,9 +274,13 @@ on			{ return (TOK_ON);	}
 open			{ return (TOK_OPEN);	}
 optional		{ return (TOK_OPTIONAL);	}
 or			{ return (TOK_OR);	}
+order			{ return (TOK_ORDER);	}
 organization		{ return (TOK_ORGANIZATION);	}
+other			{ return (TOK_OTHER);	}
 output			{ return (TOK_OUTPUT);	}
 overflow		{ return (TOK_OVERFLOW);	}
+packed-decimal          { return (TOK_PACKED_DECIMAL);	}
+padding			{ return (TOK_PADDING);	}
 page			{ return (TOK_PAGE);	}
 page-counter		{ return (TOK_PAGE_COUNTER);	}
 perform			{ return (TOK_PERFORM);	}
@@ -248,6 +290,7 @@ pic	|
 picture			{ BEGIN PICTURE_STATE; return (TOK_PICTURE);	}
 plus			{ return (TOK_PLUS);	}
 pointer			{ return (TOK_POINTER);	}
+position		{ return (TOK_POSITION);	}
 positive		{ return (TOK_POSITIVE);	}
 printing		{ return (TOK_PRINTING);	}
 procedure		{ return (TOK_PROCEDURE);	}
@@ -255,6 +298,7 @@ procedures		{ return (TOK_PROCEDURES);	}
 proceed			{ return (TOK_PROCEED);	}
 program			{ return (TOK_PROGRAM);	}
 program\-id		{ return (TOK_PROGRAM_ID);	}
+purge			{ return (TOK_PURGE);	}
 queue			{ return (TOK_QUEUE);	}
 quote	|
 quotes			{ return (TOK_QUOTE);	}
@@ -273,6 +317,7 @@ release			{ return (TOK_RELEASE);	}
 remainder		{ return (TOK_REMAINDER);	}
 removal			{ return (TOK_REMOVAL);	}
 renames			{ return (TOK_RENAMES);	}
+relace			{ return (TOK_REPLACE); }
 replacing		{ return (TOK_REPLACING);	}
 report			{ return (TOK_REPORT);	}
 reporting		{ return (TOK_REPORTING);	}
@@ -300,6 +345,7 @@ select			{ return (TOK_SELECT);	}
 send			{ return (TOK_SEND);	}
 sentence		{ return (TOK_SENTENCE);	}
 separate		{ return (TOK_SEPARATE);	}
+sequence		{ return (TOK_SEQUENCE);	}
 sequential		{ return (TOK_SEQUENTIAL);	}
 set			{ return (TOK_SET);	}
 sign			{ return (TOK_SIGN);	}
@@ -313,6 +359,8 @@ spaces			{ strcpy (StringBuffer, "_space_var");
 			  return (TOK_IDENTIFIER);}
 special-names		{ return (TOK_SPECIAL_NAMES);	}
 standard		{ return (TOK_STANDARD);	}
+standard-1		{ return (TOK_STANDARD_1);	}
+standard-2		{ return (TOK_STANDARD_2);	}
 start			{ return (TOK_START);	}
 status			{ return (TOK_STATUS);	}
 stop			{ return (TOK_STOP);	}
@@ -331,8 +379,10 @@ tallying		{ return (TOK_TALLYING);	}
 tape			{ return (TOK_TAPE);	}
 terminal		{ return (TOK_TERMINAL);	}
 terminate		{ return (TOK_TERMINATE);	}
+test			{ return (TOK_TEST);	}
 text			{ return (TOK_TEXT);	}
 than			{ return (TOK_THAN);	}
+then			{ return (TOK_THEN);	}
 through			{ return (TOK_THROUGH);	}
 thru			{ return (TOK_THRU);	}
 time			{ return (TOK_TIME);	}
@@ -340,6 +390,7 @@ times			{ return (TOK_TIMES);	}
 to			{ return (TOK_TO);	}
 top			{ return (TOK_TOP);	}
 trailing		{ return (TOK_TRAILING);	}
+true			{ return (TOK_TRUE);	}
 type			{ return (TOK_TYPE);	}
 unit			{ return (TOK_UNIT);	}
 unstring		{ return (TOK_UNSTRING);	}
@@ -360,7 +411,7 @@ write			{ return (TOK_WRITE);	}
 zero	|
 zeroes	|
 zeros 			{ strcpy (StringBuffer, "_zero_var");
-			  return (TOK_IDENTIFIER);	}
+			  return (TOK_IDENTIFIER); }
 
 [a-z]([a-z0-9\-]*[a-z0-9])?	{ strcpy (StringBuffer, yytext);
 				  return (TOK_IDENTIFIER); }

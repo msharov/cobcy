@@ -39,6 +39,8 @@ void SetObjectComputer (void)
 {
 StackEntry * entry;
     if ((entry = SemStack.Pop()) != NULL) {
+       if (entry->kind == SE_Integer)
+          entry = SemStack.Pop();
        if (entry->kind == SE_Identifier)
           outfile << "/* Written for " << entry->ident << " */\n\n";
        else

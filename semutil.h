@@ -28,7 +28,6 @@
   void 	PrintRecord (CobolSymbol * attr, ofstream& os, 
   			char * stream, BOOL nl = TRUE);
   void 	LookupParent (char * symbol, char * prefix);
-  void 	CloseScopeLevels (int LastLevel);
   void 	BuildPrefix (char * symbol, char * prefix);
   WORD 	CountIdentifiers (void);
   void 	ReverseIdentifiers (WORD nIds);

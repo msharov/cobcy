@@ -8,9 +8,14 @@
 #include "semfile.h"
 #include "semcontrol.h"
 
-void NIM (char * str)
+void NIY (char * str)
 {
-  outfile << "/* " << str <<  " Not implemented yet */" <<  "\n";
+  outfile << "/* " << str <<  " not implemented yet */" <<  "\n";
+}
+
+void Comment (char * str)
+{
+  outfile << "/* " << str << " */\n";
 }
 
 void FinishDecl (void)

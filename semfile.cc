@@ -6,6 +6,7 @@
 #include "semextern.h"
 #include "semfile.h"
 #include "semcontrol.h"		// EOF checking with if()
+#include "semdecl.h"
 #if CAN_HAVE_STDIO
 #include <unistd.h>
 #endif
