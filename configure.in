@@ -1,0 +1,27 @@
+AC_INIT
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_LEX
+AC_PROG_YACC
+AC_PROG_RANLIB
+AC_CHECK_PROG(AR,ar,ar)
+AC_CHECK_PROG(RM,rm,rm -f,no)
+
+AC_SUBST(can_have_stdio)
+
+AC_MSG_CHECKING(whether iostreams and stdio can be mixed)
+AC_LANG_CPLUSPLUS
+
+AC_CACHE_VAL(can_have_stdio,
+	AC_TRY_COMPILE([#include <stdio.h>
+		#include <iostream.h>],
+		[printf ("testing\n"); cout << "testing\n"],
+		can_have_stdio=1 can_have_stdio_res="yes", 
+		can_have_stdio=0 can_have_stdio_res="no")
+)
+
+AC_MSG_RESULT($can_have_stdio_res)
+
+AC_DECL_YYTEXT
+
+AC_OUTPUT(Makefile)
