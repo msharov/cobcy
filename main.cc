@@ -6,11 +6,17 @@
 #include <iostream.h>
 #include <mdefs.h>
 #ifdef CAN_HAVE_STDIO
+#ifndef __MSDOS__
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #endif
 #include "lyextern.h"
+#ifdef __MSDOS__
+#include "semexter.h"	/* I have no intention of shortening file names. */
+#else
 #include "semextern.h"
+#endif
 
 /*---------------------| Globals |------------------------------*/
 #ifndef CAN_HAVE_STDIO
@@ -18,38 +24,13 @@
 #endif
   extern FILE * 		yyin;
   char 				SourceFile[30];
-  char 				OutputFile[30];
-  Stack<StackEntry> 		SemStack;
-  int 				NestingLevel = 0;
-  HashTable<CobolSymbol> 	SymTable;
-  ofstream 			outfile;
+  char				OutputFile[30];
+  char 				CodeFile[30];
+  char 				DeclFile[30];
 /*--------------------------------------------------------------*/
-
-void Usage (void)
-{
-    cout << "\n";
-    cout << "Cobol compiler v0.1, Copyright (c) Mike Sharov, 1995\n";
-    cout << "Usage:\n";
-    cout << "\tcobol [-o <outfile.c] <file.cob>\n";
-    cout << "\n";
-}
-
-void ProcessFlags (int argc, char ** argv)
-{
-int SourceName = 1, OutputName = -1;
-
-    if (strcmp (argv[1], "-o") == 0) {
-       SourceName += 2;
-       OutputName = 2;
-    }
-    strcpy (SourceFile, argv[SourceName]);
-    if (OutputName < 0) {
-       strcpy (OutputFile, argv[SourceName]);
-       strcat (OutputFile, ".c");
-    }
-    else
-       strcpy (OutputFile, argv[OutputName]);
-}
+  void 	Usage (void);
+  void 	ProcessFlags (int argc, char ** argv);
+/*--------------------------------------------------------------*/
 
 int main (int argc, char ** argv)
 {
@@ -70,9 +51,44 @@ int main (int argc, char ** argv)
     yyparse();
     fclose (yyin);
 
-    if (ErrorOccured())
-       unlink (OutputFile);
+    if (ErrorOccured()) {
+       unlink (CodeFile);
+       unlink (DeclFile);
+    }
 
     return (0);
+}
+
+void Usage (void)
+{
+    cout << "\n";
+    cout << "Cobol compiler v0.1, Copyright (c) Mike Sharov, 1995\n";
+    cout << "Usage:\n";
+    cout << "\tcobol [-o <codef.c] <file.cob>\n";
+    cout << "\n";
+}
+
+void ProcessFlags (int argc, char ** argv)
+{
+int SourceName = 1, OutputName = -1;
+int count;
+
+    if (strcmp (argv[1], "-o") == 0) {
+       SourceName += 2;
+       OutputName = 2;
+    }
+    strcpy (SourceFile, argv[SourceName]);
+    if (OutputName < 0) {
+       strcpy (CodeFile, argv[SourceName]);
+       strcat (CodeFile, ".c");
+       strcpy (DeclFile, argv[SourceName]);
+       strcat (DeclFile, ".h");
+    }
+    else {
+       strcpy (CodeFile, argv[OutputName]);
+       strcpy (DeclFile, argv[OutputName]);
+       strcat (DeclFile, ".h");
+    }
+
 }
 
