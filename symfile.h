@@ -10,30 +10,12 @@
 #include <llist.h>
 #include "symbase.h"
 #include "symdata.h"
-
-typedef enum {
-    AM_Sequential,
-    AM_Random,
-    AM_Dynamic
-} AccessModeType;
-
-typedef enum {
-    ORG_Sequential,
-    ORG_Line_sequential,
-    ORG_Relative,
-    ORG_Indexed
-} OrganizationType;
-
-typedef enum {
-    OM_Input,
-    OM_Output,
-    OM_Extend,
-    OM_InputOutput
-} OpenModeType;
+#include "semtypes.h"
 
 class CobolFile : public CobolSymbol {
-protected:
-    char			FileName [PATH_MAX];
+private:
+    char			DataFileName [PATH_MAX];
+    char			IndexFileName [PATH_MAX];
     char			RecordName [MAX_SYMBOL_LENGTH];
     char			StatusVar [MAX_SYMBOL_LENGTH];
     char			RecordKey [MAX_SYMBOL_LENGTH];
@@ -48,6 +30,15 @@ protected:
     OpenModeType		OpenMode;
     BOOL			UnlinkOnClose;
 
+    BOOL			IsDBF;		// To avoid 'if Organization ==
+    BOOL			IsFormatted;
+
+private:
+    void			GenRecordSignature (ostream& os);
+    void			GenKeySignature (ostream& os);
+    void			WriteIndexCName (ostream& os);
+    void			WriteOpenMode (ostream& os, OpenModeType mode);
+
 public:
 				CobolFile (void);
     CobolSymbolType		Kind (void);
@@ -61,19 +52,21 @@ public:
     void			SetNewlineFlag (BOOL NewFlag);
     void			SetUnlinkOnClose (BOOL NewFlag);
     void			AssociateRecord (void);
+    virtual void		WriteTextStream (ostream& os);
 
-    void			GenDeclare (ofstream& os);
-    void			GenOpen (ofstream& os, OpenModeType mode);
-    void			GenFlush (ofstream& os);
-    void			GenSeek (ofstream& os);
-    void			GenClose (ofstream& os);
-    void			GenEOFCheck (ofstream& os);
-    void			GenWriteData (ofstream& os, 
+    void			GenDeclare (ostream& os);
+    void			GenOpen (ostream& os, OpenModeType mode);
+    void			GenFlush (ostream& os);
+    void			GenSeek (ostream& os);
+    void			GenClose (ostream& os);
+    void			GenEOFCheck (ostream& os);
+    void			GenWriteData (ostream& os, 
     					      CobolData * data = NULL);
-    void			GenReadData (ofstream& os, 
+    void			GenReadData (ostream& os, 
     					     CobolData * data = NULL);
-    void			GenWriteEnd (ofstream& os);
-    void			GenReadEnd (ofstream& os);
+    void			GenWriteEnd (ostream& os);
+    void			GenReadEnd (ostream& os);
+    void			GenSetupForAppend (ostream& os);
 
     			       ~CobolFile (void);
 };
