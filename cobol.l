@@ -378,8 +378,8 @@ subtract		{ return (TOK_SUBTRACT);	}
 sum			{ return (TOK_SUM);	}
 supress			{ return (TOK_SUPRESS);	}
 symbolic		{ return (TOK_SYMBOLIC);	}
-sync			{ return (TOK_SYNC);	}
-synchronized		{ return (TOK_SYNCHRONIZED);	}
+sync	|
+synchronized		{ return (TOK_SYNC);	}
 table			{ return (TOK_TABLE);	}
 tallying		{ return (TOK_TALLYING);	}
 tape			{ return (TOK_TAPE);	}
