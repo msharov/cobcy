@@ -48,7 +48,7 @@ static char ErrorBuffer [80];
 		  ++ CurrentLine;
 		  BEGIN INITIAL;
 		  yytext [strlen(yytext) - 1] = '\x0';	/* kill the newline */
-		  Comment (yytext);
+		  GenComment (yytext);
 		}
 
 <PICTURE_STATE>([\.]*[ax9vbpz09s,\*\+\-\$]+(\([0-9]+\))?)+	{ 
