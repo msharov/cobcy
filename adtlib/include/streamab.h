@@ -16,16 +16,28 @@
 
 #include <iostream.h>
 #include <fstream.h>
+#ifndef __MSDOS__
+#include <strstream.h>
+#else
+#include <strstrea.h>
+#endif
 #include <mdefs.h>
+#include <csocket.h>
 
 class Streamable {
 public:
     virtual void	Load (char * filename);
     virtual void	Save (char * filename);
+    virtual WORD	StreamSize (void) const;
     virtual void 	ReadBinaryStream (istream& is);
     virtual void 	ReadTextStream (istream& is);
     virtual void 	WriteBinaryStream (ostream& os);
     virtual void 	WriteTextStream (ostream& os);
+
+    void	ReadBinaryStringStream (const char * StreamBuf, WORD StrSize);
+    void 	ReadTextStringStream (const char * StreamBuf, WORD StrSize);
+    void 	WriteBinaryStringStream (char * StreamBuf, WORD StrSize);
+    void 	WriteTextStringStream (char * StreamBuf, WORD StrSize);
 };
 
 /*------------------------------------------------------------------------*/

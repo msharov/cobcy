@@ -73,12 +73,9 @@ inline Matrix<MatrixEl>& Matrix<MatrixEl> :: operator+
 MatrixSizeType row, col;				       
 Matrix<MatrixEl> * sum;
 
-    if (toAdd.m_Height != m_Height || toAdd.m_Width != m_Width) {
-	cerr << "Add: matrices must have same dimentions.\n";
-	exit (1);
-    }
-		
+    assert (toAdd.m_Height == m_Height && toAdd.m_Width == m_Width);
     sum = new Matrix<MatrixEl> (m_Height, m_Width);
+    assert (sum != NULL);
     
     for (row = 0; row < m_Height; ++ row)
 	for (col = 0; col < m_Width; ++ col)
@@ -94,12 +91,10 @@ inline Matrix<MatrixEl>& Matrix<MatrixEl> :: operator-
 MatrixSizeType row, col;				       
 Matrix<MatrixEl> * diff;
 
-    if (toSub.m_Height != m_Height || toSub.m_Width != m_Width) {
-	cerr << "Sub: matrices must have same dimentions.\n";
-	exit (1);
-    }
+    assert (toAdd.m_Height == m_Height && toAdd.m_Width == m_Width);
 		
     diff = new Matrix<MatrixEl> (m_Height, m_Width);
+    assert (diff != NULL);
     
     for (row = 0; row < m_Height; ++ row)
 	for (col = 0; col < m_Width; ++ col)
@@ -116,6 +111,7 @@ MatrixSizeType row, col;
 Matrix<MatrixEl> * product;
 
     product = new Matrix<MatrixEl> (m_Height, m_Width);
+    assert (product != NULL);
     
     for (row = 0; row < m_Height; ++ row)
 	for (col = 0; col < m_Width; ++ col)
@@ -132,12 +128,10 @@ MatrixSizeType row, col, idx;
 Matrix<MatrixEl> * product;
 MatrixSizeType ProductOffset, MyOffset, HisOffset;
 
-    if (m_Width != toMul.m_Height) {
-	cerr << "Mul: m_Width != m_Height.\n";
-	exit (1);
-    }
+    assert (m_Width == toMul.m_Height);
 		
     product = new Matrix<MatrixEl> (m_Height, toMul.m_Width);
+    assert (product != NULL);
     
     ProductOffset = 0;
     MyOffset = 0;
@@ -167,6 +161,7 @@ MatrixSizeType temp, x, y;
 MatrixEl * NewValue;
 
     NewValue = new MatrixEl [m_Width * m_Height];
+    assert (NewValue != NULL);
     for (y = 0; y < m_Height; ++ y)
 	for (x = 0; x < m_Width; ++ x)
 	    NewValue [x * m_Height + y] = m_Data [y * m_Width + x];
@@ -191,10 +186,7 @@ inline MatrixEl Matrix<MatrixEl> :: Determinant (void)
 MatrixEl det = 1;
 MatrixSizeType x;
 
-    if (m_Width != m_Height) {
-	cerr << "Determinant: can only work with square matrices\n";
-	exit (1);
-    }
+    assert (m_Width == m_Height);
     RowReduce();
     for (x = 0; x < m_Width; ++ x)
 	det *= m_Data [x * m_Width + x];

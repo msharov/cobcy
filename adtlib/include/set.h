@@ -11,6 +11,7 @@
 
 #include <mdefs.h>
 #include <streamab.h>
+#include <chain.h>
 
 typedef unsigned long 	SetSizeType;
 
@@ -36,6 +37,7 @@ public:
 
     virtual inline void			ReadBinaryStream (istream& is);
     virtual inline void			WriteBinaryStream (ostream& os);
+    virtual inline WORD			StreamSize (void) const;
 
     virtual inline 	 	       ~Set (void);
 };	
@@ -46,8 +48,10 @@ template <class SetEl>
 inline Set<SetEl> :: Set (SetSizeType nElem) 
 { 	   
     m_Size = nElem;
-    if (m_Size > 0)
+    if (m_Size > 0) {
 	m_Data = new SetEl [m_Size];
+	assert (m_Data != NULL);
+    }
     else
 	m_Data = NULL;
 };
@@ -58,8 +62,10 @@ inline Set<SetEl> :: Set
 {
 SetSizeType i;
     m_Size = ASet.m_Size;
-    if (m_Size > 0)
+    if (m_Size > 0) {
 	m_Data = new SetEl [m_Size];
+	assert (m_Data != NULL);
+    }
     else
 	m_Data = NULL;
     
@@ -73,8 +79,10 @@ inline Set<SetEl> :: Set
 {
 SetSizeType i;
     m_Size = nElem;
-    if (m_Size > 0)
+    if (m_Size > 0) {
 	m_Data = new SetEl [m_Size];
+	assert (m_Data != NULL);
+    }
     else
 	m_Data = NULL;
     
@@ -112,7 +120,7 @@ SetSizeType i;
     if (m_Size != toCompare.m_Size)
 	return (FALSE);
     for (i = 0; i < m_Size; ++ i)
-	if (!(m_Data[i] == toCompare.m_Data[i]))	// to require only == in m_Data
+	if (!(m_Data[i] == toCompare.m_Data[i])) // to require only == in m_Data
 	    return (FALSE);
     return (TRUE);    
 }
@@ -143,8 +151,12 @@ inline void Set<SetEl> :: Resize (SetSizeType NewSize)
 SetEl * NewSet = NULL;
 SetSizeType i;
 		 
+    if (NewSize == m_Size)
+	return;
+
     if (NewSize > 0) {
 	NewSet = new SetEl [NewSize]; 
+	assert (NewSet != NULL);
 	for (i = 0; i < min (NewSize, m_Size); ++ i)
 	    NewSet [i] = m_Data [i];
     }
@@ -189,6 +201,12 @@ SetSizeType i;
     for (i = 0; i < m_Size; ++ i)
 	WriteRaw (os, &m_Data[i], sizeof(SetEl));
 };
+
+template <class SetEl>
+inline WORD Set<SetEl> :: StreamSize (void) const
+{
+    return (sizeof(WORD) + m_Size * sizeof(SetEl));
+}
 
 template <class SetEl>
 inline Set<SetEl> :: ~Set (void)

@@ -38,12 +38,10 @@ inline QueueEl * Queue<QueueEl> :: Serve (void)
 ChainLink<QueueEl> * ptr;
 QueueEl * data;
 
-    if (IsEmpty()) {
-	cout << "Queue: Serving from an empty queue!\n";
-	return (NULL);
-    }
+    assert (!IsEmpty());
 
     ptr = MoveToTail();
+    assert (ptr != NULL);
     Disconnect (ptr);
     data = ptr->GetData();
     delete ptr;

@@ -38,12 +38,9 @@ inline StackEl * Stack<StackEl> :: Pop (void)
 ChainLink<StackEl> * ptr;
 StackEl * data;
 
-    if (IsEmpty()) {
-	cout << "Stack: Popping from an empty stack!\n";
-	return (NULL);
-    }
-
+    assert (!IsEmpty());
     ptr = MoveToHead();
+    assert (ptr != NULL);
     Disconnect (ptr);
     data = ptr->GetData();
     delete ptr;

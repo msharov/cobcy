@@ -97,6 +97,7 @@ inline HashTable<HashAttr> :: HashTable (WORD NewTableSize)
 HashKeyType i;
     TableSize = NewTableSize;
     Table = new (Bucket<HashAttr>*) [TableSize];
+    assert (Table != NULL);
     for (i = 0; i < TableSize; ++ i)
 	Table[i] = NULL;
     m_StringSpaceIndex = 0;
@@ -118,6 +119,7 @@ WORD NameLength, NewSSIndex, NeedAllocate;
 
     // First, setup the new bucket
     NewBucket = new Bucket<HashAttr>;
+    assert (NewBucket != NULL);
     NewBucket->m_Attr = Attr;
     // Enter the name in m_StringSpace
     NameLength = strlen (Name); 

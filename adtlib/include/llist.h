@@ -62,6 +62,7 @@ template <class LListEl>
 inline LList<LListEl> :: LList (void)
 {				 		  
     m_Windows = new ChainLink<LListEl> * [MaxWindows];
+    assert (m_Windows != NULL);
     m_Size = 0;
 }
     
@@ -129,12 +130,9 @@ inline LListEl * LList<LListEl> :: operator[]
 (ListSizeType index)
 {   	 
 ListSizeType i;
+   
+    assert (index < m_Size);
 
-    if (index >= m_Size) {
-	cout << "LList: index out of range.\n";
-	return (NULL);
-    }
-    		     
     Head (0);
     for (i = 0; i < index; ++ i)
 	Next (0);
@@ -148,12 +146,8 @@ inline LListEl * LList<LListEl> :: Remove
 {	   
 ChainLink<LListEl> * ObtainedLink;
 LListEl * ObtainedData;
-	       
-    if (IsEmpty()) {
-	cout << "LList: Removing an element from an empty list!\n";
-	return (NULL);
-    }		 
-    
+
+    assert (!IsEmpty());
     Disconnect (m_Windows [wid]);
     ObtainedLink = m_Windows [wid];
     m_Windows [wid] = MoveToHead();
@@ -180,6 +174,7 @@ inline void LList<LListEl> :: InsertBefore
 ChainLink<LListEl> * NewLink;
 
     NewLink = new ChainLink<LListEl>;
+    assert (NewLink != NULL);
     NewLink->SetData (data);
     ConnectBefore (m_Windows [wid], NewLink);
     ++ m_Size;
@@ -192,6 +187,7 @@ inline void LList<LListEl> :: InsertAfter
 ChainLink<LListEl> * NewLink;
 
     NewLink = new ChainLink<LListEl>;
+    assert (NewLink != NULL);
     NewLink->SetData (data);
     ConnectAfter (m_Windows [wid], NewLink);
     ++ m_Size;
@@ -207,6 +203,7 @@ inline ListSizeType LList<LListEl> :: Size
 template <class LListEl>
 inline LList<LListEl> :: ~LList (void)
 {				 		  
+    assert (m_Windows != NULL);
     delete [] m_Windows;
 }
 

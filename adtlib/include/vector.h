@@ -77,6 +77,7 @@ register int n;
     }
     
     diff = new Vector<VectorEl> (m_Size);
+    assert (diff != NULL);
     	
     for (n = 0; n < m_Size; ++ n)
 	diff->data[n] = data[n] - toSub.data[n];	 
@@ -88,13 +89,8 @@ template <class VectorEl>
 inline VectorEl& Vector<VectorEl> :: operator[] 
 (VectorSizeType index)
 {      
-#ifdef CHECK_BOUNDS
-    if (index < m_Size)
-#endif
-	return (data [index]);
-       
-    cout << "Vector: Index out of range.\n";
-    exit (1);
+    assert (index < m_Size);
+    return (data [index]);
 }
 
 template <class VectorEl>
@@ -104,10 +100,7 @@ inline VectorEl Vector<VectorEl> :: operator*
 MatrixSizeType el;
 VectorEl product = 0;
      
-    if (m_Size != toDot.m_Size) {
-	cout << "Addition: vectors must be of the same dimention.\n";
-	exit(1);
-    }   
+    assert (m_Size == toDot.m_Size);
  	    
     for (el = 0; el < m_Size; ++ el)
 	product += data[el] * toDot.data[el];
@@ -123,16 +116,11 @@ MatrixSizeType el, i1, i2, tmp;
 int sign = 1;
 Vector<VectorEl> *product;
      
-    if (m_Size != toCross.m_Size) {
-	cout << "Cross: vectors must be of the same dimention.\n";
-	exit(1);
-    }   		  
-    else if (m_Size < 3) {
-	cout << "Cross: vector dimention must be >= 3.\n";
-	exit(1);
-    }
+    assert (m_Size == toCross.m_Size);
+    assert (m_Size >= 3);
     	    
     product = new Vector<VectorEl> (m_Size);
+    assert (product != NULL);
     
     for (el = 0; el < m_Size; ++ el) {				 
 	i1 = (el + 1) % m_Size;		// Compute indeces beforehand
