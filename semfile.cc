@@ -21,6 +21,7 @@
 /*---------------------| Globals |------------------------------*/
   CobolSymbol * 		FileToAssociate = NULL;
   Queue<CobolSymbol>		FDInit;
+  BOOL				PrinterUsed = FALSE;
 /*--------------------------------------------------------------*/
 
 void FileDecl (void)
@@ -31,9 +32,12 @@ CobolSymbol * NewFD;
     NewFD = new CobolSymbol;
     CurEntry = SemStack.Pop();	// Pop file name
     strcpy (NewFD->FileName, CurEntry->ident);
+
     // Printer is a special case: spool and print on close
-    if (strcmp (NewFD->FileName, "printer") == 0)
+    if (strcmp (NewFD->FileName, "printer") == 0) {
        strcpy (NewFD->FileName, PRINTER_SPOOL_FILE);
+       PrinterUsed = TRUE;
+    }
     delete (CurEntry);
 
     CurEntry = SemStack.Pop();	// Pop file descriptor name
@@ -102,9 +106,12 @@ int nIds, i;
        }
        delete entry;
 
-       GenIndent();
-       codef << fattr->CName << " = fopen (\"" << fattr->FileName;
-       codef << "\", \"" << mode << "b\");\n";
+       // Printer file is a special file; it is opened in the init routine
+       if (strcmp (fattr->CName, PRINTER_STREAM_NAME) != 0) {
+	  GenIndent();
+	  codef << fattr->CName << " = fopen (\"" << fattr->FileName;
+	  codef << "\", \"" << mode << "b\");\n";
+       }
     }
 }
 
@@ -125,17 +132,11 @@ int nIds, i;
        delete entry;
 
        GenIndent();
-       codef << "fclose (" << fattr->CName << ");\n";
-
-       // Flush spool output to printer
-       if (strcmp (fattr->FileName, PRINTER_SPOOL_FILE)) {
-	  GenIndent();
-	  codef << "system (\"" << PRINTER_COMMAND;
-	  codef << " " << PRINTER_SPOOL_FILE << "\");\n";
-	  GenIndent();
-	  codef << "sleep (1);\n";	// Give the daemon a chance to catch up
-	  unlink (PRINTER_SPOOL_FILE);
-       }
+       // Printer file is only closed in the end; here just flush it
+       if (strcmp (fattr->CName, PRINTER_STREAM_NAME) != 0)
+	  codef << "fclose (" << fattr->CName << ");\n";
+       else
+	  FlushPrinterOutput();
     }
 }
 
@@ -163,7 +164,7 @@ void GenSeek (CobolSymbol * RecFile)
 void GenRead (void)
 {
 StackEntry * entry;
-CobolSymbol * RecFile, * Rec, * Key;
+CobolSymbol * RecFile, * Rec;
 
     entry = SemStack.Pop();
 
@@ -305,6 +306,52 @@ StackEntry * CurEntry;
        CurEntry = SemStack.Pop();
        strcpy (FileToAssociate->FileRecordName, CurEntry->ident);
        delete CurEntry;
+    }
+}
+
+// Printer spool for example...
+void OpenSpecialFiles (void)
+{
+    if (PrinterUsed) {
+       GenIndent();
+       codef << PRINTER_STREAM_NAME;
+       codef << " = fopen (";
+       codef << "\"" << PRINTER_SPOOL_FILE << "\"";
+       codef << ", \"wb\");\n";
+       codef << "\n";
+    }
+}
+
+void CloseSpecialFiles (void)
+{
+    if (PrinterUsed) {
+       codef << "\n";
+       GenIndent();
+       codef << "fflush (" << PRINTER_STREAM_NAME << ");\n";
+       GenIndent();
+       codef << "fclose (" << PRINTER_STREAM_NAME << ");\n";
+
+       // Shove spool output to printer
+       GenIndent();
+       codef << "system (\"" << PRINTER_COMMAND;
+       codef << " " << PRINTER_SPOOL_FILE << "\");\n";
+       
+       // Remove the spool file
+       GenIndent();
+       codef << "unlink (\"" << PRINTER_SPOOL_FILE << "\");\n";
+    }
+}
+
+void FlushPrinterOutput (void)
+{
+    if (PrinterUsed) {
+       GenIndent();
+       codef << "fflush (" << PRINTER_STREAM_NAME << ");\n";
+
+       // Shove spool output to printer
+       GenIndent();
+       codef << "system (\"" << PRINTER_COMMAND;
+       codef << " " << PRINTER_SPOOL_FILE << "\");\n";
     }
 }
 
