@@ -4,6 +4,7 @@
 */
 
 #include "semextern.h"
+#include "semdecl.h"
 
 /*---------------------| Globals |------------------------------*/
   Stack<CobolSymbol> 		NestedRecordList;
@@ -14,7 +15,7 @@
 void DeclareRecordLevel (void)
 {
 enum {RecFirst, RecValue = RecFirst, RecPicture, RecName, RecLevel, RecLast};
-typedef StackEntry *	StackEntryPtr;
+typedef StackEntry * StackEntryPtr;
 StackEntryPtr entry[4];
 CobolSymbol * NewSymbol;
 int i;
@@ -118,7 +119,7 @@ int i;
     }
 }
 
-void CloseScopeLevels (int LastLevel)
+void CloseScopeLevels (unsigned int LastLevel)
 {
 CobolSymbol * ChildRecord;
 
