@@ -60,7 +60,7 @@ $(CLIB):	$(COBJS)
 	@echo Building cobcy runtime library ...
 	@rm -f $(CLIB)
 	@$(AR) rs $(CLIB) $(COBJS)
-	@RANLIB_STATEMENT
+	@$(RANLIB) $(CLIB)
 
 cobfunc.o:	cobfunc.c
 	@echo Compiling $< ...
