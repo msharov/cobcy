@@ -61,7 +61,7 @@ static char ErrorBuffer [80];
 			  return (TOK_INTEGER);	}
 [0-9]+\.[0-9]+		{ fval = atof (yytext);
 			  return (TOK_FLOAT);	}
-\"[a-zA-Z0-9\t \-"\{\}\[\]\+\-_*|\\\/().,\:\';$=><!@#%"]*\"	{
+\"[a-zA-Z0-9\t \-\{\}\[\]\+\-_\*|\\\/().,\:\';=><\!\$\@\#\%]*\"	{
 			  strcpy (StringBuffer, (char*)(yytext + 1));
 			  StringBuffer [strlen (StringBuffer) - 1] = '\x0';
 			  return (TOK_STRING);	}
@@ -203,6 +203,7 @@ false			{ return (TOK_FALSE);	}
 fd			{ return (TOK_FD);	}
 file			{ return (TOK_FILE);	}
 file-control		{ return (TOK_FILE_CONTROL);	}
+file-id			{ return (TOK_FILE_ID);	}
 filler			{ return (TOK_FILLER);	}
 final			{ return (TOK_FINAL);	}
 first			{ return (TOK_FIRST);	}
@@ -313,8 +314,8 @@ random			{ return (TOK_RANDOM);	}
 rd			{ return (TOK_RD);	}
 read			{ return (TOK_READ);	}
 receive			{ return (TOK_RECEIVE);	}
+records	|
 record			{ return (TOK_RECORD);	}
-records			{ return (TOK_RECORDS);	}
 redefines		{ return (TOK_REDEFINES);	}
 reel			{ return (TOK_REEL);	}
 reference               { return (TOK_REFERENCE); }
