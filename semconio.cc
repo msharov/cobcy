@@ -5,6 +5,9 @@
 
 #include "semextern.h"
 #include "semconio.h"
+#ifdef CAN_HAVE_STDIO
+#include <stdio.h>
+#endif
 
 /*---------------------| Globals |------------------------------*/
   char 				DisplayOutput [80];

@@ -5,11 +5,17 @@
 
 #include <iostream.h>
 #include <mdefs.h>
+#ifdef CAN_HAVE_STDIO
+#include <unistd.h>
+#include <stdio.h>
+#endif
 #include "lyextern.h"
 #include "semextern.h"
 
 /*---------------------| Globals |------------------------------*/
+#ifndef CAN_HAVE_STDIO
   struct FILE;
+#endif
   extern FILE * 		yyin;
   char 				SourceFile[30];
   char 				OutputFile[30];

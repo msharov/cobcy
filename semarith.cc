@@ -4,6 +4,9 @@
 */
 
 #include "semextern.h"
+#ifdef CAN_HAVE_STDIO
+#include <stdio.h>
+#endif
 
 BOOL RoundResult = FALSE;
 
@@ -13,10 +16,11 @@ WORD nIds, i;
 CobolSymbol * src, * dest;
 StackEntry ** prms, * CurEntry;
 char SrcPrefix[80], DestPrefix[80];
+typedef StackEntry *	StackEntryPtr;
 
     // Pop all stack entries
     nIds = CountIdentifiers();
-    prms = new (StackEntry*) [nIds + 1];
+    prms = new StackEntryPtr [nIds + 1];
     for (i = 0; i < nIds; ++ i)		// the move to
        prms[i + 1] = SemStack.Pop();
     prms[0] = SemStack.Pop();		// the move from
@@ -98,6 +102,7 @@ CobolSymbol * src, * dest;
 StackEntry ** prms, * SrcEntry, * CurEntry, * DestEntry;
 char SrcPrefix[80], DestPrefix[80];
 char ErrorBuffer[80];
+typedef StackEntry *	StackEntryPtr;
 
     DestEntry = SemStack.Pop();
 
@@ -118,7 +123,7 @@ char ErrorBuffer[80];
        return;
     }
 
-    prms = new (StackEntry*) [nIds];
+    prms = new StackEntryPtr [nIds];
     for (i = 0; i < nIds; ++ i)
        prms[i] = SemStack.Pop();
 

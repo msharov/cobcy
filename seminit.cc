@@ -37,6 +37,7 @@ void StartProgram (void)
 {
 CobolSymbol * NewSymbol;
 
+    cout << "In StartProgram...\n";
     outfile.open (OutputFile);
 
     outfile << "/* " << (char*) OutputFile << "\n";
@@ -56,12 +57,16 @@ CobolSymbol * NewSymbol;
     NewSymbol->Kind = CobolSymbol::Variable;
     NewSymbol->SetPicture ("x(200)");
     NewSymbol->SetName ("_space_var");
+    cout << "Inserting space var\n";
+    cout.flush();
     SymTable.Insert (NewSymbol->CobolName, NewSymbol);
 
     NewSymbol = new CobolSymbol;
     NewSymbol->Kind = CobolSymbol::Variable;
     NewSymbol->SetPicture ("9(1)");
     NewSymbol->SetName ("_zero_var");
+    cout << "Inserting zero var\n";
+    cout.flush();
     SymTable.Insert (NewSymbol->CobolName, NewSymbol);
 }
 

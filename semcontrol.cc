@@ -5,6 +5,9 @@
 
 #include "semextern.h"
 #include "semcontrol.h"
+#ifdef CAN_HAVE_STDIO
+#include <stdio.h>
+#endif
 
 /*-----------------------| Globals |--------------------------*/
   Queue<char*> 	ParagraphList;

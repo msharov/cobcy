@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include "semactions.h"
 #include "lyextern.h"
 
@@ -16,6 +17,10 @@ long int FillerIndex = 0;
 #ifndef TRUE
 #define TRUE		1
 #endif
+
+/*-----------------------------------*/
+  int 	yyerror (char * msg);
+/*-----------------------------------*/
 
 %}
 %token TOK_ACCEPT

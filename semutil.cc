@@ -4,6 +4,9 @@
 */
 
 #include "semextern.h"		// includes semutil.h
+#ifdef CAN_HAVE_STDIO
+#include <stdio.h>
+#endif
 
 extern long int ival;
 extern double fval;
