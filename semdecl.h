@@ -12,6 +12,7 @@
   void 	DeclareRecordLevel (void);
   void 	CloseScopeLevels (unsigned int LastLevel);
   void 	InitializeVariables (void);
+  void	DeclareSpecialName (void);
 /*------------------------------------------------*/
 
 #endif
