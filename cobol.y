@@ -449,7 +449,7 @@ object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD
 	;
 
 memory_option:		TOK_MEMORY optional_size integer memsize_args
-                        { Comment("Memory size is obsolete and ignored"); }
+                        { GenComment("Memory size is obsolete and ignored"); }
         |
         ;
 
@@ -696,14 +696,16 @@ statement_list_pl:	statement_list
 
 statement:	clause TOK_PERIOD
 	|	{ GenEndProc(); }
-		TOK_PROCEDURE identifier 
+		TOK_PROCEDURE identifier TOK_PERIOD
 		{ GenStartProc(); }
 	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
-        |       TOK_REPLACE TOK_OFF { NIY("Replace off"); }
+        |       TOK_REPLACE TOK_OFF { NIY("Replace off"); } TOK_PERIOD
+	|	TOK_READ identifier { GenRead(); }
+		optional_word_record TOK_AT TOK_END at_end_clause TOK_PERIOD
 	|	identifier TOK_PERIOD { GenParagraph(); }
 	;
 
-else_list:	TOK_ELSE compound_clause
+else_list:	TOK_ELSE { GenElse(); } compound_clause
 	|	elsif_list
 	|
 	; 
@@ -805,13 +807,15 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 	|	TOK_PERFORM identifier perform_options { GenPerform(); }
 	|	TOK_OPEN open_list
 	|	TOK_CLOSE id_list close_options { GenClose(); }
-	|	TOK_READ identifier { GenRead(); }
-		optional_word_record TOK_AT TOK_END compound_clause
 	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
         |       TOK_CALL call_list using_options { NIY("CALL"); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
 	|	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
+	;
+
+at_end_clause:	compound_clause
+	|	{ GenEmptyClause(); }
 	;
 
 compound_clause:	{ BeginCompound(); }
@@ -948,10 +952,10 @@ open_list:	open_entry open_list_pl
 open_list_pl:	open_list
 	|
 	;
-open_entry:	TOK_INPUT id_list open_options { GenOpen ("r"); }
-	|	TOK_OUTPUT id_list open_options { GenOpen ("w"); }
-	|	TOK_EXTEND id_list open_options { GenOpen ("a"); }
-	|	TOK_I_O id_list open_options { GenOpen ("r+"); }
+open_entry:	TOK_INPUT id_list open_options { GenOpen ("input"); }
+	|	TOK_OUTPUT id_list open_options { GenOpen ("output"); }
+	|	TOK_EXTEND id_list open_options { GenOpen ("extend"); }
+	|	TOK_I_O id_list open_options { GenOpen ("io"); }
 	;
 
 open_options:	TOK_REVERSED
