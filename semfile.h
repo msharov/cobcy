@@ -6,6 +6,8 @@
 #ifndef __SEMFILE_H
 #define __SEMFILE_H
 
+#include "semtypes.h"
+
 #define PRINTER_COMMAND		"lpr -h"
 #define PRINTER_SPOOL_FILE	"/tmp/cobol.prn"
 
@@ -13,22 +15,23 @@
 #define DISPLAY_STREAM_NAME	"stdout"
 
 /*-------------------------------------------*/
-  void 	FileDecl (void);
+  void 	BeginFileDecl (void);
+  void 	EndFileDecl (void);
   void 	GenFileDesc (void);
   void 	AssociateFileRecord (void);
-  void 	GenOpen (char * mode);
+  void 	GenOpen (OpenModeType mode);
   void 	GenClose (void);
   void 	GenRead (void);
   void 	GenWrite (void);
+  void 	GenRewrite (void);
   void 	AssociateRecordsWithFD (void);
   void	SetFileStatus (void);
-  void	SetAccessMode (char * mode);
-  void	SetOrganization (char * org);
+  void	SetAccessMode (AccessModeType mode);
+  void	SetOrganization (OrganizationType org);
   void	SetRelativeKey (void);
   void	SetRecordKey (void);
   void	OpenSpecialFiles (void);
   void	CloseSpecialFiles (void);
-  void	FlushPrinterOutput (void);
 /*-------------------------------------------*/
 
 #endif
