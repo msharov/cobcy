@@ -7,7 +7,11 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#ifdef __MSDOS__
+#include "cob_yacc.h"
+#else
 #include "y.tab.h"
+#endif
 #include "semutil.h"
 
 #define STRINGBUFSIZE	200
@@ -43,9 +47,10 @@ static char ErrorBuffer [80];
 <COMMENT_STATE>[a-z0-9\t \!@\#\$%\*\(\)_+|\-=:\";\',.\/<>\?]*\n {
 		  ++ CurrentLine;
 		  BEGIN INITIAL;
+		  yytext [strlen(yytext) - 1] = '\x0';	/* kill the newline */
+		  Comment (yytext);
 		}
 
-<PICTURE_STATE>[\t ]+	;
 <PICTURE_STATE>([\.]*[ax9vbpz09s,\*\+\-\$]+(\([0-9]+\))?)+	{ 
 		  	  strcpy (StringBuffer, yytext);
 		  	  BEGIN INITIAL;
@@ -113,6 +118,7 @@ comp			{ return (TOK_COMP);	}
 computational		{ return (TOK_COMPUTATIONAL);	}
 compute			{ return (TOK_COMPUTE);	}
 configuration		{ return (TOK_CONFIGURATION);	}
+console			{ return (TOK_CONSOLE);	}
 contains		{ return (TOK_CONTAINS);	}
 content                 { return (TOK_CONTENT);         }
 continue		{ return (TOK_CONTINUE);	}
@@ -404,6 +410,7 @@ value	|
 values			{ return (TOK_VALUE);	}
 varying			{ return (TOK_VARYING);	}
 when			{ return (TOK_WHEN);	}
+while			{ return (TOK_WHILE);	}
 with			{ return (TOK_WITH);	}
 words			{ return (TOK_WORDS);	}
 working-storage		{ return (TOK_WORKING_STORAGE);	}
@@ -427,10 +434,10 @@ zeros 			{ strcpy (StringBuffer, "_zero_var");
 "."			{ return (TOK_PERIOD);	}
 "("			{ return (TOK_LPAREN);	}
 ")"			{ return (TOK_RPAREN);	}
-">"			{ return (TOK_GREATER);	}
-"<"			{ return (TOK_LESS);	}
 ">="                    { return (TOK_GREATER_EQ); }
 "<="                    { return (TOK_LESS_EQ); }
+">"			{ return (TOK_GREATER);	}
+"<"			{ return (TOK_LESS);	}
 
 \n		{ ++ CurrentLine; }
 

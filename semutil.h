@@ -14,8 +14,12 @@
 /*-----------------------------------------------------------------------*/
   void 	WriteError (char * str);
   void 	WriteWarning (char * str);
+  void	NIY (char * str);
+  void  Comment (char * str);
   BOOL	ErrorOccured (void);
   void 	PrintConstant (StackEntry * entry, ofstream& os);
+  CobolSymbol *	LookupIdentifier (char * id);
+  void	PrintIdentifier (char * id, ofstream& os);
   void	LookupParent (char * symbol, char * prefix);
   void	BuildPrefix (char * symbol, char * prefix);
   void 	GenIndent (void);
@@ -32,6 +36,7 @@
   WORD 	CountIdentifiers (void);
   void 	ReverseIdentifiers (WORD nIds);
   void	Push (StackEntryKind kind);
+  BOOL	IsInSet (char c, char * set);
 /*-----------------------------------------------------------------------*/
 
 #endif

@@ -3,12 +3,19 @@
 **	Implements file semantic actions for COBOL compiler.
 */
 
+#ifdef __MSDOS__
+#include "semexter.h"
+#include "semcontr.h"		// EOF checking with if()
+#else
 #include "semextern.h"
+#include "semcontrol.h"
+#endif
 #include "semfile.h"
-#include "semcontrol.h"		// EOF checking with if()
 #include "semdecl.h"
 #if CAN_HAVE_STDIO
+#ifndef __MSDOS__
 #include <unistd.h>
+#endif
 #endif
 
 /*---------------------| Globals |------------------------------*/
@@ -63,9 +70,9 @@ CobolSymbol * NewFD;
        WriteError ("No record found for file descriptor");
 
     CloseScopeLevels (0);
-    outfile << "\n";
+    codef << "\n";
     GenIndent();
-    outfile << "FILE * " << NewFD->CName << ";\n";
+    codef << "FILE * " << NewFD->CName << ";\n";
 }
 
 void AssociateFileRecord (void)
@@ -96,8 +103,8 @@ int nIds, i;
        delete entry;
 
        GenIndent();
-       outfile << fattr->CName << " = fopen (\"" << fattr->FileName;
-       outfile << "\", \"" << mode << "b\");\n";
+       codef << fattr->CName << " = fopen (\"" << fattr->FileName;
+       codef << "\", \"" << mode << "b\");\n";
     }
 }
 
@@ -118,24 +125,45 @@ int nIds, i;
        delete entry;
 
        GenIndent();
-       outfile << "fclose (" << fattr->CName << ");\n";
+       codef << "fclose (" << fattr->CName << ");\n";
 
        // Flush spool output to printer
        if (strcmp (fattr->FileName, PRINTER_SPOOL_FILE)) {
 	  GenIndent();
-	  outfile << "system (\"" << PRINTER_COMMAND;
-	  outfile << " " << PRINTER_SPOOL_FILE << "\");\n";
+	  codef << "system (\"" << PRINTER_COMMAND;
+	  codef << " " << PRINTER_SPOOL_FILE << "\");\n";
 	  GenIndent();
-	  outfile << "sleep (1);\n";	// Give the daemon a chance to catch up
+	  codef << "sleep (1);\n";	// Give the daemon a chance to catch up
 	  unlink (PRINTER_SPOOL_FILE);
        }
+    }
+}
+
+void GenSeek (CobolSymbol * RecFile)
+{
+    // For random-access files, position file pointer before read
+    //	based on the given key.
+    if (RecFile->FileAccessMode == CobolSymbol::AM_Random) {
+       GenIndent();
+       codef << "fseek (" << RecFile->CName << ", ";
+
+       // Only relative files are supported now.
+       if (RecFile->FileOrganization == CobolSymbol::ORG_Relative) {
+          // offset = record_size * key
+          codef << RecFile->RecordCSize << " * ";
+	  PrintIdentifier (RecFile->FileRelativeKey, codef);
+	  codef << ", SEEK_SET";
+       }
+       else
+	  codef << "0, SEEK_CUR";
+       codef << ");\n";
     }
 }
 
 void GenRead (void)
 {
 StackEntry * entry;
-CobolSymbol * RecFile, * Rec;
+CobolSymbol * RecFile, * Rec, * Key;
 
     entry = SemStack.Pop();
 
@@ -151,13 +179,15 @@ CobolSymbol * RecFile, * Rec;
        return;
     }
 
+    GenSeek (RecFile);
+
     if (Rec->Kind == CobolSymbol::Record)
-       ReadRecord (Rec, outfile, RecFile->CName);
+       ReadRecord (Rec, codef, RecFile->CName);
     else
-       ReadVariable (Rec, outfile, RecFile->CName);
+       ReadVariable (Rec, codef, RecFile->CName);
 
     GenStartIf();
-    outfile << "feof (" << RecFile->CName << ")";
+    codef << "feof (" << RecFile->CName << ")";
     GenEndIf();
 }
 
@@ -194,10 +224,12 @@ CobolSymbol * RecFile, * DataRec = NULL, * Rec;
     if (DataRec == NULL)
        DataRec = Rec;
 
+    GenSeek (RecFile);
+
     if (DataRec->Kind == CobolSymbol::Record)
-       PrintRecord (DataRec, outfile, RecFile->CName);
+       PrintRecord (DataRec, codef, RecFile->CName);
     else
-       PrintVariable (DataRec, outfile, RecFile->CName);
+       PrintVariable (DataRec, codef, RecFile->CName);
 }
 
 void AssociateRecordsWithFD (void)

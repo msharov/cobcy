@@ -20,7 +20,12 @@ typedef struct {
        Float,
        String 
     } 		Kind;
-    BOOL	Sign;
+    enum {
+       NoSign = FALSE,
+       TrailingSign = TRUE,
+       LeadingSign
+    }		 Sign;
+    BOOL	SignSeparate;
     WORD	nDigitsBDP;	// Before Decimal Point
     WORD	nDigitsADP;	// After Decimal Point
     WORD	nFillerZeroes;	// Zeroes after DP

@@ -3,7 +3,11 @@
 **	Console IO for the COBOL compiler.
 */
 
+#ifdef __MSDOS__
+#include "semexter.h"
+#else
 #include "semextern.h"
+#endif
 #include "semconio.h"
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
@@ -11,6 +15,7 @@
 
 /*---------------------| Globals |------------------------------*/
   char 				DisplayOutput [80];
+  AcceptSourceType		AcceptSource;
 /*--------------------------------------------------------------*/
 
 void GenAccept (void)
@@ -33,13 +38,22 @@ int i, nIds;
 	     return;
 	  }
 
-	  if (attr->Kind == CobolSymbol::Record)
-	     ReadRecord (attr, outfile, "stdin", FALSE);
+	  if (AcceptSource == AS_Console) {
+	     if (attr->Kind == CobolSymbol::Record)
+		ReadRecord (attr, codef, "stdin", FALSE);
+	     else
+		ReadVariable (attr, codef, "stdin", FALSE);
+	  }
 	  else
-	     ReadVariable (attr, outfile, "stdin", FALSE);
+	     NIY ("ACCEPT from other than console");
        }
        delete entry;
     }
+}
+
+void SetAcceptSource (AcceptSourceType NewSrc)
+{
+    AcceptSource = NewSrc;
 }
 
 void GenDisplay (void)
@@ -58,23 +72,23 @@ int i, nIds;
 
        if (entry->kind == SE_Integer) {
           GenIndent();
-	  outfile << "fprintf (" << DisplayOutput;
-	  outfile << ", \"" << entry->ival << "\");\n";
+	  codef << "fprintf (" << DisplayOutput;
+	  codef << ", \"" << entry->ival << "\");\n";
        }
        else if (entry->kind == SE_Float) {
           GenIndent();
-	  outfile << "fprintf (" << DisplayOutput;
-	  outfile << ", \"" << entry->fval << "\");\n";
+	  codef << "fprintf (" << DisplayOutput;
+	  codef << ", \"" << entry->fval << "\");\n";
        }
        else if (entry->kind == SE_Quote) {
           GenIndent();
-          outfile << "fprintf (" << DisplayOutput;
-          outfile << ", \"\\\"\");\n";
+          codef << "fprintf (" << DisplayOutput;
+          codef << ", \"\\\"\");\n";
        }
        else if (entry->kind == SE_String) {
           GenIndent();
-	  outfile << "fprintf (" << DisplayOutput;
-	  outfile << ", \"" << entry->ident << "\");\n";
+	  codef << "fprintf (" << DisplayOutput;
+	  codef << ", \"" << entry->ident << "\");\n";
        }
        else if (entry->kind == SE_Identifier) {
 	  attr = SymTable.Lookup (entry->ident);
@@ -88,15 +102,15 @@ int i, nIds;
           BuildPrefix (entry->ident, prefix);
           
 	  if (attr->Kind == CobolSymbol::Record)
-	     PrintRecord (attr, outfile, DisplayOutput, FALSE);
+	     PrintRecord (attr, codef, DisplayOutput, FALSE);
 	  else
-	     PrintVariable (attr, outfile, DisplayOutput, FALSE);
+	     PrintVariable (attr, codef, DisplayOutput, FALSE);
        }
        delete entry;
     }
 
     GenIndent();
-    outfile << "fprintf (" << DisplayOutput << ", \"\\n\");\n";
+    codef << "fprintf (" << DisplayOutput << ", \"\\n\");\n";
 }
 
 void SetDisplayOutput (void)

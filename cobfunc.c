@@ -16,36 +16,39 @@
 
 int _alphabetic (char * str) 
 {
-  int i;
-  for (i = 0; i < strlen(str); i++)
-    if (!((str[i] >= 'A' && str[i] <= 'Z') ||
-          (str[i] >= 'a' && str[i] <= 'z') ||
-          (str[i] == ' ')))
-       return (0);
- return (1);
+int i;
+    for (i = 0; i < strlen(str); i++)
+       if (!((str[i] >= 'A' && str[i] <= 'Z') 
+	     || (str[i] >= 'a' && str[i] <= 'z') ||
+	     (str[i] == ' ')
+	    ))
+	  return (0);
+    return (1);
 }
 
+/*
+** what = 1  : lowercase test
+** what = 2  : uppercase test 
+*/
 int _alphab_up_low(char * str, int what)
-
-/* what = 1  : lowercase test
-   what = 2  : uppercase test */
-
 {
-  int i;
-  if (_alphabetic(str))
-    for (i = 0; i < strlen(str); i++)
-    {
-     if (what == 2)
-     {
-       if (islower(str[i]))
-          return (0);
-     }
-     else 
-       if (isupper(str[i]))
-          return(0);
+int i;
+
+    if (_alphabetic(str)) {
+       for (i = 0; i < strlen(str); i++) {
+	  if (what == 2) {
+	     if (islower (str[i]))
+		return (0);
+	  }
+	  else {
+	     if (isupper (str[i]))
+		return(0);
+	  }
+       }
     }
-  else return(0);
-  return(1);
+    else 
+       return(0);
+    return(1);
 }
 
 void _RuntimeError (char * message)
@@ -93,7 +96,7 @@ void _WriteStringVar (FILE * stream, char * var, char * pic)
 {
 int i;
 int j;
-  for (i = 0, j = 0; i < strlen(pic); ++ i) {
+    for (i = 0, j = 0; i < strlen(pic); ++ i) {
        switch (pic[i]) {
           case 'x': fprintf (stream, "%c", var[j++]); break;
           case 'b': fprintf (stream, " "); break;
@@ -101,13 +104,21 @@ int j;
           case '0': fprintf (stream, "0"); break;
           default: fprintf (stream, "%c", pic[i]); 
        }
-  } 
+    } 
 }
 
 void _WriteIntegerVar (FILE * stream, long int var, char * pic)
 {
+char wiv_buf [128];
+    _IntegerToString (wiv_buf, var, pic);
+    fprintf (stream, "%s", wiv_buf);
+}
+
+void _IntegerToString (char * string, long int var, char * pic)
+{
 char buffer[20];
 int i, j = 0, nl, pl, fl = 0;
+int sp = 0;
 
     sprintf (buffer, "%lu", var);
     nl = strlen (buffer);
@@ -125,83 +136,109 @@ int i, j = 0, nl, pl, fl = 0;
     for (i = 0; i < pl; ++ i) {
        if (pic[i] == '9') {
 	  if (fl <= nl)
-             fprintf (stream, "%c", buffer[j++]); 
+             string[sp++] = buffer[j++]; 
 	  else
-             fprintf (stream, " ");
+             string[sp++] = ' ';
 	  -- fl;
        }
-       else if (pic[i] == '.') fprintf (stream, ".");
-       else if (pic[i] == ',') fprintf (stream, ",");
-       else if (pic[i] == '/') fprintf (stream, "/");
-       else if (pic[i] == 'b') fprintf (stream, " ");
-       else if (pic[i] == '0') fprintf (stream, "0");
+       else if (pic[i] == '.') string[sp++] = '.';
+       else if (pic[i] == ',') string[sp++] = ',';
+       else if (pic[i] == '/') string[sp++] = '/';
+       else if (pic[i] == 'b') string[sp++] = ' ';
+       else if (pic[i] == '0') string[sp++] = '0';
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
-	     fprintf (stream, "+");
+	     string[sp++] = '+';
 	  else if (var < 0)
-	     fprintf (stream, "-");
+	     string[sp++] = '-';
 	  else
-	     fprintf (stream, " ");
+	     string[sp++] = ' ';
        }
        else if (pic[i] == 'z' || pic[i] == '*')
-	  fprintf (stream, "0");
+	  string[sp++] = '0';
        else if (pic[i] == '$')
-	  fprintf (stream, "$");
+	  string[sp++] = '$';
        else
-          fprintf (stream, "%c", (fl - 1 <= nl) ? pic[i] : ' ');
+          string[sp++] = (fl - 1 <= nl) ? pic[i] : ' ';
     }
+    string[sp] = '\x0';
 }
 
 void _WriteFloatVar (FILE * stream, double var, char * pic)
+{
+char wfv_buf [128];
+    _FloatToString (wfv_buf, var, pic);
+    fprintf (stream, "%s", wfv_buf);
+}
+
+void _FloatToString (char * string, double var, char * pic)
 {
 char format_s [10];
 char buffer [20];
 int fbp = 0, fap = 0, pl;
 int i, j = 0;
 int FoundPoint = 0;
+int sp = 0;
 
     pl = strlen (pic);
 
     /* Calculate number of filler zeroes on the left */
     for (i = 0; i < pl; ++ i) {
-       if (pic[i] == '9' || pic[i] == 'z' || pic[i] == '*') {
+       if (pic[i] == '9' || pic[i] == '0' || pic[i] == 'z' || pic[i] == '*') {
 	  if (FoundPoint)
 	     ++ fap;
 	  else
 	     ++ fbp;
        }
+       else if (pic[i] == 'v')
+	  FoundPoint = 1;
     }
 
     sprintf (format_s, "%%%d.%df", fbp, fap);
     sprintf (buffer, format_s, var);
     
+    /*
+    ** sprintf will print correct number of digits after point,
+    ** but only as many as needed before the point.
+    ** We thus need to reset the index variable j to the real starting point.
+    */
+    j = strlen (buffer) - (fbp + 1 + fap);
+
     for (i = 0; i < pl; ++ i) {
-       if (pic[i] == '9')
-          fprintf (stream, "%c", buffer[j++]);
-       else if (pic[i] == '.') fprintf (stream, ".");
-       else if (pic[i] == ',') fprintf (stream, ",");
-       else if (pic[i] == '/') fprintf (stream, "/");
-       else if (pic[i] == 'b') fprintf (stream, " ");
-       else if (pic[i] == '0') fprintf (stream, "0");
+       if (pic[i] == '9') {
+	  if (j >= 0)
+	     string[sp++] = buffer[j];
+	  else
+	     string[sp++] = ' ';
+	  ++ j;
+       }
+       else if (pic[i] == '.') string[sp++] = '.';
+       else if (pic[i] == ',') string[sp++] = ',';
+       else if (pic[i] == '/') string[sp++] = '/';
+       else if (pic[i] == 'b') string[sp++] = ' ';
+       else if (pic[i] == '0') string[sp++] = '0';
        else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
           if (var > 0 && pic[i] == '-')
-	     fprintf (stream, "+");
+	     string[sp++] = '+';
 	  else if (var < 0)
-	     fprintf (stream, "-");
+	     string[sp++] = '-';
 	  else
-	     fprintf (stream, " ");
+	     string[sp++] = ' ';
        }
-       else if (pic[i] == 'z' || pic[i] == '*')
-	  fprintf (stream, "0");
+       else if (pic[i] == 'z' || pic[i] == '*') {
+	  string[sp++] = '0';
+	  ++ j;
+       }
        else if (pic[i] == 'v') {
-	  fprintf (stream, ".");
+	  string[sp++] = '.';
 	  ++ j;
        }
        else if (pic[i] == '$')
-	  fprintf (stream, "$");
+	  string[sp++] = '$';
        else
-          fprintf (stream, "%c", (buffer[i] != ' ') ? pic[i] : ' ');
+          string[sp++] = pic[i];
     }
+    string[sp] = '\x0';
 }
 
 void _AssignVarString (char * var1, char * var2, int p1, int p2)

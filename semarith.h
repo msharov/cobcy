@@ -12,6 +12,7 @@
   void 	GenSubtract (void);
   void 	GenMultiply (void);
   void 	GenDivide (void);
+  void	GenCompute (void);
   void	SetResultRounding (void);
 /*-------------------------------------------*/
 

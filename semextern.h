@@ -15,12 +15,11 @@
 #include "semsedef.h"
 #include "semutil.h"
 
+// All of these are defined in seminit.cc
 extern Stack<StackEntry> SemStack;
 extern HashTable<CobolSymbol> SymTable;
 extern int NestingLevel;
-extern ofstream outfile;
-extern char OutputFile[];
-extern char SourceFile[];
+extern ofstream codef, declf;
 
 #endif
 

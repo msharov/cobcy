@@ -6,13 +6,18 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef __MSDOS__
+#include "semactio.h"
+#else
 #include "semactions.h"
+#endif
 #include "lyextern.h"
 
 extern int CurrentLine;
 extern long int ival;
 extern double fval;
 extern char StringBuffer[];
+SEOperatorKind opkind;
 long int FillerIndex = 0;
 #ifndef TRUE
 #define TRUE		1
@@ -75,6 +80,7 @@ long int FillerIndex = 0;
 %token TOK_COMPUTATIONAL
 %token TOK_COMPUTE
 %token TOK_CONFIGURATION
+%token TOK_CONSOLE
 %token TOK_CONTAINS
 %token TOK_CONTENT
 %token TOK_CONTINUE
@@ -365,12 +371,12 @@ long int FillerIndex = 0;
 %token TOK_VARYING
 %token TOK_WHEN
 %token TOK_WITH
+%token TOK_WHILE
 %token TOK_WORDS
 %token TOK_WORKING_STORAGE
 %token TOK_WRITE
 %token TOK_ZERO
 %token TOK_IDENTIFIER
-%token TOK_PLUS
 %token TOK_MINUS
 %token TOK_ASTERISK
 %token TOK_SLASH
@@ -685,11 +691,6 @@ statement:	clause TOK_PERIOD
 		TOK_PROCEDURE identifier 
 		{ GenStartProc(); }
 	|	identifier TOK_PERIOD { GenParagraph(); }
-	|	TOK_IF { GenStartIf(); } boolean_list 
-		{ GenEndIf(); }
-			compound_clause
-		else_list
-		TOK_PERIOD
 	;
 
 else_list:	else_clause else_list
@@ -713,7 +714,8 @@ boolean_list_pl:	logic_connector { GenConnect(); } boolean_list
 	|
 	;
 
-boolean:       expression optional_is boolean2 { GenBool(); }
+boolean:	optional_lparen expression optional_is boolean2 
+		optional_rparen { GenBool(); }
         ;
 
 boolean2:           TOK_ALPHABETIC
@@ -724,6 +726,20 @@ boolean2:           TOK_ALPHABETIC
                  { strcpy (StringBuffer, "Alphabetic-Lower"); Push (SE_Bool); }
         |           relational
                       expression
+        ;
+	
+not_boolean_list:	not_boolean not_boolean_list_pl
+	;
+
+not_boolean_list_pl:	logic_connector { GenConnect(); } not_boolean_list
+	|
+	;
+
+not_boolean:	optional_lparen expression optional_is boolean2 
+		optional_rparen { GenBool(); }
+        ;
+
+not_boolean2:	reverse_relational expression
         ;
                     
 
@@ -771,8 +787,10 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 		giving_option round_option
 		{ GenDivide(); }
 		size_error_option
+	|	TOK_COMPUTE { Push (SE_Mark); } 
+		compute_arg_list { GenCompute(); }
 	|	TOK_GO TOK_TO identifier { GenGoto(); } 
-	|	TOK_PERFORM identifier times_option { GenPerform(); }
+	|	TOK_PERFORM identifier perform_options { GenPerform(); }
 	|	TOK_OPEN open_list
 	|	TOK_CLOSE id_list close_options { GenClose(); }
 	|	TOK_READ identifier { GenRead(); }
@@ -783,6 +801,11 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
         |       TOK_REPLACE TOK_OFF { NIY("Replace off"); }
 	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
+	|	TOK_IF { GenStartIf(); } boolean_list 
+		{ GenEndIf(); }
+		optional_then
+			compound_clause
+		else_list
 	;
 
 compound_clause:	{ BeginCompound(); }
@@ -802,17 +825,14 @@ expression:	identifier
 	;
 
 accept_option:  TOK_FROM from_arg
-        |
+        | 	{ SetAcceptSource (AS_Console); }
         ;
 
-from_arg:       TOK_DATE
-                { NIY("Accept from date"); }
-        |       TOK_DAY
-                { NIY("Accept from day"); }
-        |       TOK_DAY_OF_WEEK
-                { NIY("Accept from day-of-week"); }
-        |       TOK_TIME
-                { NIY("Accept from time"); }
+from_arg:       TOK_DATE { SetAcceptSource (AS_Date); }
+        |       TOK_DAY { SetAcceptSource (AS_Day); }
+        |       TOK_DAY_OF_WEEK { SetAcceptSource (AS_Weekday); }
+        |       TOK_TIME { SetAcceptSource (AS_Time); }
+	|	TOK_CONSOLE { SetAcceptSource (AS_Console); }
         ;
 
 display_args:	{ Push (SE_Mark); } optional_all display_args_marked
@@ -851,10 +871,74 @@ size_error_option:	TOK_ON TOK_SIZE TOK_ERROR
 	|
 	;
 
+perform_options:	times_option varying_option
+	;
 times_option:	integer TOK_TIMES
 	|	{ ival = 1; 
 		  Push (SE_Integer);
 		}
+	;
+varying_option:		TOK_VARYING loop_condition after_list
+	|
+	;
+after_list:	TOK_AFTER loop_condition after_list
+	|
+	;
+loop_condition:	{ GenStartLoop(); }
+		identifier 
+		TOK_FROM loop_iterator
+		{ GenLoopInit(); }
+		loop_condition_part2
+	;
+loop_condition_part2: 	TOK_TO loop_iterator
+			{ GenLoopCondition(); }
+			by_option
+			{ GenLoopIncrement(); }
+	|	by_option
+		loop_condition_part3
+		{ GenLoopIncrement(); }
+	;
+loop_condition_part3: 	TOK_WHILE boolean_list
+	|		TOK_UNTIL not_boolean_list
+	;
+by_option:	TOK_BY loop_iterator
+	|	{ ival = 1; 	/* 1 is the default increment */
+		  Push (SE_Integer);
+		}
+	;
+loop_iterator:	identifier
+	|	integer
+	;
+
+compute_arg_list:	identifier round_option TOK_EQUAL 
+			{ opkind = OP_Equal; Push (SE_Operator); }
+			compute_expr_list
+	;
+compute_expr_list:	compute_expr compute_expr_list_pl
+	|		compute_term
+	;
+compute_expr_list_pl:	compute_expr_list
+	|
+	;
+compute_expr:	compute_term compute_operator
+	|	compute_operator
+	;
+compute_term:	identifier
+	|	integer
+	|	float
+	;
+compute_operator:	TOK_PLUS	
+			{ opkind = OP_Addition; Push (SE_Operator); }
+	|		TOK_MINUS
+			{ opkind = OP_Subtraction; Push (SE_Operator); }
+	|		TOK_ASTERISK
+			{ opkind = OP_Multiplication; Push (SE_Operator); }
+	|		TOK_SLASH
+			{ opkind = OP_Division; Push (SE_Operator); }
+	|		TOK_LPAREN
+			{ opkind = OP_LParen; Push (SE_Operator); }
+	|		TOK_RPAREN
+			{ opkind = OP_RParen; Push (SE_Operator); }
 	;
 
 open_list:	open_entry open_list_pl
@@ -953,68 +1037,61 @@ optional_comma:		TOK_COMMA
 optional_word_record:	TOK_RECORD
 	|
 	;
-
 optional_to:            TOK_TO
         |
         ;
-
 optional_all:           TOK_ALL
         |
         ;
-
 optional_than:          TOK_THAN
         |
         ;
-
+optional_then:          TOK_THEN
+        |
+        ;
 optional_optional:      TOK_OPTIONAL
         |
         ;
-
 optional_by:            TOK_BY
         |
         ;
-
 optional_mode:          TOK_MODE
         |
         ;
-
 optional_file:          TOK_FILE
         |
         ;
-
 optional_key:           TOK_KEY
         |
         ;
-
 optional_usage:		TOK_USAGE
         |
         ;
-
 optional_sign:		TOK_SIGN
 	|
 	;
-
 optional_character:	TOK_CHARACTER
         |
         ;
-
 optional_size:		TOK_SIZE
 	|
 	;
-
 optional_program:	TOK_PROGRAM
 	|
 	;
-
 optional_with:		TOK_WITH
 	|
 	;
-
 optional_right:		TOK_RIGHT
 	|
 	;
-
 optional_data:		TOK_DATA
+	|
+	;
+optional_lparen:	TOK_LPAREN
+	|
+	;
+optional_rparen:	TOK_RPAREN
 	|
 	;
 
