@@ -6,7 +6,7 @@ RANLIB	= @RANLIB@
 #OPTIM	= -O2
 OPTIM	=
 
-CLAGS	= -w $(OPTIM) -pipe -Iadtlib -DCAN_HAVE_STDIO=@can_have_stdio@
+CFLAGS	= -w $(OPTIM) -pipe -I./adtlib -DCAN_HAVE_STDIO=@can_have_stdio@
 
 LEX	= @LEX@
 YACC	= @YACC@
@@ -21,6 +21,13 @@ SRCS	= main.cc semdecl.cc symbol.cc semutil.cc semarith.cc seminfo.cc \
 OBJS	= main.o semdecl.o symbol.o semutil.o semarith.o seminfo.o \
 	seminit.o semfile.o semconio.o semcontrol.o \
 	cobol_lex.o cobol_yacc.o 
+
+RCSED	= Makefile.in cobfunc.c cobfunc.h cobol.l cobol.y \
+	configure.in lyextern.h main.cc semactions.h semarith.cc \
+	semarith.h semconio.cc semconio.h semcontrol.cc semcontrol.h \
+	semdecl.cc semdecl.h semextern.h semfile.cc semfile.h \
+	seminfo.cc seminfo.h seminit.cc seminit.h semsedef.h \
+	semutil.cc semutil.h symbol.cc symbol.h
 
 CLIB	= libcobol.a
 COBJS	= cobfunc.o
@@ -68,13 +75,13 @@ cobfunc.o:	cobfunc.c
 
 checkin:
 	@echo Checking in everything ...
-	@ci -l $(SRCS) *.h cobol.l cobol.y Makefile.in configure.in
+	@ci -l $(RCSED)
 
 revert:
 	@echo Swash! Dang! Boooom!
 	@echo Canceling all recent changes.
-	@co $(SRCS) *.h cobol.l cobol.y Makefile.in configure.in
-	@chmod u+w $(SRCS) *.h cobol.l cobol.y Makefile.in configure.in
+	@co $(RCSED)
+	@chmod u+w $(RCSED)
 
 depend:
 	@echo Generating dependencies ...
