@@ -14,12 +14,15 @@ YACC	= @YACC@
 LIBS	= @LEXLIB@
 
 EXE	= cobcy
-SRCS	= main.cc semdecl.cc symbol.cc semutil.cc semarith.cc seminfo.cc \
-	seminit.cc semfile.cc semconio.cc semcontrol.cc \
+SRCS	= main.cc semdecl.cc semutil.cc semarith.cc seminfo.cc \
+	seminit.cc semfile.cc semconio.cc semcontrol.cc symbase.cc \
+	symconst.cc symfile.cc sympic.cc symrec.cc symvar.cc \
 	cobol_yacc.c cobol_lex.c \
 	cobfunc.c
-OBJS	= main.o semdecl.o symbol.o semutil.o semarith.o seminfo.o \
+OBJS	= main.o semdecl.o semutil.o semarith.o seminfo.o \
 	seminit.o semfile.o semconio.o semcontrol.o \
+	symbase.o symconst.o symdata.o symfile.o symlabel.o \
+	sympic.o symrec.o symvar.o \
 	cobol_lex.o cobol_yacc.o 
 
 RCSED	= Makefile.in cobfunc.c cobfunc.h cobol.l cobol.y \
@@ -27,7 +30,10 @@ RCSED	= Makefile.in cobfunc.c cobfunc.h cobol.l cobol.y \
 	semarith.h semconio.cc semconio.h semcontrol.cc semcontrol.h \
 	semdecl.cc semdecl.h semextern.h semfile.cc semfile.h \
 	seminfo.cc seminfo.h seminit.cc seminit.h semsedef.h \
-	semutil.cc semutil.h symbol.cc symbol.h
+	semutil.cc semutil.h symbase.cc \
+	symbase.h symconst.cc symconst.h symdata.h symfile.cc \
+	symfile.h sympic.cc sympic.h symrec.cc symrec.h \
+	symvar.cc symvar.h
 
 CLIB	= libcobol.a
 COBJS	= cobfunc.o
@@ -39,7 +45,7 @@ all:	$(EXE) $(CLIB)
 $(EXE):	$(OBJS)
 	@echo Linking cobcy ...
 	@$(CPP) -o $(EXE) $(OBJS) $(LIBS)
-#	@strip $(EXE)
+	@strip $(EXE)
 
 cobol_lex.c:	cobol.l y.tab.h
 	@echo Building lexical analyzer ...
@@ -95,7 +101,7 @@ spotless: clean
 	@./cleantest
 	@rm -f $(EXE) $(CLIB)
 
-ifeq (.depend,$(wildcard, .depend))
-include $(DEPEND_FILE)
+ifeq (.depend,$(wildcard .depend))
+include .depend
 endif
 
