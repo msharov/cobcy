@@ -14,10 +14,16 @@
 #include <stdio.h>
 #endif
 
+// This is just a very rough estimate of the maximum
+//	It will not really place the limit on how many paragraphs
+//	you may have, but if you have 40000 paragraphs and use
+//	STOP RUN in paragraph 3, it will not work!
+#define MAX_PARAGRAPHS		32000
+
 /*-----------------------| Globals |--------------------------*/
   Queue<char*> 	ParagraphList;
-  char		CurParName [32];
-  char		CurLoopVar [32];
+  char		CurParName [32] = "FirstParagraph";
+  char		CurLoopVar [32] = "";
   int		LoopNesting = 0;
 /*------------------------------------------------------------*/
 
@@ -53,8 +59,6 @@ char ** NewParName;
     delete (CurEntry);
 
     // A paragraph finishes previous proc and starts a new one.
-    GenIndent();
-    codef << "return(1);\n";
     GenEndProc();
 
     // Then declare a new function
@@ -108,7 +112,6 @@ void GenPerform (void)
 {
 StackEntry * Proc, * Count;
 CobolSymbol * ProcAttr;
-char ErrorBuffer [80];
 char ProcName [80];
 
     Count = SemStack.Pop();
@@ -148,9 +151,13 @@ char ProcName [80];
     delete Proc;
 }
 
-// Unlike pragraphs, procedures are always called, with no fall-through
+// This ends either a procedure or a paragraph
 void GenEndProc (void)
 {
+    // A paragraph finishes previous proc and starts a new one.
+    GenIndent();
+    codef << "return(1);\n";
+
     -- NestingLevel;
     GenIndent();
     codef << "}\n\n";
@@ -198,6 +205,8 @@ char ErrorBuffer [80];
 	  return;
        }
     }
+
+    GenEndProc();
 
     GenIndent();
     codef << "int " << NewProc->CName << " (void)\n";
@@ -272,14 +281,12 @@ int i;
 	  WriteError ("Unknown identifier");
 	  return;
        }
-       BuildPrefix (entry[0]->ident, prefix[0]);
     }
     if (entry[2]->kind == SE_Identifier) {
        if ((attrs[1] = SymTable.Lookup (entry[2]->ident)) == NULL) {
 	  WriteError ("Unknown identifier");
 	  return;
        }
-       BuildPrefix (entry[2]->ident, prefix[1]);
     }
 
     codef << "(";
@@ -310,8 +317,13 @@ StackEntry * CurEntry;
 
 void GenStopRun (void)
 {
+    // The point is to make cpi large enough to quit.
+    //	Nesting level is obviously important, since an overflow
+    //	may occur when adding 1 to cpi each iteration...
+    //	But that should not happen until you nest MAXINT paragraphs,
+    //	which is a very big number!
     GenIndent();
-    codef << "exit (0);\n";
+    codef << "return (" << MAX_PARAGRAPHS + 1 << ");\n";
 }
 
 void GenParagraphCalls (void)
@@ -332,11 +344,6 @@ int pi = 0, nPars = 0;
        ParagraphList.Append (CurName);
     }
 
-    codef << "\n";
-    codef << "int main ()\n";
-    codef << "{\n";
-    ++ NestingLevel;
-
     // The calling structure is basically a while loop with a switch statement
     //	inside. There is a current paragraph variable _cpi, which is parsed in
     //	that switch statement to decide which paragraph to execute. This is
@@ -349,6 +356,13 @@ int pi = 0, nPars = 0;
     GenIndent();
     codef << "{\n";
     ++ NestingLevel;
+
+    // Debugging information is generated with -g switch
+    if (CobcyConfig.GenDebug) {
+       GenIndent();
+       codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\"";
+       codef << ", _cpi, " << nPars << ");\n";
+    }
 
     // This is the switch statement
     GenIndent();
@@ -372,15 +386,19 @@ int pi = 0, nPars = 0;
        delete CurName;
     }
 
-    // This should never happen, but if it does...
+    // This should never happen, but if it does, quit gracefully
     GenIndent();
-    codef << "default: fprintf (stderr, \"Broken paragraph chain!\\n\"); ";
-    codef << "exit(1);\n";
+    codef << "default:\n";
+    NestingLevel += 2;
+    GenIndent();
+    codef << "fprintf (stderr, \"Broken paragraph chain!\\n\");\n";
+    GenIndent();
+    codef << "_cpi = " << nPars + 1 << ";\n";
+    GenIndent();
+    codef << "break;\n";
+    NestingLevel -= 2;
 
-    // First close the switch, then while loop, then main()
-    -- NestingLevel;
-    GenIndent();
-    codef << "}\n";
+    // First close the switch, then while loop
     -- NestingLevel;
     GenIndent();
     codef << "}\n";
