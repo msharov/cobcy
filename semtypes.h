@@ -11,14 +11,6 @@
 
 /*----------------------| StackEntry stuff |----------------------------*/
 
-typedef struct {
-    StackEntryKind	kind;
-    char		ident [STACK_IDENT_LENGTH];
-    long int		ival;
-    double		fval;
-    SEOperatorKind	opkind;
-} StackEntry;
-
 typedef enum {
     SE_Error,
     SE_Mark,
@@ -43,6 +35,14 @@ typedef enum {
     OP_RParen,
     OP_Equal
 } SEOperatorKind;
+
+typedef struct {
+    StackEntryKind	kind;
+    char		ident [STACK_IDENT_LENGTH];
+    long int		ival;
+    double		fval;
+    SEOperatorKind	opkind;
+} StackEntry;
 
 
 /*--------------------------| File declaration enums |--------------------*/
