@@ -10,6 +10,7 @@
 #include <llist.h>
 
 #define MAX_SYMBOL_LENGTH	50
+#define MAX_PREFIX_LENGTH	80
 
 typedef struct {
     WORD	Size;
@@ -33,6 +34,9 @@ typedef struct {
 } PictureType;
 
 class CobolSymbol {
+private:
+    char		ParentCobolName [MAX_SYMBOL_LENGTH];
+
 public:
     enum {
        Undefined,
@@ -42,15 +46,14 @@ public:
        FileDesc,
        Label
     }			Kind;
-    PictureType		Picture;
-
     WORD		RecordCSize;
+    PictureType		Picture;
 
     char		CobolName [MAX_SYMBOL_LENGTH];	// Cobol name
     char		CName [MAX_SYMBOL_LENGTH];	// C name
     WORD		DeclLevel;			// >01< ID IS RECORD
-    char		ParentCName [MAX_SYMBOL_LENGTH];
     WORD		nChildren;
+    char		Prefix [MAX_PREFIX_LENGTH];
 
     char		FileName[30];
     char		FileRecordName [MAX_SYMBOL_LENGTH];
@@ -81,6 +84,7 @@ public:
     void		SetPicture (char * NewPic);
     void		SetName (char * NewName);
     void		AddChild (CobolSymbol * NewChild);
+    void		SetParent (char * NewParent);
 		       ~CobolSymbol (void);
 };
 
