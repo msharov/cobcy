@@ -16,18 +16,33 @@ extern long int ival;
 extern double fval;
 extern char StringBuffer[];
 extern SEOperatorKind opkind;
+extern int CurrentLine;
+extern char CurParName[];
+extern BOOL CodeBegan;
 
 BOOL ErrorFlag = FALSE;
 
 void WriteError (char * str)
 {
-    cerr << ">>> ERROR: " << str << ".\n";
+    if (CodeBegan) {
+       cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+       cerr << "in paragraph " << CurParName << ":\n";
+    }
+    cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+    cerr << "error: ";
+    cerr << str << ".\n";
     ErrorFlag = TRUE;
 }
 
 void WriteWarning (char * str)
 {
-    cerr << ">>> WARNING: " << str << ".\n";
+    if (CodeBegan) {
+       cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+       cerr << "in paragraph " << CurParName << ":\n";
+    }
+    cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+    cerr << "warning: ";
+    cerr << str << ".\n";
 }
 
 void NIY (char * str)
@@ -77,18 +92,13 @@ char ErrorBuffer [80];
 void PrintIdentifier (char * id, ofstream& os)
 {
 CobolSymbol * sym;
-char SymPrefix [80];
 
     sym = LookupIdentifier (id);
-    BuildPrefix (id, SymPrefix);
-    os << SymPrefix << sym->CName;
+    os << sym->Prefix << sym->CName;
 }
 
 void ReadVariable (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
 {
-char prefix [80];
-
-    BuildPrefix (attr->CobolName, prefix);
     GenIndent();
     switch (attr->Picture.Kind) {
        case PictureType::String: 
@@ -109,7 +119,7 @@ char prefix [80];
        default:		  WriteError ("Invalid picture type");
 			  break;
     }
-    os << prefix << attr->CName;
+    os << attr->Prefix << attr->CName;
     os << ", \"" << attr->Picture.Text << "\");\n";
 
     if (nl) {
@@ -120,9 +130,6 @@ char prefix [80];
 
 void PrintVariable (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
 {
-char prefix [80];
-
-    BuildPrefix (attr->CobolName, prefix);
     GenIndent();
     switch (attr->Picture.Kind) {
        case PictureType::String: 
@@ -143,7 +150,7 @@ char prefix [80];
        default:		  WriteError ("Invalid picture type");
 			  break;
     }
-    os << prefix << attr->CName;
+    os << attr->Prefix << attr->CName;
     os << ", \"" << attr->Picture.Text << "\");\n";
 
     if (nl) {
@@ -154,7 +161,7 @@ char prefix [80];
 
 void ReadRecord (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
 {
-int i;
+unsigned int i;
 CobolSymbol * child;
 
     attr->ChildList.Head();
@@ -176,7 +183,7 @@ CobolSymbol * child;
 
 void PrintRecord (CobolSymbol * attr, ofstream& os, char * stream, BOOL nl)
 {
-int i;
+unsigned int i;
 CobolSymbol * child;
 
     attr->ChildList.Head();
@@ -194,39 +201,6 @@ CobolSymbol * child;
        GenIndent();
        os << "fprintf (" << stream << ", \"\\n\");\n";
     }
-}
-
-void LookupParent (char * symbol, char * prefix)
-{
-CobolSymbol * attr;
-
-    if ((attr = SymTable.Lookup (symbol)) == NULL) {
-       WriteError ("Unknown parent");
-       return;
-    }
-
-    if (strlen (attr->ParentCName) > 0)
-       LookupParent (attr->ParentCName, prefix);
-
-    strcat (prefix, attr->CName);
-    strcat (prefix, ".");
-}
-
-void BuildPrefix (char * symbol, char * prefix)
-{
-CobolSymbol * attr;
-char ErrorBuffer [80];
-
-    if ((attr = SymTable.Lookup (symbol)) == NULL) {
-       sprintf (ErrorBuffer, "Cannot find symbol %s in BuildPrefix", symbol);
-       WriteError (ErrorBuffer);
-       return;
-    }
-
-    memset (prefix, 0, strlen (attr->ParentCName) + 2);
-
-    if (strlen (attr->ParentCName) > 0)
-       LookupParent (attr->ParentCName, prefix);
 }
 
 WORD CountIdentifiers (void)
