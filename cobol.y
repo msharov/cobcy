@@ -165,6 +165,7 @@ long int FillerIndex = 0;
 %token TOK_FD
 %token TOK_FILE
 %token TOK_FILE_CONTROL
+%token TOK_FILE_ID
 %token TOK_FILLER
 %token TOK_FINAL
 %token TOK_FIRST
@@ -419,45 +420,37 @@ prg_name_option:	optional_is common_initial optional_program
 common_initial:		TOK_COMMON
 	|		TOK_INITIAL
 	;
-
 environment_division:	TOK_ENVIRONMENT TOK_DIVISION TOK_PERIOD
 		configuration_section
 		input_output_section
 	;
-
 configuration_section:	TOK_CONFIGURATION TOK_SECTION TOK_PERIOD
 			source_computer
 			object_computer
 			special_names
 	|
 	;
-
 source_computer:	TOK_SOURCE_COMPUTER TOK_PERIOD
 			identifier source_debug_option TOK_PERIOD
 			{ SetSourceComputer(); }
 	|
 	;
-
 source_debug_option:	optional_with TOK_DEBUGGING TOK_MODE
 	|
 	;
-
 object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD 
 			identifier memory_option TOK_PERIOD
 			{ SetObjectComputer(); }
 	|
 	;
-
 memory_option:		TOK_MEMORY optional_size integer memsize_args
                         { GenComment("Memory size is obsolete and ignored"); }
         |
         ;
-
 memsize_args:		TOK_WORDS
 	|		TOK_CHARACTERS
 	|		TOK_MODULES
         ;
-
 special_names:		TOK_SPECIAL_NAMES TOK_PERIOD special_name_list
 	|
 	;
@@ -468,12 +461,10 @@ special_name_decl:	identifier TOK_IS identifier
 			{ DeclareSpecialName(); }
 			TOK_PERIOD
 	;
-
 input_output_section:	TOK_INPUT_OUTPUT TOK_SECTION TOK_PERIOD
 			file_control
 	|
 	;
-
 file_control:	TOK_FILE_CONTROL TOK_PERIOD
 			select_block
 	|
@@ -484,38 +475,41 @@ select_block:	select_statement select_block_pl
 select_block_pl:	select_block
 	|
 	;
-select_statement:	TOK_SELECT optional_optional identifier TOK_ASSIGN optional_to identifier
-			file_status_option
-			access_mode_option
-			organization_option
-			TOK_PERIOD { FileDecl(); }
+select_statement:	TOK_SELECT optional_optional identifier 
+			TOK_ASSIGN optional_to identifier
+			{ BeginFileDecl(); }
+			select_option_list
+			{ EndFileDecl(); }
+			TOK_PERIOD
 	;
-
+select_option_list:	select_option select_option_list
+	|
+	;
+select_option:	file_status_option
+	|	access_mode_option
+	|	organization_option
+	;
 file_status_option:	optional_file TOK_STATUS optional_is 
 			identifier { SetFileStatus(); }
-	|
 	;
 access_mode_option:	TOK_ACCESS optional_mode optional_is access_mode
-	|
 	;
-access_mode:	TOK_SEQUENTIAL	{ SetAccessMode ("sequential"); }
-	|	TOK_RANDOM	{ SetAccessMode ("random"); }
-	|	TOK_DYNAMIC	{ SetAccessMode ("dynamic"); }
+access_mode:	TOK_SEQUENTIAL	{ SetAccessMode (AM_Sequential); }
+	|	TOK_RANDOM	{ SetAccessMode (AM_Random); }
+	|	TOK_DYNAMIC	{ SetAccessMode (AM_Dynamic); }
 	;
 organization_option:	TOK_ORGANIZATION optional_is organization_kind
-	|
 	;
 organization_kind:	TOK_SEQUENTIAL		
-			{ SetOrganization ("sequential"); }
+			{ SetOrganization (ORG_Sequential); }
 	|		TOK_LINE TOK_SEQUENTIAL
-			{ SetOrganization ("line sequential"); }
+			{ SetOrganization (ORG_Line_sequential); }
 	|		TOK_RELATIVE 
-			{ SetOrganization ("relative"); }
+			{ SetOrganization (ORG_Relative); }
 			relative_key_option
 	|		TOK_INDEXED 
-			{ SetOrganization ("indexed"); }
+			{ SetOrganization (ORG_Indexed); }
 			record_key_option
-	|
 	;
 relative_key_option:	TOK_RELATIVE optional_key optional_is 
 			identifier { SetRelativeKey(); }
@@ -525,41 +519,49 @@ record_key_option:	TOK_RECORD TOK_KEY optional_is
 			identifier { SetRecordKey(); }
 	|
 	;
-
 data_division:	TOK_DATA TOK_DIVISION TOK_PERIOD
-		file_section
-		working_storage_section
-                linkage_section
-                communication_section
-                report_section
+		data_section_list
 	;
-
+data_section_list:	data_section_entry data_section_list
+	|
+	;
+data_section_entry:	file_section
+	|		working_storage_section
+        |        	linkage_section
+        |        	communication_section
+        |        	report_section
+	;
 file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
 		file_desc_block
+	;
+file_desc_block:	file_desc_entry file_desc_block
 	|
 	;
-
-file_desc_block:	file_desc_entry file_desc_block_pl
-	;
-file_desc_block_pl:	file_desc_block
-	|
-	;
-
-file_desc_entry:	TOK_FD identifier TOK_LABEL TOK_RECORD optional_is
-			file_desc_type file_name_option
-			{ GenFileDesc(); } TOK_PERIOD
+file_desc_entry:	TOK_FD identifier 
+			file_label_entry
+			file_name_entry
+			{ GenFileDesc(); } 
+			TOK_PERIOD
 			file_record_desc 
 	;
-file_desc_type:		TOK_STANDARD
+file_label_entry:	TOK_LABEL TOK_RECORD optional_is file_label_type 
+	|
+	;
+file_label_type:	TOK_STANDARD
 	|		TOK_OMITTED
 	;
-file_name_option:	TOK_VALUE optional_is
-			identifier
+file_name_entry:	TOK_VALUE optional_prep optional_is
+			file_name_string
 	|		{ StringBuffer[0] = 0; 
 			  Push (SE_Identifier); 
 			}
 	;
-
+file_name_string:	identifier
+	|		string
+	;
+optional_prep:	TOK_OF TOK_FILE_ID
+	|
+	;
 file_record_desc:	file_record_level file_record_desc_pl
 	;
 file_record_desc_pl:	file_record_desc
@@ -569,37 +571,35 @@ file_record_level:	integer level_name { AssociateFileRecord(); }
 			picture TOK_PERIOD 
 			{ Push (SE_Null); DeclareRecordLevel(); }
 
-record_level:	integer 
-		level_name 
-		picture 
-		value_entry 
-		usage_option 
-		sign_option 
-		sync_option 
-		justified_option 
+record_level:	integer
+		level_name
+		picture
+		value_entry
+		reclev_option_list
 		TOK_PERIOD
 		{ DeclareRecordLevel(); }
 	;
-
+reclev_option_list:	record_level_option
+	|
+	;
+record_level_option:	usage_option 
+	|		sign_option 
+	|		sync_option 
+	|		justified_option 
+	;
 usage_option:          TOK_USAGE optional_is pict_usage_args
-        |
         ;
-
 sign_option:	optional_sign optional_is sign_args 
 		sep_char_option { NIY("Sign is [leading/trailing]"); }
-        |
         ;
-
 sign_args:		TOK_LEADING
         |		TOK_TRAILING
 	;
-
 sep_char_option:	TOK_SEPARATE optional_character
         |
         ;
 
 justified_option:	justified_just optional_right { NIY("Just/Justified"); }
-	|
 	;
 
 justified_just:		TOK_JUSTIFIED
@@ -608,17 +608,12 @@ justified_just:		TOK_JUSTIFIED
 
 sync_option:		TOK_SYNC left_right_option 
 			{ NIY("Sync/Synchronized"); } 
-	|
 	;
 
-left_right_option:	left_right
-	|
-	;
-
-left_right:		TOK_LEFT
+left_right_option:	TOK_LEFT
 	|		TOK_RIGHT
+	|
 	;
-
 level_name:	identifier
 	|	TOK_FILLER	
 	 	{ sprintf (StringBuffer, "filler%03ld", FillerIndex);
@@ -665,17 +660,14 @@ record_entry_block_pl:	record_entry_block
 
 linkage_section:	TOK_LINKAGE TOK_SECTION TOK_PERIOD
 				record_entry_block
-	|
 	;
 
 communication_section:  TOK_COMMUNICATION TOK_SECTION TOK_PERIOD
                           { NIY("Communication Section"); }
-        |
         ;
 
 report_section:         TOK_REPORT TOK_SECTION TOK_PERIOD
                           { NIY("Report Section"); }
-        |
         ;
 
 procedure_division:	TOK_PROCEDURE TOK_DIVISION using_option TOK_PERIOD
@@ -687,13 +679,9 @@ procedure_division:	TOK_PROCEDURE TOK_DIVISION using_option TOK_PERIOD
 using_option:	TOK_USING using_identifier
 	|
 	;
-
-statement_list:		statement statement_list_pl
-	;
-statement_list_pl:	statement_list
+statement_list:		statement statement_list
 	|
 	;
-
 statement:	clause TOK_PERIOD
 	|	{ GenEndProc(); }
 		TOK_PROCEDURE identifier TOK_PERIOD
@@ -701,7 +689,9 @@ statement:	clause TOK_PERIOD
 	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
         |       TOK_REPLACE TOK_OFF { NIY("Replace off"); } TOK_PERIOD
 	|	TOK_READ identifier { GenRead(); }
-		optional_word_record TOK_AT TOK_END at_end_clause TOK_PERIOD
+		optional_word_record
+		optional_at_end_clause
+		TOK_PERIOD
 	|	identifier TOK_PERIOD { GenParagraph(); }
 	;
 
@@ -808,13 +798,14 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 	|	TOK_OPEN open_list
 	|	TOK_CLOSE id_list close_options { GenClose(); }
 	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
+	|	TOK_REWRITE identifier write_from_clause { GenRewrite(); }
         |       TOK_CALL call_list using_options { NIY("CALL"); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
 	|	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
 	;
 
-at_end_clause:	compound_clause
+optional_at_end_clause:	TOK_AT TOK_END compound_clause
 	|	{ GenEmptyClause(); }
 	;
 
@@ -952,10 +943,10 @@ open_list:	open_entry open_list_pl
 open_list_pl:	open_list
 	|
 	;
-open_entry:	TOK_INPUT id_list open_options { GenOpen ("input"); }
-	|	TOK_OUTPUT id_list open_options { GenOpen ("output"); }
-	|	TOK_EXTEND id_list open_options { GenOpen ("extend"); }
-	|	TOK_I_O id_list open_options { GenOpen ("io"); }
+open_entry:	TOK_INPUT id_list open_options { GenOpen (OM_Input); }
+	|	TOK_OUTPUT id_list open_options { GenOpen (OM_Output); }
+	|	TOK_EXTEND id_list open_options { GenOpen (OM_Extend); }
+	|	TOK_I_O id_list open_options { GenOpen (OM_InputOutput); }
 	;
 
 open_options:	TOK_REVERSED
@@ -1040,6 +1031,7 @@ divide_action_word:	TOK_BY
 	;
 
 optional_is:		TOK_IS
+	|		TOK_ARE
 	|
 	;
 optional_comma:		TOK_COMMA
@@ -1119,8 +1111,7 @@ int yyerror (char * msg)
 {
 char ErrorBuffer [80];
 
-    sprintf (ErrorBuffer, "Line %d: %s\n\tDEBUG: yychar = %d, str = %s, ival = %ld, fval = %f\n", 
-    		CurrentLine, msg, yychar, StringBuffer, ival, fval);
+    sprintf (ErrorBuffer, "%s, (%d, %s)", msg, yychar, StringBuffer);
     WriteError (ErrorBuffer);
     return (0);
 }
