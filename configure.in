@@ -12,13 +12,12 @@ AC_SUBST(can_have_stdio)
 AC_MSG_CHECKING(whether iostreams and stdio can be mixed)
 AC_LANG_CPLUSPLUS
 
-AC_CACHE_VAL(can_have_stdio,
-	AC_TRY_COMPILE([#include <stdio.h>
+AC_TRY_COMPILE([#include <stdio.h>
 		#include <iostream.h>],
 		[printf ("testing\n"); cout << "testing\n"],
 		can_have_stdio=1 can_have_stdio_res="yes", 
 		can_have_stdio=0 can_have_stdio_res="no")
-)
+AC_CACHE_VAL(can_have_stdio, can_have_stdio_res)
 
 AC_MSG_RESULT($can_have_stdio_res)
 
