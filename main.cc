@@ -22,73 +22,123 @@
 #ifndef CAN_HAVE_STDIO
   struct FILE;
 #endif
-  extern FILE * 		yyin;
-  char 				SourceFile[30];
-  char				OutputFile[30];
-  char 				CodeFile[30];
-  char 				DeclFile[30];
+  extern FILE * 	yyin;
+  CobcyConfigType 	CobcyConfig;
 /*--------------------------------------------------------------*/
-  void 	Usage (void);
-  void 	ProcessFlags (int argc, char ** argv);
+  void 	Usage (char * progname);
+  int 	ProcessFlags (int argc, char ** argv);
+  void	SetInitialConfiguration (void);
 /*--------------------------------------------------------------*/
 
 int main (int argc, char ** argv)
 {
-    if (argc < 2) {
-       Usage();
-       return (1);
+    SetInitialConfiguration();
+    if (ProcessFlags (argc, argv) == S_ERROR) {
+       Usage (argv[0]);
+       return (2);
     }
-
-    ProcessFlags (argc, argv);
     
-    if ((yyin = fopen (SourceFile, "r")) == NULL) {
-       cerr << "FATAL: Could not open '" << SourceFile << "'!\n";
+    if ((yyin = fopen (CobcyConfig.SourceFile, "r")) == NULL) {
+       cerr << "FATAL: Could not open '" << CobcyConfig.SourceFile << "'!\n";
        return (1);
     }
     else
-       cout << "Compiling " << SourceFile << " ...\n";
+       cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
     
     yyparse();
     fclose (yyin);
 
     if (ErrorOccured()) {
-       unlink (CodeFile);
-       unlink (DeclFile);
+       unlink (CobcyConfig.CodeFile);
+       unlink (CobcyConfig.DeclFile);
     }
 
     return (0);
 }
 
-void Usage (void)
+void Usage (char * progname)
 {
     cout << "\n";
-    cout << "Cobol compiler v0.1, Copyright (c) Mike Sharov, 1995\n";
+    cout << "Cobol to C compiler v0.1, Copyright (c) Mike Sharov, 1995\n";
     cout << "Usage:\n";
-    cout << "\tcobol [-o <codef.c] <file.cob>\n";
+    cout << "\t" << progname << " [options] <file.cob>\n";
+    cout << "\n";
+    cout << "\tOptions:\n";
+    cout << "\t-g\t\tGenerate compiler debugging info (_cpi trace)\n";
+    cout << "\t-o <file.c>\tFile where to put the C code\n";
+    cout << "\t\t\t<file.c>.h will also be made with decls.\n";
+    cout << "\t\t\tIf this is not specified, Cobcy uses\n";
+    cout << "\t\t\t<file.cob>.c and <file.cob>.h\n";
     cout << "\n";
 }
 
-void ProcessFlags (int argc, char ** argv)
+int ProcessFlags (int argc, char ** argv)
 {
-int SourceName = 1, OutputName = -1;
-int count;
+int i;
+enum {
+    FlagMode,
+    SourceFileMode,	/* This will be the default */
+    OutputFileMode
+} mode = FlagMode;
+BOOL SourceSet = FALSE, OutputSet = FALSE;
 
-    if (strcmp (argv[1], "-o") == 0) {
-       SourceName += 2;
-       OutputName = 2;
-    }
-    strcpy (SourceFile, argv[SourceName]);
-    if (OutputName < 0) {
-       strcpy (CodeFile, argv[SourceName]);
-       strcat (CodeFile, ".c");
-       strcpy (DeclFile, argv[SourceName]);
-       strcat (DeclFile, ".h");
-    }
-    else {
-       strcpy (CodeFile, argv[OutputName]);
-       strcpy (DeclFile, argv[OutputName]);
-       strcat (DeclFile, ".h");
+    mode = SourceFileMode;
+    for (i = 1; i < argc; ++ i) {
+       if (argv[i][0] == '-')
+	  mode = FlagMode;
+
+       switch (mode) {
+	  case FlagMode:
+	  	if (strcmp (argv[i], "-o") == 0)
+		   mode = OutputFileMode;
+	  	else if (strcmp (argv[i], "-g") == 0)
+		   CobcyConfig.GenDebug = TRUE;
+
+		// If not -o, revert to looking for the source file
+		if (mode != OutputFileMode)
+		   mode = SourceFileMode;
+		break;
+	  case SourceFileMode:
+	 	if (!SourceSet) {
+		   strcpy (CobcyConfig.SourceFile, argv[i]);
+		   if (!OutputSet) {
+		      strcpy (CobcyConfig.CodeFile, CobcyConfig.SourceFile);
+		      strcat (CobcyConfig.CodeFile, ".c");
+		      strcpy (CobcyConfig.DeclFile, CobcyConfig.SourceFile);
+		      strcat (CobcyConfig.DeclFile, ".h");
+		   }
+		   SourceSet = TRUE;
+		}
+	  	break;
+	  case OutputFileMode:
+	        if (!OutputSet) {
+		   strcpy (CobcyConfig.CodeFile, argv[i]);
+		   strcpy (CobcyConfig.DeclFile, argv[i]);
+		   strcat (CobcyConfig.DeclFile, ".h");
+		   mode = SourceFileMode;
+		   OutputSet = TRUE;
+		}
+	  	break;
+       }
     }
 
+    cerr << "Reading from " << CobcyConfig.SourceFile << "\n";
+    cerr << "Compiling into " << CobcyConfig.CodeFile << " and ";
+    cerr << CobcyConfig.DeclFile << "\n";
+
+    if (!SourceSet) {
+       cerr << "No cobol file specified\n";
+       return (S_ERROR);
+    }
+    else
+       return (S_OK);
+}
+
+void SetInitialConfiguration (void)
+{
+    memset (CobcyConfig.SourceFile, 0, MAX_FILENAME);
+    memset (CobcyConfig.CodeFile, 0, MAX_FILENAME);
+    memset (CobcyConfig.DeclFile, 0, MAX_FILENAME);
+    CobcyConfig.GenDebug = FALSE;
 }
 
