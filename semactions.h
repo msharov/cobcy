@@ -11,7 +11,7 @@
 #include "semdecl.h"
 #include "seminfo.h"
 #include "seminit.h"
-#include "semsedef.h"
+#include "semtypes.h"
 #include "semutil.h"
 #include "semconio.h"
 #include "semcontrol.h"
