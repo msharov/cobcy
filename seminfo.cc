@@ -3,15 +3,19 @@
 **	Implements informational semantic actions for COBOL compiler.
 */
 
+#ifdef __MSDOS__
+#include "semexter.h"
+#else
 #include "semextern.h"
+#endif
 
 void SetProgramName (void)
 {
 StackEntry * entry;
     if ((entry = SemStack.Pop()) != NULL) {
        if (entry->kind == SE_Identifier) {
-          outfile << "/* This program is called ";
-	  outfile << entry->ident << " */\n";
+          codef << "/* This program is called ";
+	  codef << entry->ident << " */\n";
        }
        else
 	  WriteError ("Program name must be one word");
@@ -26,7 +30,7 @@ void SetSourceComputer (void)
 StackEntry * entry;
     if ((entry = SemStack.Pop()) != NULL) {
        if (entry->kind == SE_Identifier)
-          outfile << "/* Written on " << entry->ident << " */\n";
+          codef << "/* Written on " << entry->ident << " */\n";
        else
 	  WriteError ("Source computer name must be one word");
        delete (entry);
@@ -42,7 +46,7 @@ StackEntry * entry;
        if (entry->kind == SE_Integer)
           entry = SemStack.Pop();
        if (entry->kind == SE_Identifier)
-          outfile << "/* Written for " << entry->ident << " */\n\n";
+          codef << "/* Written for " << entry->ident << " */\n\n";
        else
 	  WriteError ("Object computer name must be one word");
        delete (entry);

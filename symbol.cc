@@ -3,13 +3,24 @@
 **	Constructor and destructor for CobolSymbol
 */
 
+#ifdef __MSDOS__
+#include "semexter.h"
+#else
 #include "semextern.h"
+#endif
 
 CobolSymbol :: CobolSymbol (void)
 {
-    nChildren = 0;
     Picture.Text = NULL;
+    Picture.Size = 0;
     Picture.CSize = 0;
+    Picture.Sign = PictureType::NoSign;
+    Picture.SignSeparate = FALSE;
+    Picture.nDigitsBDP = 0;
+    Picture.nDigitsADP = 0;
+    Picture.nFillerZeroes = 0;
+
+    nChildren = 0;
     ParentCName[0] = '\x0';
     RecordCSize = 0;
     CobolName[0] = '\x0';
@@ -70,13 +81,15 @@ int i;
 int j = 0;
 int length;
 int oldlength;
+BOOL FoundPoint = FALSE;
 
     ExpandPicture (NewPic, Expanded);
 
-    for (i=0; i < strlen (Expanded); i++)
-if (Expanded[i] != '.' && Expanded[i] != ',' && Expanded[i] != '/' && Expanded[i] != 'b' && Expanded[i] != '0') 
-       j++;
+    for (i = 0; i < strlen (Expanded); i++)
+       if (!IsInSet (Expanded[i], ".,/b0")) 
+          j++;
 
+    // length will be the number of substitutable spots length(XX.X.B909) = 5
     length = j;
 
     oldlength = strlen (Expanded); 
@@ -96,9 +109,14 @@ if (Expanded[i] != '.' && Expanded[i] != ',' && Expanded[i] != '/' && Expanded[i
 	  Picture.Kind = PictureType::String;
        else if (Expanded[i] == 'a')
 	  Picture.Kind = PictureType::String;
-       else if (Expanded[i] == '9') {
+       else if (IsInSet (Expanded[i], "90z*")) {
 	  if (Picture.Kind == PictureType::Undefined)
-	   		   Picture.Kind = PictureType::Integer;
+	     Picture.Kind = PictureType::Integer;
+
+	  if (FoundPoint)
+	     ++ Picture.nDigitsADP;
+	  else
+	     ++ Picture.nDigitsBDP;
        }
        else if (Expanded[i] == 's')
 	  Picture.Sign = TRUE;
@@ -106,17 +124,12 @@ if (Expanded[i] != '.' && Expanded[i] != ',' && Expanded[i] != '/' && Expanded[i
 	  ++ Picture.nFillerZeroes;
        else if (Expanded[i] == 'v') {
 	  Picture.Kind = PictureType::Float;
-	  // nDigitsBDP is i unless a sign was present
-	  Picture.nDigitsBDP = i - (Picture.Sign ? 1 : 0); 
-	  // Subtract DBDP from total and subtract this V
-	  Picture.nDigitsADP = oldlength - 
-			       Picture.nDigitsBDP - 1;
+	  FoundPoint = TRUE;
        }
     }
 
     switch (Picture.Kind) {
 	case PictureType::String:	
-/*		Picture.CSize = strlen (Expanded) + 1; */
 		Picture.CSize = length + 1;
 		break; 
 	case PictureType::Integer:	

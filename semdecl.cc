@@ -3,7 +3,11 @@
 **	Implements declaratory semantic actions for COBOL compiler.
 */
 
+#ifdef __MSDOS__
+#include "semexter.h"
+#else
 #include "semextern.h"
+#endif
 #include "semdecl.h"
 
 /*---------------------| Globals |------------------------------*/
@@ -42,7 +46,7 @@ int i;
        // Generate the actual field declaration
        //	Note that this is done before incrementing nesting level
        GenIndent();
-       outfile << "struct {\n";
+       codef << "struct {\n";
 
        // Record always increases nesting level
        ++ NestingLevel;
@@ -55,20 +59,20 @@ int i;
        // Generate the actual field declaration
        GenIndent();
        if (NewSymbol->Picture.Kind == PictureType::String) {
-	  outfile << "char " << NewSymbol->CName;
-	  outfile << " [" << NewSymbol->Picture.Size + 1 << "];\n";
+	  codef << "char " << NewSymbol->CName;
+	  codef << " [" << NewSymbol->Picture.Size + 1 << "];\n";
        }
        else if (NewSymbol->Picture.Kind == PictureType::Float) {
 	  if (NewSymbol->Picture.Sign)
-	     outfile << "unsigned ";
-	  outfile << "double " << NewSymbol->CName;
-	  outfile << ";\n";
+	     codef << "unsigned ";
+	  codef << "double " << NewSymbol->CName;
+	  codef << ";\n";
        }
        else {
 	  if (NewSymbol->Picture.Sign)
-	     outfile << "unsigned ";
-	  outfile << "long int " << NewSymbol->CName;
-	  outfile << ";\n";
+	     codef << "unsigned ";
+	  codef << "long int " << NewSymbol->CName;
+	  codef << ";\n";
        }
     }
 
@@ -90,7 +94,7 @@ int i;
     else {	// No parent
        strcpy (NewSymbol->ParentCName, "");
        // Skip a line if level 0 record
-       outfile << "\n";
+       codef << "\n";
 
        // No parent = NewSymbol is the new parent
        if (NewSymbol->Kind == CobolSymbol::Record) 
@@ -130,7 +134,7 @@ CobolSymbol * ChildRecord;
     {
        -- NestingLevel;
        GenIndent();
-       outfile << "} " << ParentRecord->CName << ";\n";
+       codef << "} " << ParentRecord->CName << ";\n";
        ChildRecord = ParentRecord;
        ParentRecord = NestedRecordList.Pop();
        if (ParentRecord != NULL) {
@@ -142,7 +146,7 @@ CobolSymbol * ChildRecord;
     {
        -- NestingLevel;
        GenIndent();
-       outfile << "} " << ParentRecord->CName << ";\n";
+       codef << "} " << ParentRecord->CName << ";\n";
        ParentRecord = NULL;
     }
 }
@@ -153,14 +157,14 @@ StackEntry * VarName, * VarValue;
 CobolSymbol * attr, * ValueAttr;
 char prefix[80], ValuePrefix[80];
 
-    outfile << "void _SetVarValues (void)\n";
-    outfile << "{\n";
+    codef << "void _SetVarValues (void)\n";
+    codef << "{\n";
     ++ NestingLevel;
     // Initialize predefined variables
     GenIndent();
-    outfile << "memset (_space_var, ' ', 200);\n";
+    codef << "memset (_space_var, ' ', 200);\n";
     GenIndent();
-    outfile << "_space_var[200] = 0;\n";
+    codef << "_space_var[200] = 0;\n";
 
     // Initialize user-defined variables
     while (!VarInit.IsEmpty()) {
@@ -175,32 +179,32 @@ char prefix[80], ValuePrefix[80];
 
        GenIndent();
        if (attr->Picture.Kind == PictureType::String) {
-	  outfile << "_AssignVarString (" << prefix << attr->CName << ", ";
+	  codef << "_AssignVarString (" << prefix << attr->CName << ", ";
 	  if (VarValue->kind == SE_Identifier) {
-	     outfile << ValuePrefix << ValueAttr->CName;
-	     outfile << ", " << attr->Picture.Size;
-	     outfile << ", " << ValueAttr->Picture.Size;
-	     outfile << ");\n";
+	     codef << ValuePrefix << ValueAttr->CName;
+	     codef << ", " << attr->Picture.Size;
+	     codef << ", " << ValueAttr->Picture.Size;
+	     codef << ");\n";
 	  }
 	  else {
-	     PrintConstant (VarValue, outfile);
-	     outfile << ", " << attr->Picture.Size;
-	     outfile << ", 0);\n";
+	     PrintConstant (VarValue, codef);
+	     codef << ", " << attr->Picture.Size;
+	     codef << ", 0);\n";
 	  }
        }
        else {
-	  outfile << prefix << attr->CName << " = ";
+	  codef << prefix << attr->CName << " = ";
 	  if (VarValue->kind == SE_Identifier)
-	     outfile << ValuePrefix << ValueAttr->CName;
+	     codef << ValuePrefix << ValueAttr->CName;
 	  else
-	     PrintConstant (VarValue, outfile);
-	  outfile << ";\n";
+	     PrintConstant (VarValue, codef);
+	  codef << ";\n";
        }
        delete VarName;
        delete VarValue;
     }
     -- NestingLevel;
     GenIndent();
-    outfile << "}\n\n";
+    codef << "}\n\n";
 }
 
