@@ -20,7 +20,6 @@ void GenMove (void)
 WORD nIds, i;
 CobolSymbol * src = NULL, * dest = NULL;
 StackEntry ** prms, * CurEntry = NULL;
-char SrcPrefix[80], DestPrefix[80];
 typedef StackEntry * StackEntryPtr;
 
     // Pop all stack entries
@@ -32,17 +31,14 @@ typedef StackEntry * StackEntryPtr;
 
     // First get the value (or identifier) to assign to everything
     CurEntry = prms[0];
-    if (CurEntry->kind == SE_Identifier) {
+    if (CurEntry->kind == SE_Identifier)
        if ((src = LookupIdentifier (CurEntry->ident)) == NULL)
 	  return;
-       BuildPrefix (CurEntry->ident, SrcPrefix);
-    }
 
     for (i = 0; i < nIds; ++ i) {
        CurEntry = prms[i + 1];
        if ((dest = LookupIdentifier (CurEntry->ident)) == NULL)
 	  return;
-       BuildPrefix (CurEntry->ident, DestPrefix);
        delete CurEntry;
 
        GenIndent();
@@ -52,21 +48,21 @@ typedef StackEntry * StackEntryPtr;
 	       if (src != NULL) {
 		  if (src->Picture.Kind == PictureType::Integer) {
 		     codef << "_IntegerToString (_tmpbuf, ";
-		     codef << SrcPrefix << src->CName << ", ";
+		     codef << src->Prefix << src->CName << ", ";
 		     codef << src->Picture.Text << ");\n";
 		  }
 		  else if (src->Picture.Kind == PictureType::Float) {
 		     codef << "_FloatToString (_tmpbuf, ";
-		     codef << SrcPrefix << src->CName << ", ";
+		     codef << src->Prefix << src->CName << ", ";
 		     codef << src->Picture.Text << ");\n";
 		  }
 	       }
 
 	       codef << "_AssignVarString (";
-	       codef << DestPrefix << dest->CName;
+	       codef << dest->Prefix << dest->CName;
 	       if (prms[0]->kind == SE_Identifier) {
 		  if (src->Picture.Kind == PictureType::String)
-		     codef << ", " << SrcPrefix << src->CName;
+		     codef << ", " << dest->Prefix << src->CName;
 		  else
 		     codef << ", _tmpbuf";
 		  codef << ", " << dest->Picture.Size;
@@ -86,10 +82,10 @@ typedef StackEntry * StackEntryPtr;
 	       break;
 	  case PictureType::Integer:
 	  case PictureType::Float:
-	       codef << DestPrefix << dest->CName;
+	       codef << dest->Prefix << dest->CName;
 	       codef << " = ";
 	       if (prms[0]->kind == SE_Identifier)
-		  codef << SrcPrefix << src->CName;
+		  codef << src->Prefix << src->CName;
 	       else if (prms[0]->kind == SE_Integer ||
 			prms[0]->kind == SE_Float) 
 		  PrintConstant (prms[0], codef);
@@ -124,7 +120,6 @@ static void GenericArithmetic (char * OpName, BOOL SourceFirst, char OpChar)
 WORD nIds, i;
 CobolSymbol * src = NULL, * dest = NULL;
 StackEntry ** prms, * SrcEntry = NULL, * CurEntry = NULL, * DestEntry = NULL;
-char SrcPrefix[80], DestPrefix[80];
 char ErrorBuffer[80];
 BOOL ZeroDivCheck = FALSE;
 typedef StackEntry * StackEntryPtr;
@@ -163,12 +158,11 @@ typedef StackEntry * StackEntryPtr;
 	  WriteError (ErrorBuffer);
 	  return;
        }
-       BuildPrefix (SrcEntry->ident, SrcPrefix);
 
        // Generate a check for x/0 for divide
        if (OpChar == '/') {
           GenIndent();
-          codef << "if (" << SrcPrefix << src->CName << " != 0)\n";
+          codef << "if (" << src->Prefix << src->CName << " != 0)\n";
 	  ZeroDivCheck = TRUE;
           ++ NestingLevel;
        }
@@ -184,17 +178,16 @@ typedef StackEntry * StackEntryPtr;
 	     WriteError (ErrorBuffer);
 	     return;
 	  }
-	  BuildPrefix (CurEntry->ident, DestPrefix);
 	  delete CurEntry;
 
 	  GenIndent();
 	  switch (dest->Picture.Kind) {
 	     case PictureType::Integer:
 	     case PictureType::Float:
-			   codef << DestPrefix << dest->CName;
+			   codef << dest->Prefix << dest->CName;
 			   codef << " " << OpChar << "= ";
 			   if (SrcEntry->kind == SE_Identifier)
-			      codef << SrcPrefix << src->CName;
+			      codef << src->Prefix << src->CName;
 			   else if (SrcEntry->kind == SE_Integer ||
 				    SrcEntry->kind == SE_Float) 
 			      PrintConstant (SrcEntry, codef);
@@ -220,10 +213,9 @@ typedef StackEntry * StackEntryPtr;
 	  WriteError (ErrorBuffer);
 	  return;
        }
-       BuildPrefix (dest->CobolName, DestPrefix);
 
        GenIndent();
-       codef << DestPrefix << dest->CName << " = ";
+       codef << dest->Prefix << dest->CName << " = ";
 
        if (RoundResult)
 	  codef << "_RoundResult (";
@@ -237,7 +229,6 @@ typedef StackEntry * StackEntryPtr;
 	     WriteError (ErrorBuffer);
 	     return;
 	  }
-	  BuildPrefix (CurEntry->ident, DestPrefix);
        }
 
        switch (dest->Picture.Kind) {
@@ -246,7 +237,7 @@ typedef StackEntry * StackEntryPtr;
 	  		if (RoundResult)
 			   codef << "(double) ";
 			if (CurEntry->kind == SE_Identifier)
-			   codef << DestPrefix << dest->CName;
+			   codef << dest->Prefix << dest->CName;
 			else
 			   PrintConstant (CurEntry, codef);
 			break;
@@ -262,7 +253,7 @@ typedef StackEntry * StackEntryPtr;
        if (RoundResult)
 	  codef << "(double) ";
        if (SrcEntry->kind == SE_Identifier)
-	  codef << SrcPrefix << src->CName;
+	  codef << src->Prefix << src->CName;
        else
 	  PrintConstant (SrcEntry, codef);
 
@@ -307,7 +298,6 @@ void GenCompute (void)
 int nArgs, i;
 StackEntry ** prms;
 typedef StackEntry * StackEntryPtr;
-CobolSymbol * sym;
 
     nArgs = CountIdentifiers();
 
