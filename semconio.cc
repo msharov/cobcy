@@ -38,14 +38,40 @@ int i, nIds;
 	     return;
 	  }
 
-	  if (AcceptSource == AS_Console) {
-	     if (attr->Kind == CobolSymbol::Record)
-		ReadRecord (attr, codef, "stdin", FALSE);
-	     else
-		ReadVariable (attr, codef, "stdin", FALSE);
+	  if (attr->Kind == CobolSymbol::Record && AcceptSource != AS_Console) {
+	     WriteError ("cannot accept time variables into records");
+	     return;
 	  }
-	  else
-	     NIY ("ACCEPT from other than console");
+
+	  switch (AcceptSource) {
+	     case AS_Console:
+		if (attr->Kind == CobolSymbol::Record)
+		   ReadRecord (attr, codef, "stdin", FALSE);
+		else
+		   ReadVariable (attr, codef, "stdin", FALSE);
+		break;
+	     case AS_Date:
+	        GenIndent();
+	        codef << attr->Prefix << attr->CName;
+		codef << " = ";
+		codef << "_GetDate();\n";
+		break;
+	     case AS_Day:
+	        GenIndent();
+	        codef << attr->Prefix << attr->CName;
+		codef << " = ";
+		codef << "_GetDay();\n";
+		break;
+	     case AS_Weekday:
+	        NIY ("Weekdays");
+	     	break;
+	     case AS_Time:
+	        GenIndent();
+	        codef << attr->Prefix << attr->CName;
+		codef << " = ";
+		codef << "_GetTime();\n";
+		break;
+	  }
        }
        delete entry;
     }
@@ -60,7 +86,6 @@ void GenDisplay (void)
 {
 StackEntry * entry;
 CobolSymbol * attr;
-char prefix [80];
 char ErrorBuffer [80];
 int i, nIds;
 
@@ -99,7 +124,6 @@ int i, nIds;
 	     return;
 	  }
 
-          BuildPrefix (entry->ident, prefix);
           
 	  if (attr->Kind == CobolSymbol::Record)
 	     PrintRecord (attr, codef, DisplayOutput, FALSE);
@@ -116,9 +140,12 @@ int i, nIds;
 void SetDisplayOutput (void)
 {
 StackEntry * OutputStream;
+CobolSymbol * OutStrSym;
     
     OutputStream = SemStack.Pop();
-    strcpy (DisplayOutput, OutputStream->ident);
+    OutStrSym = LookupIdentifier (OutputStream->ident);
+    if (OutStrSym != NULL)
+       strcpy (DisplayOutput, OutStrSym->CName);
     delete OutputStream;
 }
 
