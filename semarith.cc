@@ -98,11 +98,12 @@ void SetResultRounding (void)
 static void GenericArithmetic (char * OpName, BOOL SourceFirst, char OpChar)
 {
 WORD nIds, i;
-CobolSymbol * src, * dest;
-StackEntry ** prms, * SrcEntry, * CurEntry, * DestEntry;
+CobolSymbol * src = NULL, * dest = NULL;
+StackEntry ** prms, * SrcEntry = NULL, * CurEntry = NULL, * DestEntry = NULL;
 char SrcPrefix[80], DestPrefix[80];
 char ErrorBuffer[80];
-typedef StackEntry *	StackEntryPtr;
+BOOL ZeroDivCheck = FALSE;
+typedef StackEntry * StackEntryPtr;
 
     DestEntry = SemStack.Pop();
 
@@ -139,13 +140,14 @@ typedef StackEntry *	StackEntryPtr;
 	  return;
        }
        BuildPrefix (SrcEntry->ident, SrcPrefix);
-    }
 
-    // Generate a check for x/0 for divide
-    if (OpChar == '/') {
-       GenIndent();
-       outfile << "if (" << SrcPrefix << src->CName << " != 0)\n";
-       ++ NestingLevel;
+       // Generate a check for x/0 for divide
+       if (OpChar == '/') {
+          GenIndent();
+          outfile << "if (" << SrcPrefix << src->CName << " != 0)\n";
+	  ZeroDivCheck = TRUE;
+          ++ NestingLevel;
+       }
     }
 
     if (DestEntry->kind == SE_Null) {
@@ -248,7 +250,7 @@ typedef StackEntry *	StackEntryPtr;
     }
 
     // Close check for zero
-    if (OpChar == '/')
+    if (ZeroDivCheck)
        -- NestingLevel;
 
     delete SrcEntry;
