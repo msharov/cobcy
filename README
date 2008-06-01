@@ -5,11 +5,26 @@
 			|      Version 0.2      |
 			+-----------------------+
 
-Cobcy is a free (GPL) cobol compiler. It compiles cobol code into
+Cobcy is a free cobol compiler. It compiles cobol code into
 frequently messy, but readable C (confusion is mostly due to long 
 variable names). Turning wrapping off while viewing helps a lot.
 Current capabilities include a lot of basic COBOL, but several features,
 like arrays, strings, and record-record MOVEs are still missing.
+
+=========================================================================
+-------------------------------------------------------------------------
+This was a project of mine back in 1996, which is when the last release
+occured. I dug this up recently on uu.net, and decided to put it up to
+some public place. It might make a decent starting point if you want to
+make a COBOL compiler. I don't know yet if I want to maintain it much. I
+plan to clean it up a bit and maybe make one release that compiles on
+a modern gcc.
+
+The "alberto" branch is for Alberto Santini's changes. He did some work
+on the project between 1996 and 1999, and made two releases. I ought to
+merge some of that in, when I figure out exactly what he did.
+-------------------------------------------------------------------------
+=========================================================================
 
 cleantest, cobol, and most the other scripts are for BASH. 
 They assume that /bin/sh is BASH-compatible. If that's not right - edit.
@@ -40,16 +55,3 @@ thus generated program, the generated C code (.c and .h), and the
 test file you used. Feel free to find bugs on your own though :)
 
 -------------------------------------------------------------------------
-
-You can reach me at msharov@bev.net, the account valid until at least
-December of 1996. A PGP public key is available for privacy nuts like me:
-
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: 2.6.2
-
-mQBNAi9AGmEAAAECANxTRcdjDRoswqW+uWOh9NdKOqcqk/6Yut6qeQGiGRms8pGX
-j1R1gf9GcJ4u2kVtzrvM2WxBgk2lVwVJAQEk1A8ABRG0L01pa2UgU2hhcm92IDxt
-c2hhcm92QHJ1Y3MyLnN1bmxhYi5jcy5ydW5ldC5lZHU+
-=4BeI
------END PGP PUBLIC KEY BLOCK-----
-
