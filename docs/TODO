@@ -1,0 +1,35 @@
+Just a few comments and observations about v0.4.
+
+The only bug I found is this one.
+- This will stop cobcy with no messages and a return code of 139.
+  01  WTABLE.
+    05  FILLER      PIC X(1250).
+
+These are parse statement errors I came across. You probably know about
+then anyway.
+- Types COMP COMP-3 will not parse.
+- Arrays seam to work only if INDEXED BY is used. For example this will not
+parse;
+  01  MONTH-AND-YEAR-TODATE-ACCS.                                  
+    05  BREAK-ACCS          OCCURS   5.               
+      10  UNITS-ACCS        OCCURS  30.              
+         15  CURR-MONTH-ACC     PIC 9(12).
+         15  CURR-YTD-ACC       PIC 9(12).
+- Value all will not parse. For example; 
+  01  FILLER                      PIC X(20) VALUE ALL 'X'.
+- Redefines with pic will not parse. For example; 
+  10  LINE-UNIT   PIC ZZZZZZZ.
+  10  LINE-DIF REDEFINES LINE-UNIT   PIC -ZZZ.ZZ.
+- Levels 88 with multi value will not parse. For example;
+  01  S-DATE.
+    05  R-MTH                 PIC X(03).
+      88  VALID-MONTH         VALUE  'JAN' 'FEB' 'MAR'.
+- Negation logic will not parse. For example this will not work
+   IF NOT DIST-ZONE-NAT AND
+      NOT REGION AND
+      NOT TERR
+  however this will work
+    IF DIST-ZONE-NAT AND
+       REGION AND
+       TERR
+

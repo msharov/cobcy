@@ -1,0 +1,149 @@
+########################################################################
+#
+# Makefile for CobCy
+#
+########################################################################
+
+APPL = CobCy
+
+CXX	= gcc
+CC	= gcc
+
+AR	= ar cr
+RANLIB	= ar s
+
+INCDIR = -I./adtlib/include
+LIBDIR = -L./adtlib/lib
+
+# WARN = -w
+# OPTIM	= \
+#	-O3 \
+#	-DNDEBUG \
+#	-fomit-frame-pointer \
+#	-fstrength-reduce \
+#	-fexpensive-optimizations \
+#   -funroll-loops
+
+WARN	= -Wall
+OPTIM	= -g -fno-implicit-templates
+
+DEFS	= -DCAN_HAVE_STDIO -DYY_NO_UNPUT -DNOCURSES
+
+CFLAGS	= $(WARN) $(OPTIM) $(INCDIR) $(DEFS)
+LDFLAGS	= $(LIBDIR)
+
+LEX	    = flex
+YACC	= bison -y
+
+LFLAGS  =
+YFLAGS  = -d
+
+LIBS = -llibadt -lstdcpp
+
+EXE	= cobcy.exe
+
+SRCS = \
+    main.cc \
+    semdecl.cc \
+    semutil.cc \
+    semarith.cc \
+    seminfo.cc \
+	seminit.cc \
+	semfile.cc \
+	semconio.cc \
+	semcontrol.cc \
+	symbase.cc \
+	symconst.cc \
+	symfile.cc \
+	sympic.cc \
+	symrec.cc \
+	symvar.cc \
+	semscreen.cc \
+	symscreen.cc \
+	templates.cc \
+	cobfunc.c
+	
+OBJS = \
+    main.o \
+    semdecl.o \
+    semutil.o \
+    semarith.o \
+    seminfo.o \
+	seminit.o \
+	semfile.o \
+	semconio.o \
+	semcontrol.o \
+	symbase.o \
+	symconst.o \
+	symdata.o \
+	symfile.o \
+	symlabel.o \
+	sympic.o \
+	symrec.o \
+	symvar.o \
+	semscreen.o \
+	templates.o \
+	symscreen.o \
+	cobol_lex.o \
+	cobol_yacc.o
+
+CLIB	= libcobol.a
+COBJS	= cobfunc.o
+DBFOBJS	= dbf/dbf.o dbf/ndx.o
+
+ADTLIB	= adtlib.a
+
+########################################################################
+
+all:	$(ADTLIB) $(EXE) $(CLIB)
+
+$(ADTLIB):
+	$(MAKE) -C adtlib/src install
+
+$(EXE):	$(OBJS)
+	$(CXX) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS)
+
+cobol_lex.cc: cobol_lex.l y.tab.h
+	$(LEX) -t $< > $@
+
+cobol_yacc.cc: cobol_yacc.y
+	$(YACC) $<
+	mv y.tab.c $@
+
+y.tab.h:
+	$(YACC) -d cobol_yacc.y
+	rm -f y.tab.c
+
+$(CLIB):	$(COBJS)
+	$(MAKE) -C dbf
+	rm -f $(CLIB)
+	$(AR) $(CLIB) $(COBJS) $(DBFOBJS)
+	$(RANLIB) $(CLIB)
+
+cobfunc.o:	cobfunc.c
+	$(CC) $(CFLAGS) -c $<
+
+.cc.o:
+	$(CXX) $(CFLAGS) -c $<
+.c.o:
+	$(CXX) $(CFLAGS) -c $<
+
+depend:
+	$(CXX) $(CFLAGS) -MM $(SRCS) > .depend
+	$(MAKE) -C adtlib/src depend
+	$(MAKE) -C dbf depend
+
+clean:
+	$(RM) $(OBJS) .depend *.d y.tab.h cobol_lex.cc cobol_yacc.cc core
+	$(RM) $(COBJS)
+
+cleanall: clean
+	$(RM) $(EXE) $(CLIB)
+	$(RM) $(ADTLIB)
+	$(MAKE) -C adtlib/src clean
+	$(MAKE) -C dbf clean
+
+ifeq (.depend,$(wildcard .depend))
+include .depend
+endif
+

@@ -1,0 +1,4 @@
+../cobcy -nc $1.cob
+echo 'start compile'
+gcc -g -I.. -I../adtlib/include -L..  -L../dbf  -L../adtlib/lib -o $1.exe $1.cob.c -lcobol -ldbf
+

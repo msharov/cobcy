@@ -1,0 +1,4 @@
+set close on
+b main
+b 120
+r

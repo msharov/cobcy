@@ -1,0 +1,42 @@
+----------------------------------------------------------------------------
+
+DOCUMENT : build.txt
+RELEASE  : CobCy 0.4.1
+DATE     : 22-Jan-1999
+RIGHTS   : (c) 1997-1999 by Alberto Santini
+
+
+
+Building CobCy
+--------------
+
+I'm developing on OS/2 platform using EMX, GCC porting.
+I have not Linux machine and I don't use configure script.
+The scripts are based on GNU tool like make, sed, bison, flex
+to compile the source code:
+
+    gcc   2.8.1
+    make  3.76.1
+    bison 1.25
+    flex  2.54
+
+
+QuickStart
+----------
+
+    * Unzip the distribution file.
+      If you are on Unix environment I advice you to use -a option,
+      converting end of record from OS/2 to UNIX format.
+
+	* Edit Makefile (may be you have to change it).
+
+    * cd cobcy-0.4.1
+
+    * make
+        or
+      make -f Makefile.linux
+
+I don't use configure because I'm developing on OS/2.
+I prefer to keep Makefile for any platform. 
+Please send me your Makefile, I'll add it to the distribution.
+----------------------------------------------------------------------------

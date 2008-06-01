@@ -1,0 +1,70 @@
+[22-Jan-1999]
+
+* Released 0.4.1 version.
+
+[17-Apr-1998]
+
+    * Added Linux makefile.
+
+[15-Mar-1998]
+
+    * Released 0.4 version.
+
+[07-Feb-1998]
+
+    * Received from Mike S. last changes.
+
+[26-Oct-1997]
+
+    * Add version of the tools to compile the source code in 'build.txt'.
+
+[07-Oct-1997]
+
+    * Create 'docs/internal.txt'.
+
+    * Parsing REDEFINES token.
+
+[05-Oct-1997]
+
+    * Add 'COPY' handle in 'cobol_lex.l':
+        COPY filename
+
+[04-Oct-1997]
+
+    * Fix '_IntegerToString' testing valid picture clauses 
+      when pic is 'ZZZZ' d value is '0'.
+
+
+[30-Sep-1997]
+
+    * Modified 'tests' directory.
+
+    * Modified 'float' expression in 'cobol_lex.l'. 
+      Now it can handle number like '.02' or '-123.4'.
+
+    * Fix '_IntegerToString' testing valid picture clauses.
+
+[29-Sep-1997]
+
+    * Deleted 'adtlib/mesh.h', 'adtlib/matrix.h'.
+
+[28-Sep-1997]
+
+    * Downloaded last release of M. Sharow.
+
+    * Cleaned up source code.
+
+    * Added 'version.h'.
+
+    * Moved 'cobol.l' to 'cobol_lex.l'.
+    * Moved 'cobol.y' to 'cobol_yacc.y'.
+
+    * Added '%option noyywrap' in 'cobol_lex.l'. You need Flex.
+
+    * Added '_MAX_PATH' in 'adtlib/mdefs.h' for OS/2.
+
+    * Changed semantic of picture '9,Z,*' in 'cobfunc.c'. (E.G.)
+
+    * Moved 'dbf/create' to 'dbf/dbf_test.c'.
+
+    * Released 0.3 version.

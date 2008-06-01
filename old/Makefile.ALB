@@ -1,0 +1,102 @@
+###############################################################################
+#
+# Makefile for CobCy 
+# 
+###############################################################################
+
+PACKAGE = CobCy
+VERSION = 03
+
+CXX = gcc
+CC  = gcc
+
+OPTS  =
+INCLS = -I./adtlib
+CDEFS    = -DNOCURSES
+CXXDEFS  = -DCAN_HAVE_STDIO 
+DEBUG = -g
+
+CXXFLAGS = $(OPTS) $(DEBUG) $(INCLS) $(CXXDEFS)
+LDFLAGS  = 
+
+CFLAGS   = $(DEBUG) $(CDEFS)
+
+LEX      = flex
+YACC     = bison -y
+
+LFLAGS   = 
+YFLAGS   = -d
+
+O   = .o
+LIB = .a
+EXE	= .exe
+
+COBCY = cobcy$(EXE)
+
+SOURCES = \
+    semdecl.cc semutil.cc semarith.cc seminfo.cc \
+    seminit.cc semfile.cc semconio.cc semcontrol.cc \
+    semscreen.cc \
+    symbase.cc symconst.cc symdata.cc symfile.cc \
+    symlabel.cc sympic.cc symrec.cc symvar.cc \
+    symscreen.cc \
+    templates.cc main.cc
+
+C_SOURCES = \
+    cobfunc.c
+
+OBJS = \
+    semdecl$(O) semutil$(O) semarith$(O) seminfo$(O) \
+	seminit$(O) semfile$(O) semconio$(O) semcontrol$(O) \
+    semscreen$(O) \
+    symbase$(O) symconst$(O) symdata$(O) symfile$(O) \
+    symlabel$(O) sympic$(O) symrec$(O) symvar$(O) \
+    symscreen$(O) \
+    templates$(O) cobol_yacc$(O) cobol_lex$(O)
+
+C_LIB = libcobol$(LIB)
+
+C_OBJS_LIB = \
+    cobfunc.o 
+
+LIBS = -llibcobol -lstdcpp
+
+DBF = dbf
+
+###############################################################################
+
+all: $(DBF) $(C_LIB) $(COBCY)
+
+%.d: %.cc
+	$(CXX) -MM $(CPPFLAGS) $(INCLS) $< | sed "s/$*\\.o/& $@/g" > $@
+
+%.d: %.c
+	$(CXX) -MM $(CPPFLAGS) $(INCLS) $< | sed "s/$*\\.o/& $@/g" > $@
+
+include $(SOURCES:.cc=.d)
+include $(C_SOURCES:.c=.d)
+
+cobol_yacc.cc: cobol_yacc.y
+	$(YACC.y) $<
+	mv -f y.tab.c $@
+
+cobol_lex.cc: cobol_lex.l y.tab.h
+	@$(RM) $@ 
+	$(LEX.l) $< > $@
+
+$(COBCY): main.o $(OBJS)
+	$(CXX) -o $@ $< $(OBJS) $(LIBS)
+
+$(C_LIB): $(C_OBJS_LIB)
+	$(AR) cr $(C_LIB) $(C_OBJS_LIB)
+	$(AR) s $(C_LIB)
+
+cobfunc.o: cobfunc.c
+	$(CC) $(CFLAGS) $(INCLS) -c $<
+
+$(DBF):
+	echo ciao
+	make -C ./dbf
+
+clean:
+	$(RM) *.o *.exe *.a *.d cobol_yacc.cc cobol_lex.cc y.tab.h core

@@ -1,8 +1,0 @@
-rm -f runall.out
-for i in `cat WORKING_TESTS`; do
-    echo Running $i ...
-    run $i < Makefile >> runall.out 2> /dev/null
-    # Some tests use the printer, so kill the print jobs.
-    # If you really want to print, remove the next line.
-    lprm -
-done
