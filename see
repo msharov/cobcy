@@ -1,8 +1,0 @@
-#! /bin/sh
-if [ "$1" = "" ]; then
-   echo Specify the number of test to see.
-   exit
-fi
-
-cat tests/test$1.cob
-

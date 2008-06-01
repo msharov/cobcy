@@ -6,11 +6,10 @@ OBJS	= $(SRCS:.cc=.o)
 CLIB	= lib/libcobol.a
 DBFOBJS	= dbf/dbf.o dbf/ndx.o
 ADTLIB	= adtlib/libadt.a
-LIBS	+= ${ADTLIB}
 
 #############################################
 
-all:	$(ADTLIB) $(EXE) $(CLIB)
+all:	${EXE} ${CLIB}
 
 ${ADTLIB}:
 	@echo "Building base classes ..."
@@ -20,7 +19,7 @@ ${CLIB}:
 	@echo "Building cobcy runtime library ..."
 	@+make -C lib
 
-${EXE}:	${OBJS}
+${EXE}:	${OBJS} ${ADTLIB}
 	@echo "Linking $@ ..."
 	@${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
@@ -53,6 +52,9 @@ cobfunc.o:	cobfunc.c
 	@echo "    Compiling $< to assembly ..."
 	@${CXX} ${CXXFLAGS} -S -o $@ -c $<
 
+check:	${EXE} ${CLIB}
+	@+make -C bvt run
+
 depend:
 	@echo Generating dependencies ...
 	@${CXX} ${CXXFLAGS} -MM ${SRCS} > .depend
@@ -63,11 +65,11 @@ clean:
 	@+make -C adtlib clean
 	@+make -C dbf clean
 	@+make -C lib clean
+	@+make -C bvt clean
 	@rm -f $(OBJS) *.bak *~ y.tab.h cobol_lex.cc cobol_yacc.cc
 	@rm -f $(COBJS)
 
 realclean: clean
-	@./cleantest
 	@rm -f $(EXE) $(CLIB)
 	@rm -f $(ADTLIB)
 

@@ -1,5 +1,0 @@
-rm -f runall.out
-for i in `cat WORKING_TESTS`; do
-    echo Running $i ...
-    run $i < Makefile >> runall.out 2> /dev/null
-done
