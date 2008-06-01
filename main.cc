@@ -4,23 +4,11 @@
 */
 
 #include "adtlib/mdefs.h"
-#ifdef CAN_HAVE_STDIO
-#ifndef __MSDOS__
 #include <unistd.h>
-#endif
-#include <stdio.h>
-#endif
 #include "lyextern.h"
-#ifdef __MSDOS__
-#include "semexter.h"	/* I have no intention of shortening file names. */
-#else
 #include "semextern.h"
-#endif
 
 /*---------------------| Globals |------------------------------*/
-#ifndef CAN_HAVE_STDIO
-  struct FILE;
-#endif
   extern FILE * 	yyin;
   CobcyConfigType 	CobcyConfig;
 /*--------------------------------------------------------------*/

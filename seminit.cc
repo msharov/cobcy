@@ -3,13 +3,8 @@
 **	Implements initialization actions for COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#include "semcontr.h"
-#else
 #include "semextern.h"
 #include "semcontrol.h"
-#endif
 #include "semdecl.h"
 #include "semfile.h"
 #include "symfile.h"

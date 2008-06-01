@@ -3,15 +3,8 @@
 **	Console IO for the COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#else
 #include "semextern.h"
-#endif
 #include "semconio.h"
-#ifdef CAN_HAVE_STDIO
-#include <stdio.h>
-#endif
 #include "symdata.h"
 #include "symconst.h"
 #include "symfile.h"

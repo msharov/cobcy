@@ -10,9 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#ifndef __MSDOS__
 #include <unistd.h>
-#endif
 #include "ndx.h"
 
 /*--------------------------------------------------------------------------*/

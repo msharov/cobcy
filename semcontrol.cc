@@ -3,16 +3,8 @@
 **	Control statement semantics.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#include "semcontr.h"
-#else
 #include "semextern.h"
 #include "semcontrol.h"
-#endif
-#ifdef CAN_HAVE_STDIO
-#include <stdio.h>
-#endif
 #include "symlabel.h"
 #include "symvar.h"
 

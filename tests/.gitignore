@@ -5,3 +5,4 @@ test?.[ch]
 test??
 test??.[ch]
 relative.dbf
+output-file

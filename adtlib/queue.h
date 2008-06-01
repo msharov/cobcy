@@ -38,7 +38,7 @@ inline QueueEl * Queue<QueueEl> :: Serve (void)
 ChainLink<QueueEl> * ptr;
 QueueEl * data;
 
-    assert (!IsEmpty());
+    assert (!this->IsEmpty());
 
     ptr = this->MoveToTail();
     assert (ptr != NULL);

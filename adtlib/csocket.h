@@ -19,11 +19,9 @@
 #include "mdefs.h"
 
 /* Set platform-independent types. Winsock should work with these */
-#ifndef __MSDOS__
 #define SOCKET		int
 #define SOCKADDR_IN	struct sockaddr_in
 #define HOSTENT		struct hostent
-#endif
 
 class CSocket {
 protected:

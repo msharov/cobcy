@@ -8,14 +8,7 @@
 ** they developed for COBOL by any chance?
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#else
 #include "semextern.h"
-#endif
-#ifdef CAN_HAVE_STDIO
-#include <stdio.h>
-#endif
 #include "symfile.h"
 #include "symrec.h"
 #include "symvar.h"

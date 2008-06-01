@@ -9,9 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#ifndef __MSDOS__
 #include <unistd.h>
-#endif
 
 #define NDX_KEY_NAME_LENGTH	488	/* Yup. it can be THAT big. */
 #define NDX_PAGE_SIZE		512

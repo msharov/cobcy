@@ -1,11 +1,9 @@
-Makefile
+Config.mk
 .depend
-autom4te.cache
-config.log
-config.status
-configure
 *.[oa]
 cobcy
 y.tab.h
-cobol_lex.c
-cobol_yacc.c
+cobol_lex.cc
+cobol_yacc.cc
+bsconf
+runall.out

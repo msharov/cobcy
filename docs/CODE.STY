@@ -8,12 +8,8 @@ The rules are flexible; just make sure it looks readable.
 		A good reason is that two such indents make a tab,
 		a very convenient property. Using just tabs for indenting
 		takes me off the screen way too quickly. So there you are.
+	* Tab size is 8.
 	* Use tabs whenever possible.
-	* Use the supplied ADT library to save code and time. It is fairly
-		well documented. (If not, tell me what do you want to see)
-	* NEVER NEVER NEVER use gotos. Yes, I do use them in Cobcy output,
-		but that's just because COBOL has them and all programmers
-		used it. There is no excuse (almost) for using them in C++.
 	* Try to separate elements for readability. One space is usually
 		enough. One possible exception is the empty function call.
 		So here are some examples of good statements:
@@ -27,6 +23,7 @@ The rules are flexible; just make sure it looks readable.
 	* Functions are named in the uppercase convention: ReadBigVar
 		internal variables in generated C code are
 		with prepended underscore: _ReadIntegerVar
+	* Use hungarian notation, but don't go overboard.
 	* If you write a skeleton code generation function that does 
 		not do anything, include a call to NIY (defined in semutil.h)
 	* Read the docs in ./docs

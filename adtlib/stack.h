@@ -38,7 +38,7 @@ inline StackEl * Stack<StackEl> :: Pop (void)
 ChainLink<StackEl> * ptr;
 StackEl * data;
 
-    assert (!IsEmpty());
+    assert (!this->IsEmpty());
     ptr = this->MoveToHead();
     assert (ptr != NULL);
     Disconnect (ptr);

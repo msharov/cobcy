@@ -4,9 +4,6 @@
 */
 
 #include "semextern.h"
-#ifdef CAN_HAVE_STDIO
-#include <stdio.h>
-#endif
 #include "symbase.h"
 #include "symconst.h"
 #include "symlabel.h"

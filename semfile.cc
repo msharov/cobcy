@@ -3,20 +3,10 @@
 **	Implements file semantic actions for COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#include "semcontr.h"		// EOF checking with if()
-#else
 #include "semextern.h"
 #include "semcontrol.h"
-#endif
 #include "semfile.h"
 #include "semdecl.h"
-#if CAN_HAVE_STDIO
-#ifndef __MSDOS__
-#include <unistd.h>
-#endif
-#endif
 #include "symfile.h"
 #include "semdecl.h"	// for CloseScopeLevels
 #include "symdata.h"

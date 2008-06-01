@@ -3,11 +3,7 @@
 **	Implements informational semantic actions for COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#else
 #include "semextern.h"
-#endif
 
 void SetProgramName (void)
 {

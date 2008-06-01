@@ -3,14 +3,7 @@
 **	Variable class
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#else
 #include "semextern.h"
-#endif
-#ifdef CAN_HAVE_STDIO
-#include <stdio.h>
-#endif
 #include "symvar.h"
 #include "symconst.h"
 #include "semcontrol.h"
