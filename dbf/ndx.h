@@ -37,11 +37,11 @@ typedef struct {
 } NDX_FILE;
 
 /*---------------------------------------------------------------*/
-  NDX_FILE *	NDX_Open (char * filename, char * mode);
-  NDX_FILE * 	NDX_Create (char * filename, char * keyname, 
+  NDX_FILE *	NDX_Open (const char * filename, const char * mode);
+  NDX_FILE * 	NDX_Create (const char * filename, const char * keyname, 
   			int keytype, int keylength);
-  void	NDX_InsertKey (NDX_FILE * fp, char * key, int recnum);
-  int	NDX_LookupKey (NDX_FILE * fp, char * key);
+  void	NDX_InsertKey (NDX_FILE * fp, const char * key, int recnum);
+  int	NDX_LookupKey (NDX_FILE * fp, const char * key);
   void	NDX_Close (NDX_FILE ** fp);
 /*---------------------------------------------------------------*/
 

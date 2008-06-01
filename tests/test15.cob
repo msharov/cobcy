@@ -36,7 +36,6 @@ write-loop.
     move count-var to aptnum.
     move "I don't know" to city.
     move 837480985 to zip.
-    display sample-idx-record.
     write sample-idx-record.
     add 1 to count-var.
     if count-var is greater than 10 go to end-loop.

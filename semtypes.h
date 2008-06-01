@@ -36,6 +36,13 @@ typedef enum {
     OP_Equal
 } SEOperatorKind;
 
+typedef enum {
+    FA_Bold,
+    FA_Reverse,
+    FA_Blink,
+    FA_Underline
+} SCRAttr;
+
 typedef struct {
     StackEntryKind	kind;
     char		ident [STACK_IDENT_LENGTH];
@@ -44,6 +51,7 @@ typedef struct {
     SEOperatorKind	opkind;
 } StackEntry;
 
+typedef StackEntry*	StackEntryPtr;
 
 /*--------------------------| File declaration enums |--------------------*/
 

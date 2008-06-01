@@ -75,7 +75,7 @@ void CobolFile :: SetOrganization (OrganizationType org)
     Organization = org;
     // No warning needed because organization should always be set
     //	before access mode. This is just to be sure it has reasonable values.
-    if (Organization == ORG_Sequential)
+    if (Organization == ORG_Sequential || Organization == ORG_Line_sequential)
        AccessMode = AM_Sequential;
     else
        AccessMode = AM_Random;
@@ -266,19 +266,16 @@ CobolData * BoundRecord;
 
     if (Open) {
 	GenIndent();
-
-	if (IsDBF) {
-	    switch (Organization) {
-		case ORG_Relative:	
-		    os << "_SeekRelativeFile";	
-		    break;
-		case ORG_Indexed:	
-		    os << "_SeekIndexedFile";	
-		    break;
-		default:	
-		    WriteError ("cannot seek in sequential files");
-		    break;
-	    }
+	switch (Organization) {
+	    case ORG_Relative:	
+		os << "_SeekRelativeFile";	
+		break;
+	    case ORG_Indexed:	
+		os << "_SeekIndexedFile";	
+		break;
+	    default:	
+		WriteError ("cannot seek in sequential files");
+		break;
 	}
 
 	// Now look up the bound record to determine block size for the file
@@ -293,7 +290,11 @@ CobolData * BoundRecord;
 	    os << ", ";
 	}
 
-	((CobolVar*) LookupIdentifier (RecordKey))->GenCharCast (os);
+	CobolVar* keyAttr = (CobolVar*) LookupIdentifier (RecordKey);
+	if (keyAttr != NULL)
+	    keyAttr->GenCharCast (os);
+	else
+	    WriteError ("this DBF file has no index variable");
 	os << ");\n";
     }
 }
@@ -405,7 +406,11 @@ void CobolFile :: GenSetupForAppend (ostream& os)
 	os << "NDX_InsertKey (";
 	WriteIndexCName (os);
 	os << ", ";
-	((CobolVar*) LookupIdentifier (RecordKey))->GenCharCast (os);
+	CobolVar* keyAttr = (CobolVar*) LookupIdentifier (RecordKey);
+	if (keyAttr != NULL)
+	    keyAttr->GenCharCast (os);
+	else
+	    WriteError ("this DBF file has no index variable");
 	os << ", " << GetFullCName() << "->Header.nRecords - 1);\n";
     }
 }

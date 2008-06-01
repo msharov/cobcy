@@ -23,7 +23,7 @@ fd sample-idx-file
 	05	zip	picture is 99999B9999.
 
 working-storage section.
-01	count-var	picture is 999 value is 1.
+01	count-var	picture is 999 value is zero.
 
 procedure division.
     display "This program will read a file with indexed organization".
@@ -36,8 +36,8 @@ read-loop.
     * No at end clause here because it is random access
     read sample-idx-record.
     display sample-idx-record.
-    if count-var is not less than 10 go to end-loop.
     add 1 to count-var.
+    if count-var is greater than 10 go to end-loop.
     go to read-loop.
 end-loop.
     close sample-idx-file.

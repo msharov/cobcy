@@ -1,71 +1,123 @@
-CPP	= g++
+###############################################################################
+#
+# Makefile for CobCy (Linux version)
+# 
+###############################################################################
+
+PACKAGE = CobCy
+VERSION = 04
+
+CXX	= gcc
 CC	= gcc
-AR	= ar
-RANLIB	= ranlib
 
-#OPTIM	= -O2
-OPTIM	=
+AR	= ar cr
+RANLIB	= ar s
 
-CFLAGS	= -w $(OPTIM) -I./adtlib -DCAN_HAVE_STDIO
+INCDIR	= -I./adtlib/include
+LIBDIR	= -L./adtlib/lib
 
-LEX	= lex
-YACC	= yacc
+#WARN	= -w
+#OPTIM	= -O6 -DNDEBUG
 
-LIBS	= -ll
+WARN	= -Wall
+OPTIM	= -g -fno-implicit-templates
+
+DEFS	= -DCAN_HAVE_STDIO -DYY_NO_UNPUT -DNOCURSES
+
+CFLAGS	= $(WARN) $(OPTIM) $(INCDIR) $(DEFS)
+LDFLAGS	= $(LIBDIR)
+
+LEX	    = flex
+YACC	= bison -y 
+
+LFLAGS  = 
+YFLAGS  = -d
+
+LIBS	= -ladt -lstdc++
 
 EXE	= cobcy
-SRCS	= main.cc semdecl.cc symbol.cc semutil.cc semarith.cc seminfo.cc \
-	seminit.cc semfile.cc semconio.cc semcontrol.cc \
+
+SRCS	= \
+    main.cc semdecl.cc semutil.cc semarith.cc seminfo.cc \
+	seminit.cc semfile.cc semconio.cc semcontrol.cc symbase.cc \
+	symconst.cc symfile.cc sympic.cc symrec.cc symvar.cc \
+	semscreen.cc symscreen.cc templates.cc \
 	cobfunc.c
-OBJS	= main.o semdecl.o symbol.o semutil.o semarith.o seminfo.o \
+OBJS	= \
+    main.o semdecl.o semutil.o semarith.o seminfo.o \
 	seminit.o semfile.o semconio.o semcontrol.o \
-	cobol_lex.o cobol_yacc.o 
+	symbase.o symconst.o symdata.o symfile.o symlabel.o \
+	sympic.o symrec.o symvar.o semscreen.o templates.o \
+	symscreen.o cobol_lex.o cobol_yacc.o 
 
 CLIB	= libcobol.a
 COBJS	= cobfunc.o
+DBFOBJS	= dbf/dbf.o dbf/ndx.o
+
+ADTLIB	= adtlib.a
 
 #############################################
 
-all:	$(EXE) $(CLIB)
+all:	$(ADTLIB) $(EXE) $(CLIB)
+
+$(ADTLIB): 
+	@echo Building base classes ...
+	@make -C adtlib/src install
 
 $(EXE):	$(OBJS)
-	$(CPP) -o $(EXE) $(OBJS) $(LIBS)
-	strip $(EXE)
+	@echo Linking cobcy ...
+	@$(CXX) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS)
 
-cobol_lex.c:	cobol.l y.tab.h
-	$(LEX) cobol.l 
-	mv lex.yy.c cobol_lex.c
+cobol_lex.cc:	cobol_lex.l y.tab.h
+	@echo Building lexical analyzer ...
+	@$(LEX) -t $< > $@
 
-cobol_yacc.c:	cobol.y
-	$(YACC) cobol.y
-	mv y.tab.c cobol_yacc.c
+cobol_yacc.cc:	cobol_yacc.y
+	@echo Building parser ...
+	@$(YACC) $<
+	@mv y.tab.c $@
 
 y.tab.h:
-	$(YACC) -d cobol.y
-	rm -f y.tab.c
+	@echo Updating parser symbol defs ...
+	@$(YACC) -d cobol_yacc.y
+	@rm -f y.tab.c
 
 $(CLIB):	$(COBJS)
-	rm -f $(CLIB)
-	$(AR) rs $(CLIB) $(COBJS)
-	$(RANLIB) $(CLIB)
+	@echo Making DBF objects ...
+	@make -C dbf
+	@echo Building cobcy runtime library ...
+	@rm -f $(CLIB)
+	@$(AR) $(CLIB) $(COBJS) $(DBFOBJS)
+	@$(RANLIB) $(CLIB)
 
 cobfunc.o:	cobfunc.c
-	$(CC) $(CFLAGS) -c $<
+	@echo Compiling $< ...
+	@$(CC) $(CFLAGS) -c $<
 
 .cc.o:
-	$(CPP) $(CFLAGS) -c $<
+	@echo Compiling $< ...
+	@$(CXX) $(CFLAGS) -c $<
 .c.o:
-	$(CPP) $(CFLAGS) -c $<
-
-checkin:
-	ci -l $(SRCS) *.h cobol.l cobol.y
+	@echo Compiling $< ...
+	@$(CXX) $(CFLAGS) -c $<
 
 depend:
-	$(CPP) $(CFLAGS) -MM $(SRCS) > .depend
+	@echo Generating dependencies ...
+	@$(CXX) $(CFLAGS) -MM $(SRCS) > .depend
+	@make -C adtlib/src depend
+	@make -C dbf depend
 
 clean:
-	rm -f $(OBJS) $(EXE) *.bak *~ y.tab.h cobol_lex.c cobol_yacc.c
-	rm -f $(CLIB) $(COBJS)
+	@rm -f $(OBJS) .depend *.bak *~ *.d y.tab.h cobol_lex.cc cobol_yacc.cc core
+	@rm -f $(COBJS)
 
+cleanall: clean
+	@rm -f $(EXE) $(CLIB)
+	@rm -f $(ADTLIB)
+	@make -C adtlib/src clean
+	@make -C dbf clean
+
+ifeq (.depend,$(wildcard .depend))
 include .depend
+endif
 

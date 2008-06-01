@@ -17,13 +17,15 @@ protected:
 
 public:
 			CobolVar (void);
+    virtual	       ~CobolVar (void);
+    inline const PictureType& GetPicture (void) const;
     void		SetPicture (char * NewPic);
     virtual CobolSymbolType	Kind (void);
     inline BOOL		IsNumeric (void);
 
     void		GenDeclare (ostream& os);
-    void		GenRead (ostream& os, char * stream);
-    void		GenWrite (ostream& os, char * stream);
+    virtual void	GenRead (ostream& os, const char * stream);
+    virtual void	GenWrite (ostream& os, const char * stream);
     void		GenMove (ostream& os, CobolVar * data);
     void		GenMove (ostream& os, CobolConstant& data);
     void		GenArith (ostream& os, Streamable * op1,
@@ -31,8 +33,6 @@ public:
     void		GenSignature (ostream& os);
     void		GenCharCast (ostream& os);
     inline void		WritePicture (ostream& os);
-
-    virtual	       ~CobolVar (void);
 };
 
 /*-----------------------------------------------------------------------*/
@@ -40,6 +40,11 @@ public:
 inline BOOL CobolVar :: IsNumeric (void)
 {
     return (Picture.IsNumeric());
+}
+
+inline const PictureType& CobolVar :: GetPicture (void) const
+{
+    return (Picture);
 }
 
 inline void CobolVar :: WritePicture (ostream& os)

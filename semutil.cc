@@ -24,6 +24,7 @@ extern CobolLabel * CurPar;
 extern BOOL CodeBegan;
 
 BOOL ErrorFlag = FALSE;
+BOOL CursesUsed = FALSE;
 
 void WriteError (char * str)
 {
@@ -92,7 +93,7 @@ int index = 1;
     cerr << "Stack:\n";
     while (!SemStack.IsEmpty()) {
        se = SemStack.Pop();
-       cerr << "\t" << index << ") ";
+       cerr << "\t" << index++ << ") ";
        PrintStackEntry (se);
        cerr << "\n";
        TempStack.Push (se);
@@ -150,10 +151,9 @@ char ErrorBuffer [80];
 
 void PrintIdentifier (char * id, ostream& os)
 {
-CobolSymbol * sym;
-
-    sym = LookupIdentifier (id);
-    os << *sym;
+    CobolSymbol* sym = LookupIdentifier (id);
+    if (sym != NULL)
+	os << *sym;
 }
 
 WORD CountIdentifiers (void)
@@ -242,5 +242,15 @@ register int i, sl;
 	  return (TRUE);
     }
     return (FALSE);
+}
+
+void SetCursesUsed (BOOL newValue)
+{
+    CursesUsed = newValue;
+}
+
+BOOL GetCursesUsed (void)
+{
+    return (CursesUsed);
 }
 

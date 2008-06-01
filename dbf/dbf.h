@@ -42,14 +42,14 @@ typedef struct {
 } DBF_FILE;
 
 /*-------------------------------------------------------------------------*/
-  DBF_FILE *	DBF_Open (char * filename, char * mode);
-  DBF_FILE *	DBF_Create (char * filename, WORD nFields, DBF_Field * def);
+  DBF_FILE *	DBF_Open (const char * filename, const char * mode);
+  DBF_FILE *	DBF_Create (const char * filename, WORD nFields, DBF_Field * def);
   void		DBF_SeekToRecord (DBF_FILE * fp, WORD record);
   void		DBF_SeekToNext (DBF_FILE * fp);
   void		DBF_SeekToFirst (DBF_FILE * fp);
   void		DBF_SeekToLast (DBF_FILE * fp);
   void		DBF_AppendRecord (DBF_FILE * fp);
-  void		DBF_RewriteRecord (DBF_FILE * fp, void * data);
+  void		DBF_RewriteRecord (DBF_FILE * fp, const void * data);
   void		DBF_ReadRecord (DBF_FILE * fp, void * data);
   void		DBF_DeleteRecord (DBF_FILE * fp);
   void		DBF_Pack (DBF_FILE * fp);

@@ -5,12 +5,19 @@
 
 #include "symdata.h"
 #include "symfile.h"
+#include <string.h>
 
 CobolData :: CobolData (void)
 {
-    CSize = 0;
+    Size = 0;
     DeclLevel = 0;
     AssociatedStream = NULL;
+    ArraySize = 1;
+    IndexVarName[0] = 0;
+}
+
+CobolData :: ~CobolData (void)
+{
 }
 
 CobolFile * CobolData :: GetStream (void)
@@ -33,7 +40,13 @@ void CobolData :: GenWrite (ostream& os)
     GenWrite (os, AssociatedStream->GetFullCName());
 }
 
-CobolData :: ~CobolData (void)
+void CobolData :: CreateFullCName (void)
 {
+    CobolSymbol::CreateFullCName();
+    if (ArraySize > 1) {
+	strcat (FullCName, "[");
+	strcat (FullCName, IndexVarName);
+	strcat (FullCName, "]");
+    }
 }
 

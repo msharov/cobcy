@@ -20,6 +20,7 @@ typedef enum {
     CS_Variable,
     CS_Procedure,
     CS_FileDesc,
+    CS_ScreenField,
     CS_Label
 } CobolSymbolType;
 
@@ -28,41 +29,65 @@ private:
     char		ParentCobolName [MAX_SYMBOL_LENGTH];
     char		Prefix [MAX_PREFIX_LENGTH];
     char		CName [MAX_SYMBOL_LENGTH];	   // C name
-    char		FullCName [MAX_FULLNAME_LENGTH];   // C name with prefix
     char		CobolName [MAX_SYMBOL_LENGTH];	   // Cobol name
+    WORD		DeclLevel;
+
+protected:
+    char		FullCName [MAX_FULLNAME_LENGTH];   // C name with prefix
 
 protected:
     void		CobolToCName (char * str);
+    virtual void	CreateFullCName (void);
 
 public:
 				CobolSymbol (void);
-    void			SetName (char * NewName);
-    inline char *		GetName (void);
-    inline char *		GetCName (void);
-    inline char *		GetFullCName (void);
-    void			SetParent (char * NewParent);
+    virtual		       ~CobolSymbol (void);
+    inline void			SetDeclLevel (WORD NewLevel);
+    inline WORD			GetDeclLevel (void) const;
+    void			SetName (const char * NewName);
+    inline const char *		GetName (void) const;
+    inline const char *		GetCName (void) const;
+    inline const char *		GetFullCName (void) const;
+    inline const char *		GetParentName (void) const;
+    void			SetParent (const char * NewParent);
     virtual CobolSymbolType	Kind (void) = 0;
     virtual void		WriteBinaryStream (ostream& os);
     virtual void		WriteTextStream (ostream& os);
-    virtual		       ~CobolSymbol (void);
 };
 
 /*------------------------------------------------------------------------*/
 
-inline char * CobolSymbol :: GetName (void)
+inline const char * CobolSymbol :: GetName (void) const
 {
     return (CobolName);
 }
 
-inline char * CobolSymbol :: GetCName (void)
+inline const char * CobolSymbol :: GetCName (void) const
 {
     return (CName);
 }
 
-inline char * CobolSymbol :: GetFullCName (void)
+inline const char * CobolSymbol :: GetFullCName (void) const
 {
     return (FullCName);
 }
+
+inline const char * CobolSymbol :: GetParentName (void) const
+{
+    return (ParentCobolName);
+}
+
+inline void CobolSymbol :: SetDeclLevel (WORD NewLevel)
+{
+    DeclLevel = NewLevel;
+}
+
+inline WORD CobolSymbol :: GetDeclLevel (void) const
+{
+    return (DeclLevel);
+}
+
+/*------------------------------------------------------------------------*/
 
 #endif
 

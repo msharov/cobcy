@@ -1,12 +1,13 @@
 %{
-/* cobol.l
+/* 
+** COBOL lexical structure.
 **
-**	Describes COBOL lexical structure.
 */
 
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+
 #ifdef __MSDOS__
 #include "cob_yacc.h"
 #else
@@ -17,18 +18,21 @@
 #define STRINGBUFSIZE	200
 
 int CurrentLine = 1;
+
 long int ival;
 double fval;
 char StringBuffer [STRINGBUFSIZE];
 static char ErrorBuffer [80];
 
 #ifndef TRUE
-#define TRUE	1
+#define TRUE 1
 #endif
 
-/*-------------------------------------------------*/
-  void StringToLowercase (char * string);
-/*-------------------------------------------------*/
+#define MAX_COPY_DEPTH 10
+YY_BUFFER_STATE copy_stack[MAX_COPY_DEPTH];
+int copy_stack_ptr = 0;
+
+void StringToLowercase(char *);
 
 /* Read everything in lowercase	*/
 #define YY_INPUT(buf,result,max_size) 					\
@@ -37,41 +41,91 @@ static char ErrorBuffer [80];
 	StringToLowercase (buf);
 
 %}
+
 %s PICTURE_STATE
 %s COMMENT_STATE
+
+%s COPY_STATE
+
+
+%option noyywrap
 %%
 
-[\t ]+		;
+[\t ]+
 
-^[\t ]*"*"	{ BEGIN COMMENT_STATE; }
+^[\t ]*"*" { BEGIN COMMENT_STATE; }
+
 <COMMENT_STATE>.*\n {
-		  ++ CurrentLine;
-		  BEGIN INITIAL;
-		  yytext [strlen(yytext) - 1] = '\x0';	/* kill the newline */
-		  GenComment (yytext);
-		}
+    CurrentLine++;
+    yytext[strlen(yytext) - 1] = '\x0';	/* kill the newline */
+    GenComment(yytext);
+    BEGIN INITIAL;
+}
 
-<PICTURE_STATE>([\.]*[ax9vbpz09s,\*\+\-\$]+(\([0-9]+\))?)+	{ 
-		  	  strcpy (StringBuffer, yytext);
-		  	  BEGIN INITIAL;
-		  	  return (TOK_PIC_TEXT); 
-			}
+<PICTURE_STATE>([\.]*[ax9vbpz09s,\*\+\-\$]+(\([0-9]+\))?)+ { 
+    strcpy(StringBuffer, yytext);
+    BEGIN INITIAL;
+    return(TOK_PIC_TEXT);
+}
 
-[0-9]+			{ ival = atol (yytext);
-			  return (TOK_INTEGER);	}
-[0-9]+\.[0-9]+		{ fval = atof (yytext);
-			  return (TOK_FLOAT);	}
+<COPY_STATE>[ \t]*
+<COPY_STATE>[^ \t\n]+ {
+    if (copy_stack_ptr >= MAX_COPY_DEPTH) {
+        fprintf(stderr, "Copy nested too deeply (max. %d)\n", MAX_COPY_DEPTH);
+        exit(1);
+    }
+    
+    copy_stack[copy_stack_ptr++] = YY_CURRENT_BUFFER;
+
+    yyin = fopen(yytext, "r");
+    if (!yyin) {
+        fprintf(stderr, "Cannot open copy file %s\n", yytext);
+        exit(1);
+    }
+
+    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+
+    BEGIN INITIAL;
+}    
+
+<<EOF>> {
+    copy_stack_ptr--;
+    if (copy_stack_ptr < 0) 
+        yyterminate();
+    else {
+        yy_delete_buffer(YY_CURRENT_BUFFER);
+        yy_switch_to_buffer(copy_stack[copy_stack_ptr]);
+    }
+}
+
+[\+\-]?[0-9]+ {
+    ival = atol (yytext);
+    return(TOK_INTEGER);	
+}
+
+[\+\-]?[0-9]+\.[0-9]+ {
+    fval = atof (yytext);
+    return(TOK_FLOAT);
+}
+
 \"[a-zA-Z0-9\t \-\{\}\[\]\+\-_\*|\\\/().,\:\';=><\!\$\@\#\%]*\"	{
-			  strcpy (StringBuffer, (char*)(yytext + 1));
-			  StringBuffer [strlen (StringBuffer) - 1] = '\x0';
-			  return (TOK_STRING);	}
+    strcpy(StringBuffer, (char*)(yytext + 1));
+    StringBuffer[strlen (StringBuffer) - 1] = '\x0';
+    return(TOK_STRING);	
+}
+
+\'[a-zA-Z0-9\t \-\{\}\[\]\+\-_\*|\\\/().,\:\";=><\!\$\@\#\%]*\'	{
+    strcpy(StringBuffer, (char*)(yytext + 1));
+    StringBuffer[strlen (StringBuffer) - 1] = '\x0';
+    return(TOK_STRING);	
+}
 
 accept			{ return (TOK_ACCEPT);	}
 access			{ return (TOK_ACCESS);	}
-add			{ return (TOK_ADD);	}
+add			    { return (TOK_ADD);	}
 advancing		{ return (TOK_ADVANCING);	}
 after			{ return (TOK_AFTER);	}
-all			{ return (TOK_ALL);	}
+all			    { return (TOK_ALL);	}
 alphabet		{ return (TOK_ALPHABET);	}
 alphabetic		{ return (TOK_ALPHABETIC);	}
 alphabetic-lower        { return (TOK_ALPHABETIC_LOWER); }
@@ -90,9 +144,11 @@ ascending		{ return (TOK_ASCENDING);	}
 assign			{ return (TOK_ASSIGN);	}
 at			{ return (TOK_AT);	}
 author			{ return (TOK_AUTHOR);	}
+background-color	{ return (TOK_BACKGROUND_COLOR);}
 before			{ return (TOK_BEFORE);	}
 binary			{ return (TOK_BINARY);  }
 blank			{ return (TOK_BLANK);	}
+blink			{ return (TOK_BLINK);	}
 block			{ return (TOK_BLOCK);	}
 bottom			{ return (TOK_BOTTOM);	}
 by			{ return (TOK_BY);	}
@@ -124,7 +180,7 @@ content                 { return (TOK_CONTENT);         }
 continue		{ return (TOK_CONTINUE);	}
 control			{ return (TOK_CONTROL);	}
 controls		{ return (TOK_CONTROLS);	}
-copy			{ return (TOK_COPY);	}
+copy			{ BEGIN COPY_STATE; }
 corr			{ return (TOK_CORR);	}
 corresponding		{ return (TOK_CORRESPONDING);	}
 count			{ return (TOK_COUNT);	}
@@ -209,6 +265,7 @@ final			{ return (TOK_FINAL);	}
 first			{ return (TOK_FIRST);	}
 footing			{ return (TOK_FOOTING);	}
 for			{ return (TOK_FOR);	}
+foreground-color	{ return (TOK_FOREGROUND_COLOR);}
 from			{ return (TOK_FROM);	}
 generate		{ return (TOK_GENERATE);	}
 giving			{ return (TOK_GIVING);	}
@@ -219,6 +276,7 @@ group			{ return (TOK_GROUP);	}
 heading			{ return (TOK_HEADING);	}
 high-value	|
 high-values		{ return (TOK_HIGH_VALUE);	}
+highlight		{ return (TOK_HIGHLIGHT);	}
 i-o			{ return (TOK_I_O);	}
 i-o-control		{ return (TOK_I_O_CONTROL);	}
 identification		{ return (TOK_IDENTIFICATION);	}
@@ -334,6 +392,7 @@ rerun			{ return (TOK_RERUN);	}
 reserve			{ return (TOK_RESERVE);	}
 reset			{ return (TOK_RESET);	}
 return			{ return (TOK_RETURN);	}
+reverse-video		{ return (TOK_REVERSE_VIDEO);	}
 reversed		{ return (TOK_REVERSED);	}
 rewind			{ return (TOK_REWIND);	}
 rewrite			{ return (TOK_REWRITE);	}
@@ -343,6 +402,7 @@ right			{ return (TOK_RIGHT);	}
 rounded			{ return (TOK_ROUNDED);	}
 run			{ return (TOK_RUN);	}
 same			{ return (TOK_SAME);	}
+screen			{ return (TOK_SCREEN);	}
 sd			{ return (TOK_SD);	}
 search			{ return (TOK_SEARCH);	}
 section			{ return (TOK_SECTION);	}
@@ -400,6 +460,7 @@ top			{ return (TOK_TOP);	}
 trailing		{ return (TOK_TRAILING);	}
 true			{ return (TOK_TRUE);	}
 type			{ return (TOK_TYPE);	}
+underline		{ return (TOK_UNDERLINE);	}
 unit			{ return (TOK_UNIT);	}
 unstring		{ return (TOK_UNSTRING);	}
 until			{ return (TOK_UNTIL);	}
@@ -425,42 +486,41 @@ zeros 			{ strcpy (StringBuffer, "_zero_var");
 [a-z]([a-z0-9\-]*[a-z0-9])?	{ strcpy (StringBuffer, yytext);
 				  return (TOK_IDENTIFIER); }
 
-"+"			{ return (TOK_PLUS);	}
-"-"			{ return (TOK_MINUS);	}
-"*"			{ return (TOK_ASTERISK);	}
-"/"			{ return (TOK_SLASH);	}
-"="			{ return (TOK_EQUAL);	}
-"$"			{ return (TOK_DOLLAR);	}
-","			{ return (TOK_COMMA);	}
-";"			{ return (TOK_SEMICOLON);	}
-"."			{ return (TOK_PERIOD);	}
-"("			{ return (TOK_LPAREN);	}
-")"			{ return (TOK_RPAREN);	}
-">="                    { return (TOK_GREATER_EQ); }
-"<="                    { return (TOK_LESS_EQ); }
-">"			{ return (TOK_GREATER);	}
-"<"			{ return (TOK_LESS);	}
+"+"			{ return(TOK_PLUS); }
+"-"			{ return(TOK_MINUS); }
+"*"			{ return(TOK_ASTERISK); }
+"/"			{ return(TOK_SLASH); }
+"="			{ return(TOK_EQUAL); }
+"$"			{ return(TOK_DOLLAR); }
+","			{ return(TOK_COMMA); }
+";"			{ return(TOK_SEMICOLON); }
+"."			{ return(TOK_PERIOD); }
+"("			{ return(TOK_LPAREN); }
+")"			{ return(TOK_RPAREN); }
+">="        { return(TOK_GREATER_EQ); }
+"<="        { return(TOK_LESS_EQ); }
+">"			{ return(TOK_GREATER); }
+"<"			{ return(TOK_LESS); }
 
-\n		{ ++ CurrentLine; }
+\n          { CurrentLine++; }
 
-.		{ sprintf (ErrorBuffer, "Line %d: parse error on |%s|\n", 
-		  	   CurrentLine, yytext); 
-		  WriteError (ErrorBuffer);
-		}
+.           { 
+            sprintf( ErrorBuffer, 
+                     "Line %d: parse error on |%s|\n", 
+		  	         CurrentLine, yytext ); 
+		    WriteError (ErrorBuffer);
+		    }
 
 %%
 
-void StringToLowercase (char * string)
-{
-register int i, StringLength;
-int QuotedText = 0;
+void StringToLowercase(char* string) {
+    int i, StringLength, QuotedText = 0;
 
-    StringLength = strlen (string);
-    for (i = 0; i < StringLength; ++ i) {
-       if (string[i] == '"')
-	  QuotedText ^= 1;
-       else if (!QuotedText)
-          string[i] = tolower (string[i]);
+    StringLength = strlen(string);
+    for (i = 0; i < StringLength; i++) {
+        if (string[i] == '"')
+	       QuotedText ^= 1;
+        else if (!QuotedText)
+           string[i] = tolower(string[i]);
     }
 }
-

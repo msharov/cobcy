@@ -13,7 +13,7 @@
   static void DBF_WriteHeader (DBF_FILE * dfd);
 /*-------------------------------------------------------*/
 
-DBF_FILE * DBF_Open (char * filename, char * mode)
+DBF_FILE * DBF_Open (const char * filename, const char * mode)
 {
 DBF_FILE * NewFD;
 
@@ -39,7 +39,7 @@ DBF_FILE * NewFD;
     return (NewFD);
 }
 
-DBF_FILE * DBF_Create (char * filename, WORD nFields, DBF_Field * Fields)
+DBF_FILE * DBF_Create (const char * filename, WORD nFields, DBF_Field * Fields)
 {
 DBF_FILE * NewFD;
 int i;
@@ -248,7 +248,7 @@ int i;
     DBF_SeekToRecord (fp, fp->Header.nRecords - 1);
 }
 
-void DBF_RewriteRecord (DBF_FILE * fp, void * data)
+void DBF_RewriteRecord (DBF_FILE * fp, const void * data)
 {
     fwrite (data, 1, fp->Header.RecordLength, fp->DataDesc);
 }

@@ -1,9 +1,9 @@
-CC	= g++
-CFLAGS	= -Wall -O6 -m486 -pipe -I ../include
-AR	= ar
-RANLIB	= ranlib
+CC	= gcc
+CFLAGS	= -Wall -O6 -I ../include
+AR	= ar cr
+RANLIB	= ar s
 RM	= rm -f
-INSTALL	= install -m 644 
+INSTALL	= cp
  
 SRCS	= bitarray.cc cdate.cc cstring.cc streamab.cc csocket.cc
 INCLUDES= ../include/array.h ../include/array2d.h ../include/bitarray.h \
@@ -25,7 +25,7 @@ LIB	= libadt.a
 ${LIB}: ${OBJS}
 	@echo ${LIB} ...
 	@${RM} ${LIB}
-	@${AR} q ${LIB} ${OBJS} &> /dev/null
+	@${AR} ${LIB} ${OBJS} 
 	@${RANLIB} ${LIB}
  
 .cc.o:
@@ -34,12 +34,10 @@ ${LIB}: ${OBJS}
  
 install: ${LIB}
 	@echo Installing library ...
-	@${INSTALL} -m 644 ${LIB} ../lib
+	@${INSTALL} ${LIB} ../lib
 
-checkin:
-	@ci -l ${RCSED}
 clean:
-	@${RM} *.bak *~ ${OBJS} ${LIB}
+	@${RM} .depend *.bak *~ ${OBJS} ${LIB} ../lib/${LIB}
  
 depend: ${SRCS}
 	@${CC} ${CFLAGS} -MM ${SRCS} > .depend

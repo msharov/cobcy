@@ -25,6 +25,7 @@ typedef struct {
 
     /* Build options */
     BOOL	GenDebug;	/* Generate debugging code? */
+    BOOL	UseCurses;
 } CobcyConfigType;
 
 // All of these are defined in seminit.cc

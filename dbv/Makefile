@@ -1,5 +1,5 @@
 CC	= gcc
-CFLAGS	= -Wall -g -pipe -I../adtlib -L../dbf -I../dbf
+CFLAGS	= -Wall -O6 -m486 -pipe -I../adtlib/include -L../dbf -I../dbf
 RM	= rm -f
 INSTALL	= install -s -m 755 
 AR	= ar

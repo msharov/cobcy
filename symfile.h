@@ -41,6 +41,7 @@ private:
 
 public:
 				CobolFile (void);
+    virtual		       ~CobolFile (void);
     CobolSymbolType		Kind (void);
     void			SetFilename (char * filename);
     void			SetAccessMode (AccessModeType mode);
@@ -51,6 +52,7 @@ public:
     void			SetFlushCommand (char * NewCommand);
     void			SetNewlineFlag (BOOL NewFlag);
     void			SetUnlinkOnClose (BOOL NewFlag);
+    inline OrganizationType	GetOrganization (void) const;
     void			AssociateRecord (void);
     virtual void		WriteTextStream (ostream& os);
 
@@ -67,9 +69,15 @@ public:
     void			GenWriteEnd (ostream& os);
     void			GenReadEnd (ostream& os);
     void			GenSetupForAppend (ostream& os);
-
-    			       ~CobolFile (void);
 };
 
+//----------------------------------------------------------------------------
+
+inline OrganizationType	CobolFile::GetOrganization (void) const
+{
+    return (Organization);
+}
+
+//----------------------------------------------------------------------------
 #endif
 

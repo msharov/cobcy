@@ -22,7 +22,7 @@
   static void 	NDX_WritePage (NDX_FILE * fp, int PageIndex);
   static void 	NDX_FreePage (NDX_FILE * fp);
   static int 	NDX_AddPage (NDX_FILE * fp);
-  static int 	NDX_FindKeyPlace (NDX_FILE * fp, char * key, int AddPage);
+  static int 	NDX_FindKeyPlace (NDX_FILE * fp, const char * key, int AddPage);
 /*--------------------------------------------------------------------------*/
 
 static void NDX_ReadHeader (NDX_FILE * fp)
@@ -118,7 +118,7 @@ NDX_INDEX_ITEM * CurRec;
     }
 }
 
-NDX_FILE * NDX_Open (char * filename, char * mode)
+NDX_FILE * NDX_Open (const char * filename, const char * mode)
 {
 NDX_FILE * fp;
 int imode;
@@ -146,7 +146,7 @@ int imode;
     return (fp);
 }
 
-NDX_FILE * NDX_Create (char * filename, char * keyname,
+NDX_FILE * NDX_Create (const char * filename, const char * keyname,
 		int keytype, int keylength)
 {
 NDX_FILE * fp;
@@ -193,7 +193,7 @@ char PageFiller [NDX_PAGE_SIZE];
     return (PagePos);
 }
 
-static int NDX_FindKeyPlace (NDX_FILE * fp, char * key, int AddPage)
+static int NDX_FindKeyPlace (NDX_FILE * fp, const char * key, int AddPage)
 {
 int DBF_RecordIndex = -1, IndexInPage = -1;
 int NewPageIndex, i;
@@ -233,7 +233,7 @@ int NewPageIndex, i;
     return (DBF_RecordIndex);
 }
 
-void NDX_InsertKey (NDX_FILE * fp, char * key, int recnum)
+void NDX_InsertKey (NDX_FILE * fp, const char * key, int recnum)
 {
 int IndexInPage, i;
 
@@ -259,7 +259,7 @@ int IndexInPage, i;
     NDX_WritePage (fp, fp->PageLoaded);
 }
 
-int NDX_LookupKey (NDX_FILE * fp, char * key)
+int NDX_LookupKey (NDX_FILE * fp, const char * key)
 {
 int IndexInPage;
 

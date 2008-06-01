@@ -13,6 +13,7 @@
 #include <stdio.h>
 #endif
 #include "symdata.h"
+#include "symscreen.h"
 #include "symconst.h"
 #include "symfile.h"
 #include "semcontrol.h"
@@ -24,25 +25,57 @@
 
 void GenAccept (void)
 {
-StackEntry * entry;
-CobolData * attr;
-int i, nIds;
-
 #ifndef NDEBUG
     cout << "\tIn GenAccept\n";
 #endif
+    int nIds = CountIdentifiers();
 
-    nIds = CountIdentifiers();
+    StackEntryPtr* destArray = new StackEntryPtr [nIds];
+    int i;
+    for (i = 0; i < nIds; ++ i)
+       destArray[i] = SemStack.Pop();
+
+    // The following checks for an AT x,y clause, bordered by marks
+    StackEntryPtr entry = SemStack.Pop();
+    int xloc = -1, yloc = -1;
+    if (entry->kind != SE_Mark) {
+       yloc = entry->ival;
+       delete entry;
+       entry = SemStack.Pop();
+       xloc = entry->ival;
+       delete entry;
+       entry = SemStack.Pop();
+       if (entry->kind != SE_Mark)
+	  WriteError ("ACCEPT AT x,y has no second mark");
+       SetCursesUsed (TRUE);
+    }
+    delete entry;
+
+    if (CobcyConfig.UseCurses && xloc >= 0 && yloc >= 0) {
+       GenIndent();
+       codef << "move (" << xloc << ", " << yloc << ");\n";
+    }
 
     for (i = 0; i < nIds; ++ i) {
-       entry = SemStack.Pop();
+       entry = destArray[i];
        if (entry->kind == SE_Identifier) {
-	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
-	     return;
+	  CobolSymbol* attr = LookupIdentifier (entry->ident);
+	  if (attr == NULL) {
+	     delete entry;
+	     continue;
+	  }
+	  if (attr->Kind() == CS_ScreenField && AcceptSource != AS_Console) {
+	     WriteError ("Can only accept a SCREEN from CONSOLE");
+	     delete entry;
+	     continue;
+	  }
 
 	  switch (AcceptSource) {
 	     case AS_Console:
-	        attr->GenRead (codef, "stdin");
+	     	if (attr->Kind() == CS_ScreenField)
+		   ((CobolScreenField*) attr)->GenRead (codef, "stdin");
+		else
+		   ((CobolData*) attr)->GenRead (codef, "stdin");
 		GenEmptyClause();
 		break;
 	     case AS_Date:
@@ -70,6 +103,7 @@ int i, nIds;
        }
        delete entry;
     }
+    delete [] destArray;
 }
 
 void SetAcceptSource (AcceptSourceType NewSrc)
@@ -79,38 +113,74 @@ void SetAcceptSource (AcceptSourceType NewSrc)
 
 void GenDisplay (void)
 {
-StackEntry * entry;
-CobolData * attr;
-CobolConstant cattr;
-int i, nIds;
-
 #ifndef NDEBUG
     cout << "\tIn GenDisplay\n";
 #endif
+    char outputStream [MAX_SYMBOL_LENGTH];
+    strcpy (outputStream, DisplayOutput);
 
-    nIds = CountIdentifiers();
+    int nIds = CountIdentifiers();
     ReverseIdentifiers (nIds);
-
 #ifndef NDEBUG
     cout << "\t\t" << nIds << " things on stack\n";
 #endif
+    StackEntryPtr* printables = new StackEntryPtr [nIds];
+    int i;
+    for (i = 0; i < nIds; ++ i)
+       printables[i] = SemStack.Pop();
 
-    for (i = 0; i < nIds; ++ i) {
+    // The following checks for an AT x,y clause, bordered by marks
+    StackEntryPtr entry = SemStack.Pop();
+    int xloc = -1, yloc = -1;
+    if (entry->kind != SE_Mark) {
+       yloc = entry->ival;
+       delete entry;
        entry = SemStack.Pop();
+       xloc = entry->ival;
+       delete entry;
+       entry = SemStack.Pop();
+       if (entry->kind != SE_Mark)
+	  WriteError ("DISPLAY AT x,y has no second mark");
+       if (CobcyConfig.UseCurses)
+          strcpy (outputStream, "NULL");
+       SetCursesUsed (TRUE);
+    }
+    delete entry;
 
-       if (entry->kind == SE_Identifier) {
-	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
-	     return;
-          attr->GenWrite (codef, DisplayOutput);   
-       }
-       else {
-	  cattr = entry;
-	  cattr.GenWrite (codef, DisplayOutput);
-       }
+    if (CobcyConfig.UseCurses && xloc >= 0 && yloc >= 0) {
+       GenIndent();
+       codef << "move (" << xloc << ", " << yloc << ");\n";
     }
 
-    GenIndent();
-    codef << "fprintf (" << DisplayOutput << ", \"\\n\");\n";
+    BOOL hasScreens = FALSE;
+    for (i = 0; i < nIds; ++ i) {
+       entry = printables[i];
+
+       if (entry->kind == SE_Identifier) {
+	  CobolSymbol* attr = LookupIdentifier (entry->ident);
+	  if (attr == NULL) {
+	     delete entry;
+	     continue;
+	  }
+	  if (attr->Kind() == CS_ScreenField) {
+	     hasScreens = TRUE;
+	     ((CobolScreenField*) attr)->GenWrite (codef, outputStream);
+	  }
+	  else
+	     ((CobolData*) attr)->GenWrite (codef, outputStream);
+       }
+       else {
+	  CobolConstant cattr = entry;
+	  cattr.GenWrite (codef, outputStream);
+       }
+       delete entry;
+    }
+    delete [] printables;
+
+    if (!hasScreens && !(CobcyConfig.UseCurses && xloc >= 0 && yloc >= 0)) {
+       GenIndent();
+       codef << "fprintf (" << outputStream << ", \"\\n\");\n";
+    }
 }
 
 void SetDisplayOutput (void)

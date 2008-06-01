@@ -50,11 +50,14 @@ long int FillerIndex = 0;
 %token TOK_AREAS
 %token TOK_ASCENDING
 %token TOK_ASSIGN
+%token TOK_ASTERISK
 %token TOK_AT
 %token TOK_AUTHOR
+%token TOK_BACKGROUND_COLOR
 %token TOK_BEFORE
 %token TOK_BINARY
 %token TOK_BLANK
+%token TOK_BLINK
 %token TOK_BLOCK
 %token TOK_BOTTOM
 %token TOK_BY
@@ -73,6 +76,7 @@ long int FillerIndex = 0;
 %token TOK_CODE_SET
 %token TOK_COLLATING
 %token TOK_COLUMN
+%token TOK_COMMA
 %token TOK_COMMA
 %token TOK_COMMON
 %token TOK_COMMUNICATION
@@ -98,6 +102,7 @@ long int FillerIndex = 0;
 %token TOK_DAY
 %token TOK_DAY_OF_WEEK
 %token TOK_DE
+%token TOK_DEBUGGING
 %token TOK_DEBUG_CONTENTS
 %token TOK_DEBUG_ITEM
 %token TOK_DEBUG_LINE
@@ -105,7 +110,6 @@ long int FillerIndex = 0;
 %token TOK_DEBUG_SUB_1
 %token TOK_DEBUG_SUB_2
 %token TOK_DEBUG_SUB_3
-%token TOK_DEBUGGING
 %token TOK_DECIMAL_POINT
 %token TOK_DECLARATIVES
 %token TOK_DELETE
@@ -120,12 +124,13 @@ long int FillerIndex = 0;
 %token TOK_DISPLAY
 %token TOK_DIVIDE
 %token TOK_DIVISION
+%token TOK_DOLLAR
 %token TOK_DOWN
 %token TOK_DUPLICATES
 %token TOK_DYNAMIC
 %token TOK_EGI
-%token TOK_ELSIF
 %token TOK_ELSE
+%token TOK_ELSIF
 %token TOK_EMI
 %token TOK_ENABLE
 %token TOK_END
@@ -153,6 +158,7 @@ long int FillerIndex = 0;
 %token TOK_ENVIRONMENT
 %token TOK_EOP
 %token TOK_EQUAL
+%token TOK_EQUAL
 %token TOK_ERROR
 %token TOK_ESI
 %token TOK_EVALUATE
@@ -169,21 +175,24 @@ long int FillerIndex = 0;
 %token TOK_FILLER
 %token TOK_FINAL
 %token TOK_FIRST
+%token TOK_FLOAT
 %token TOK_FOOTING
 %token TOK_FOR
+%token TOK_FOREGROUND_COLOR
 %token TOK_FROM
 %token TOK_GENERATE
 %token TOK_GIVING
 %token TOK_GLOBAL
 %token TOK_GO
 %token TOK_GREATER
+%token TOK_GREATER
 %token TOK_GREATER_EQ
 %token TOK_GROUP
 %token TOK_HEADING
+%token TOK_HIGHLIGHT
 %token TOK_HIGH_VALUE
-%token TOK_I_O
-%token TOK_I_O_CONTROL
 %token TOK_IDENTIFICATION
+%token TOK_IDENTIFIER
 %token TOK_IF
 %token TOK_IN
 %token TOK_INDEX
@@ -196,9 +205,12 @@ long int FillerIndex = 0;
 %token TOK_INPUT_OUTPUT
 %token TOK_INSPECT
 %token TOK_INSTALLATION
+%token TOK_INTEGER
 %token TOK_INTO
 %token TOK_INVALID
 %token TOK_IS
+%token TOK_I_O
+%token TOK_I_O_CONTROL
 %token TOK_JUST
 %token TOK_JUSTIFIED
 %token TOK_KEY
@@ -208,20 +220,23 @@ long int FillerIndex = 0;
 %token TOK_LEFT
 %token TOK_LENGTH
 %token TOK_LESS
+%token TOK_LESS
 %token TOK_LESS_EQ
 %token TOK_LIMIT
 %token TOK_LIMITS
 %token TOK_LINAGE
 %token TOK_LINAGE_COUNTER
 %token TOK_LINE
-%token TOK_LINE_COUNTER
 %token TOK_LINES
+%token TOK_LINE_COUNTER
 %token TOK_LINKAGE
 %token TOK_LOCK
 %token TOK_LOW_VALUE
+%token TOK_LPAREN
 %token TOK_MEMORY
 %token TOK_MERGE
 %token TOK_MESSAGE
+%token TOK_MINUS
 %token TOK_MODE
 %token TOK_MODULES
 %token TOK_MOVE
@@ -254,10 +269,12 @@ long int FillerIndex = 0;
 %token TOK_PAGE
 %token TOK_PAGE_COUNTER
 %token TOK_PERFORM
+%token TOK_PERIOD
 %token TOK_PF
 %token TOK_PH
 %token TOK_PIC
 %token TOK_PICTURE
+%token TOK_PIC_TEXT
 %token TOK_PLUS
 %token TOK_POINTER
 %token TOK_POSITION
@@ -296,14 +313,18 @@ long int FillerIndex = 0;
 %token TOK_RESET
 %token TOK_RETURN
 %token TOK_REVERSED
+%token TOK_REVERSE_VIDEO
 %token TOK_REWIND
 %token TOK_REWRITE
 %token TOK_RF
 %token TOK_RH
 %token TOK_RIGHT
 %token TOK_ROUNDED
+%token TOK_RPAREN
+%token TOK_RPAREN
 %token TOK_RUN
 %token TOK_SAME
+%token TOK_SCREEN
 %token TOK_SD
 %token TOK_SEARCH
 %token TOK_SECTION
@@ -311,6 +332,7 @@ long int FillerIndex = 0;
 %token TOK_SEGMENT
 %token TOK_SEGMENT_LIMIT
 %token TOK_SELECT
+%token TOK_SEMICOLON
 %token TOK_SEND
 %token TOK_SENTENCE
 %token TOK_SEPARATE
@@ -319,6 +341,7 @@ long int FillerIndex = 0;
 %token TOK_SET
 %token TOK_SIGN
 %token TOK_SIZE
+%token TOK_SLASH
 %token TOK_SORT
 %token TOK_SORT_MERGE
 %token TOK_SOURCE
@@ -333,10 +356,11 @@ long int FillerIndex = 0;
 %token TOK_STATUS
 %token TOK_STOP
 %token TOK_STRING
+%token TOK_STRING
+%token TOK_SUBTRACT
 %token TOK_SUB_QUEUE_1
 %token TOK_SUB_QUEUE_2
 %token TOK_SUB_QUEUE_3
-%token TOK_SUBTRACT
 %token TOK_SUM
 %token TOK_SUPRESS
 %token TOK_SYMBOLIC
@@ -359,6 +383,7 @@ long int FillerIndex = 0;
 %token TOK_TRAILING
 %token TOK_TRUE
 %token TOK_TYPE
+%token TOK_UNDERLINE
 %token TOK_UNIT
 %token TOK_UNSTRING
 %token TOK_UNTIL
@@ -371,30 +396,12 @@ long int FillerIndex = 0;
 %token TOK_VALUES
 %token TOK_VARYING
 %token TOK_WHEN
-%token TOK_WITH
 %token TOK_WHILE
+%token TOK_WITH
 %token TOK_WORDS
 %token TOK_WORKING_STORAGE
 %token TOK_WRITE
 %token TOK_ZERO
-%token TOK_IDENTIFIER
-%token TOK_MINUS
-%token TOK_ASTERISK
-%token TOK_SLASH
-%token TOK_EQUAL
-%token TOK_DOLLAR
-%token TOK_COMMA
-%token TOK_SEMICOLON
-%token TOK_PERIOD
-%token TOK_LPAREN
-%token TOK_RPAREN
-%token TOK_GREATER
-%token TOK_LESS
-%token TOK_RPAREN
-%token TOK_INTEGER
-%token TOK_FLOAT
-%token TOK_STRING
-%token TOK_PIC_TEXT
 %%
 
 program:	{ StartProgram(); }
@@ -406,11 +413,7 @@ program:	{ StartProgram(); }
 	;
 
 identification_division:	TOK_IDENTIFICATION TOK_DIVISION TOK_PERIOD
-		program_name
-	;
-
-program_name:	TOK_PROGRAM_ID TOK_PERIOD identifier prg_name_option TOK_PERIOD
-		{ SetProgramName(); }
+		program_info_list
 	;
 
 prg_name_option:	optional_is common_initial optional_program
@@ -420,6 +423,20 @@ prg_name_option:	optional_is common_initial optional_program
 common_initial:		TOK_COMMON
 	|		TOK_INITIAL
 	;
+
+program_info_list:	program_info_clause program_info_list
+	|
+	;
+program_info_clause:	TOK_AUTHOR TOK_PERIOD word_list TOK_PERIOD
+       	|		TOK_INSTALLATION TOK_PERIOD word_list TOK_PERIOD
+       	|		TOK_DATE_WRITTEN TOK_PERIOD word_list TOK_PERIOD
+       	|		TOK_DATE_COMPILED TOK_PERIOD word_list TOK_PERIOD
+       	|		TOK_SECURITY TOK_PERIOD word_list TOK_PERIOD
+	|		TOK_PROGRAM_ID TOK_PERIOD word_list
+			{ Push (SE_Identifier); } prg_name_option TOK_PERIOD
+			{ SetProgramName(); }
+	;
+
 environment_division:	TOK_ENVIRONMENT TOK_DIVISION TOK_PERIOD
 		configuration_section
 		input_output_section
@@ -470,9 +487,7 @@ file_control:	TOK_FILE_CONTROL TOK_PERIOD
 	|
 	;
 
-select_block:	select_statement select_block_pl
-	;
-select_block_pl:	select_block
+select_block:	select_statement select_block
 	|
 	;
 select_statement:	TOK_SELECT optional_optional identifier 
@@ -530,6 +545,7 @@ data_section_entry:	file_section
         |        	linkage_section
         |        	communication_section
         |        	report_section
+	|		screen_section
 	;
 file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
 		file_desc_block
@@ -568,16 +584,23 @@ file_record_desc_pl:	file_record_desc
 	|
 	;
 file_record_level:	integer level_name { AssociateFileRecord(); }
+			array_options
 			picture TOK_PERIOD 
 			{ Push (SE_Null); DeclareRecordLevel(); }
-
+	;
 record_level:	integer
 		level_name
-		picture
-		value_entry
-		reclev_option_list
+		record_new_or_redef
 		TOK_PERIOD
-		{ DeclareRecordLevel(); }
+	;
+record_new_or_redef:	array_options 
+			picture value_entry reclev_option_list
+			{ DeclareRecordLevel(); }
+	|		TOK_REDEFINES identifier
+	;
+array_options:		TOK_OCCURS integer optional_times
+			TOK_INDEXED optional_by identifier
+	|		{ ival = 1; Push (SE_Integer); Push (SE_Null); }
 	;
 reclev_option_list:	record_level_option
 	|
@@ -626,17 +649,11 @@ picture:	TOK_PICTURE optional_is pic_text
 	;
 
 pict_usage_args:    TOK_BINARY
-                    { NIY("Usage is binary"); }
         |           TOK_COMPUTATIONAL
-                    { NIY("Usage is computational"); }
         |           TOK_COMP
-                    { NIY("Usage is comp"); }
         |           TOK_DISPLAY
-                    { NIY("Usage is display"); }
         |           TOK_INDEX
-                    { NIY("Usage is index"); }
         |           TOK_PACKED_DECIMAL
-                    { NIY("Usage is packed-decimal"); }
         ;
 
 value_entry:	TOK_VALUE optional_is value
@@ -650,7 +667,6 @@ value:		integer
 	
 working_storage_section:	TOK_WORKING_STORAGE TOK_SECTION TOK_PERIOD
 				record_entry_block
-	|
 	;
 record_entry_block:	record_level record_entry_block_pl
 	;
@@ -670,42 +686,81 @@ report_section:         TOK_REPORT TOK_SECTION TOK_PERIOD
                           { NIY("Report Section"); }
         ;
 
+screen_section:		TOK_SCREEN TOK_SECTION TOK_PERIOD
+			screen_field_list
+	;
+screen_field_list:	screen_field screen_field_list_pl
+	;
+screen_field_list_pl:	screen_field_list
+	|
+	;
+screen_field:	integer			{ BeginScreenField(); }
+		optional_field_name
+		field_def_list
+		TOK_PERIOD		{ EndScreenField(); }
+	;
+optional_field_name:	identifier	{ SetScreenFieldName(); }
+	|
+	;
+field_def_list:		field_def_clause field_def_list
+	|
+	;
+field_def_clause:	TOK_LINE integer	{ SetScreenFieldLine(); }
+	|		TOK_COLUMN integer	{ SetScreenFieldColumn(); }
+	|		TOK_FOREGROUND_COLOR integer { SetScreenForeColor(); }
+	|		TOK_BACKGROUND_COLOR integer { SetScreenBackColor(); }
+	|		TOK_VALUE optional_is value  { SetScreenDefaultValue(); }
+	|		TOK_PICTURE optional_is pic_text { SetScreenFieldPicture(); }
+	|		src_var_word identifier	     { SetScreenFieldSource(); }
+	|		TOK_HIGHLIGHT		{ SetScreenFieldAttr (FA_Bold); }
+	|		TOK_REVERSE_VIDEO	{ SetScreenFieldAttr (FA_Reverse); }
+	|		TOK_BLINK		{ SetScreenFieldAttr (FA_Blink); }
+	|		TOK_UNDERLINE		{ SetScreenFieldAttr (FA_Underline); }
+	|		TOK_BLANK TOK_SCREEN	{ SetScreenBlankFlag (TRUE); }
+	;
+src_var_word:		TOK_FROM
+	|		TOK_USING
+	;
+
 procedure_division:	TOK_PROCEDURE TOK_DIVISION using_option TOK_PERIOD
 			{ StartCode(); }
 			statement_list
 			{ GenEndProc(); EndCode(); }
 	;
 
-using_option:	TOK_USING using_identifier
+using_option:	TOK_USING using_id_list
 	|
 	;
 statement_list:		statement statement_list
 	|
 	;
 statement:	clause TOK_PERIOD
+	|	if_clause TOK_PERIOD
 	|	{ GenEndProc(); }
 		TOK_PROCEDURE identifier TOK_PERIOD
 		{ GenStartProc(); }
-	|	TOK_INITIALIZE initialize_args { NIY("Initialize"); }
+	|	TOK_INITIALIZE initialize_args TOK_PERIOD { NIY("Initialize"); }
         |       TOK_REPLACE TOK_OFF { NIY("Replace off"); } TOK_PERIOD
 	|	TOK_READ identifier { GenRead(); }
 		optional_word_record
 		optional_at_end_clause
 		TOK_PERIOD
-	|	identifier TOK_PERIOD { GenParagraph(); }
+	|	identifier id_statement { GenParagraph(); }
+	;
+id_statement:	TOK_PERIOD
+	|	TOK_SECTION TOK_PERIOD
 	;
 
-else_list:	TOK_ELSE { GenElse(); } compound_clause
-	|	elsif_list
-	|
-	; 
-elsif_list:	TOK_ELSIF elsif_clause elsif_list_pl
+if_clause:	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
 	;
-elsif_list_pl:	elsif_list
+if_args:	optional_then compound_clause if_args_end
+	;
+if_args_end:	TOK_ELSE { GenElse(); } optional_then compound_clause
+	|	TOK_ELSIF elsif_clause if_args_end
 	|
 	;
-elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); } 
-			compound_clause
+elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); }
+		optional_then compound_clause
 	;
 
 boolean_list:	boolean boolean_list_pl
@@ -727,6 +782,9 @@ boolean2:           TOK_ALPHABETIC
                  { strcpy (StringBuffer, "Alphabetic-Lower"); Push (SE_Bool); }
         |           relational
                       expression
+	|	{ strcpy (StringBuffer, "=="); Push (SE_Bool);
+		  ival = 0; Push (SE_Integer);
+		}
         ;
 	
 not_boolean_list:	not_boolean not_boolean_list_pl
@@ -741,6 +799,9 @@ not_boolean:	optional_lparen expression optional_is not_boolean2
         ;
 
 not_boolean2:	reverse_relational expression
+	|	{ strcpy (StringBuffer, "=="); Push (SE_Bool);
+		  ival = 0; Push (SE_Integer);
+		}
         ;
                     
 
@@ -775,7 +836,7 @@ reverse_relational:	TOK_GREATER optional_than
                 { strcpy (StringBuffer, ">"); Push (SE_Bool); }
 	;
 
-clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
+clause:		TOK_ACCEPT accept_args accept_option { GenAccept(); }
 	|	TOK_DISPLAY display_args upon_option { GenDisplay(); }
 	|	TOK_MOVE expression TOK_TO id_list { GenMove(); }
 	|	TOK_ADD expression TOK_TO id_list giving_option
@@ -784,25 +845,26 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 		{ GenSubtract(); }
 	|	TOK_MULTIPLY id_list TOK_BY expression giving_option
 		{ GenMultiply(); }
-	|	TOK_DIVIDE id_list divide_action_word expression 
-		giving_option round_option
-		{ GenDivide(); }
-		size_error_option
 	|	TOK_COMPUTE { Push (SE_Mark); } 
 		identifier round_option TOK_EQUAL 
 		{ opkind = OP_Equal; Push (SE_Operator); }
 		compute_expr_list
 		{ GenCompute(); }
 	|	TOK_GO TOK_TO identifier { GenGoto(); } 
-	|	TOK_PERFORM identifier perform_options { GenPerform(); }
+	|	TOK_PERFORM identifier perform_options end_perform
 	|	TOK_OPEN open_list
 	|	TOK_CLOSE id_list close_options { GenClose(); }
-	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
+	|	TOK_WRITE identifier write_from_clause write_options
+		{ GenWrite(); }
 	|	TOK_REWRITE identifier write_from_clause { GenRewrite(); }
-        |       TOK_CALL call_list using_options { NIY("CALL"); }
+        |       TOK_CALL { Push (SE_Mark); } call_list
+		{ Push (SE_Mark); } using_options { GenCall(); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
-	|	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
+	|	TOK_DIVIDE id_list divide_action_word expression 
+		giving_option round_option
+		{ GenDivide(); }
+		size_error_option
 	;
 
 optional_at_end_clause:	TOK_AT TOK_END compound_clause
@@ -814,6 +876,8 @@ compound_clause:	{ BeginCompound(); }
 			{ EndCompound(); }
 	;
 clause_list:	clause clause_list_pl
+	|	if_clause TOK_END_IF clause_list_pl
+	|	if_clause
 	;
 clause_list_pl:	clause_list
 	|
@@ -823,6 +887,11 @@ expression:	identifier
 	|	integer
 	|	float
 	|	string
+	;
+
+accept_args:	{ Push (SE_Mark); }
+		optional_at
+		id_list
 	;
 
 accept_option:  TOK_FROM from_arg
@@ -836,9 +905,13 @@ from_arg:       TOK_DATE { SetAcceptSource (AS_Date); }
 	|	TOK_CONSOLE { SetAcceptSource (AS_Console); }
         ;
 
-display_args:	{ Push (SE_Mark); } optional_all display_args_marked
+display_args:	{ Push (SE_Mark); } optional_at
+		{ Push (SE_Mark); } optional_all
+		display_args_marked
 	;
-
+optional_at:	TOK_LPAREN integer TOK_COMMA integer TOK_RPAREN
+	|
+	;
 display_args_marked:	display_arg display_args_pl
 	;
 display_args_pl: optional_comma	display_args_marked
@@ -868,11 +941,19 @@ round_option:	TOK_ROUNDED { SetResultRounding(); }
 
 size_error_option:	TOK_ON TOK_SIZE TOK_ERROR 
 			{ GenElse(); }
-			compound_clause
+			compound_clause TOK_PERIOD
 	|
 	;
 
-perform_options:	times_option varying_option
+perform_options:	thru_option times_option varying_option
+	;
+thru_option:	TOK_THRU identifier
+	|	{ Push (SE_Null); }
+	;
+end_perform:	TOK_UNTIL
+		{ Push (SE_Bool); GenPerform(); } not_boolean_list
+		{ GenEndPerformUntil(); }
+	| 	{ Push (SE_Null); GenPerform(); }
 	;
 times_option:	integer TOK_TIMES
 	|	{ ival = 1; 
@@ -968,36 +1049,27 @@ write_from_clause:	TOK_FROM identifier
 	|	{ strcpy (StringBuffer, ""); 
 		  Push (SE_Identifier); }
 	;
+write_options:	TOK_AFTER TOK_ADVANCING loop_iterator TOK_LINES
+	|	{ ival = 0; Push (SE_Integer); }
+	;
 
-call_list:     string
-         |     identifier
+call_list: 	string
+         |	identifier
          ;
 
-using_options: TOK_USING using_args using_identifier
+using_options:	TOK_USING using_id_list
         | 
         ;
-
-using_args:    optional_by using_by
+using_id_list:	identifier using_id_list_pl
+	|	TOK_BY TOK_REFERENCE using_id_list
+    	|	TOK_BY TOK_CONTENT using_id_list
+        ;
+using_id_list_pl:	TOK_COMMA using_id_list
+	|		using_id_list
         |
         ;
 
-using_by:      TOK_REFERENCE
-        |      TOK_CONTENT
-        ;
-
-using_identifier:   identifier using_inde_next
-        ;
-
-using_inde_next:    TOK_COMMA using_identifier
-        |
-        ;
-
-if_args:	optional_then if_args_2
-	;
-if_args_2:	compound_clause else_list
-	;
-
-initialize_args:	using_identifier replace_option
+initialize_args:	using_id_list replace_option
 	;
 
 replace_option:		TOK_REPLACING replace_next
@@ -1023,6 +1095,16 @@ id_list:	{ Push (SE_Mark); } id_list_marked
 id_list_marked: identifier id_list_pl
 	;
 id_list_pl:	optional_comma id_list_marked
+	|
+	;
+
+word_list:	TOK_IDENTIFIER word_list_pl
+	|	TOK_INTEGER word_list_pl
+	|	TOK_FLOAT word_list_pl
+	|	TOK_STRING word_list_pl
+	|	TOK_SLASH word_list_pl
+	;
+word_list_pl:	word_list
 	|
 	;
 
@@ -1094,6 +1176,9 @@ optional_lparen:	TOK_LPAREN
 optional_rparen:	TOK_RPAREN
 	|
 	;
+optional_times:         TOK_TIMES
+        |
+        ;
 
 identifier:	TOK_IDENTIFIER { Push (SE_Identifier); }
 	;

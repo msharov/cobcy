@@ -1,9 +1,9 @@
 CC	= gcc
-CFLAGS	= -Wall -O6 -pipe -I../adtlib/include
+CFLAGS	= -Wall -I../adtlib/include
 RM	= rm -f
-INSTALL	= install -s -m 755 
-AR	= ar
-RANLIB	= ranlib
+INSTALL	= cp 
+AR	= ar cr
+RANLIB	= ar s
  
 SRCS	= dbf.c ndx.c
 LIBOBJ	= dbf.o ndx.o
@@ -16,7 +16,7 @@ all:	${LIB}
  
 ${LIB}:	${LIBOBJ}
 	@echo Lumping ${LIB}
-	@${AR} ruv ${LIB} ${LIBOBJ}
+	@${AR} ${LIB} ${LIBOBJ}
 	@${RANLIB} ${LIB}
  
 .c.o:
@@ -24,7 +24,7 @@ ${LIB}:	${LIBOBJ}
 	@${CC} ${CFLAGS} -c $<
  
 clean:
-	@${RM} *.bak *~ ${LIBOBJ} ${LIB}
+	@${RM} .depend *.bak *~ ${LIBOBJ} ${LIB}
  
 depend: ${SRCS}
 	@${CC} ${CFLAGS} -MM ${SRCS} > .depend

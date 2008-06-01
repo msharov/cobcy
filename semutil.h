@@ -25,6 +25,8 @@
   void 	ReverseIdentifiers (WORD nIds);
   void	Push (StackEntryKind kind);
   BOOL	IsInSet (char c, char * set);
+  void	SetCursesUsed (BOOL newValue);
+  BOOL	GetCursesUsed (void);
 #ifndef NDEBUG
   void	PrintStackEntry (StackEntry * se);
   void	PrintStack (void);

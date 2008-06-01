@@ -36,6 +36,7 @@ protected:
 
 public:
 			PictureType (void);
+    virtual	       ~PictureType (void);
     WORD		Set (char * NewPicture);
     void		GenTypePrefix (ostream& os);
     void		GenTypeSuffix (ostream& os);
@@ -45,19 +46,24 @@ public:
     BOOL		GenCastFrom (ostream& os, PictureType& pic);
     BOOL		GenCastTo (ostream& os, PictureType& pic);
     virtual void	WriteTextStream (ostream& os);
-    inline BOOL		IsNumeric (void);
-    inline WORD		GetSize (void);
-    virtual	       ~PictureType (void);
+    inline BOOL		IsNumeric (void) const;
+    inline BOOL		IsInteger (void) const;
+    inline WORD		GetSize (void) const;
 };
 
 /*------------------------------------------------------------------------*/
 
-inline BOOL PictureType :: IsNumeric (void)
+inline BOOL PictureType :: IsNumeric (void) const
 {
     return (Kind == Integer || Kind == Float);
 }
 
-inline WORD PictureType :: GetSize (void)
+inline BOOL PictureType :: IsInteger (void) const
+{
+    return (Kind == Integer);
+}
+
+inline WORD PictureType :: GetSize (void) const
 {
     return (Size);
 }

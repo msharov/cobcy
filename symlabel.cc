@@ -14,7 +14,7 @@ CobolLabel :: CobolLabel (void)
 
 void CobolLabel :: GenDeclare (ostream& os)
 {
-    os << "int " << *this << " (void)\n";
+    os << "static int " << *this << " (void)\n";
     BeginCompound();
     os << *this << ":\n";
 }
@@ -35,6 +35,22 @@ void CobolLabel :: GenJump (ostream& os, CobolLabel * dest)
        os << "_pi_" << *dest << " - ";
        os << "_pi_" << *this << ");\n";
     }
+}
+
+void CobolLabel :: WriteBinaryStream (ostream& os)
+{
+    if (strcmp (FullCName, "main") == 0)
+	os << "cob_main";
+    else
+	os << FullCName;
+}
+
+void CobolLabel :: WriteTextStream (ostream& os)
+{
+    if (strcmp (FullCName, "main") == 0)
+	os << "cob_main";
+    else
+	os << FullCName;
 }
 
 CobolLabel :: ~CobolLabel (void)

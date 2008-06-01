@@ -13,6 +13,11 @@
 #include <limits.h>
 #include <assert.h>
 
+#ifdef __EMX__
+#define PATH_MAX _MAX_PATH
+#define MAXHOSTNAMELEN 255
+#endif
+
 #ifndef NeedFunctionPrototypes
 #   define NeedFunctionPrototypes		1
 #endif

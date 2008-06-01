@@ -1,7 +1,7 @@
 /* semcontrol.cc
-**
-**	Control statement semantics.
-*/
+ **
+ **	Control statement semantics.
+ */
 
 #ifdef __MSDOS__
 #include "semexter.h"
@@ -15,6 +15,7 @@
 #endif
 #include "symlabel.h"
 #include "symvar.h"
+#include "symconst.h"
 
 // This is just a very rough estimate of the maximum
 //	It will not really place the limit on how many paragraphs
@@ -23,41 +24,42 @@
 #define MAX_PARAGRAPHS		32000
 
 /*-----------------------| Globals |--------------------------*/
-  Queue<CobolLabel> 	ParagraphList;
-  CobolLabel *		CurPar = NULL;
-  char			CurLoopVar [32] = "";
-  int			LoopNesting = 0;
+Queue<CobolLabel> 	ParagraphList;
+CobolLabel *		CurPar = NULL;
+char			CurLoopVar [32] = "";
+int			LoopNesting = 0;
 /*------------------------------------------------------------*/
 
 void GenParagraph (void)
 {
-CobolLabel * NewLabel;
-StackEntry * CurEntry;
-char ErrorBuffer [80];
+    CobolLabel * NewLabel;
+    StackEntry * CurEntry;
+    char ErrorBuffer [80];
 
     CurEntry = SemStack.Pop();
 
     if ((NewLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
-       // Allocate new symbol table entry
-       NewLabel = new CobolLabel;
-       NewLabel->SetName (CurEntry->ident);
-       // Enter it in the table
+	// Allocate new symbol table entry
+	NewLabel = new CobolLabel;
+	NewLabel->SetName (CurEntry->ident);
+	NewLabel->Undeclared = FALSE;
+	// Enter it in the table
 #ifndef NDEBUG
-       cout << "DBG: Inserting paragraph " << CurEntry->ident;
-       cout << " into symbol table.\n";
+	cout << "DBG: Inserting paragraph " << CurEntry->ident;
+	cout << " into symbol table.\n";
 #endif
-       SymTable.Insert (CurEntry->ident, NewLabel);
+	SymTable.Insert (CurEntry->ident, NewLabel);
     }
     else {
-       if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
-	  NewLabel->Undeclared = FALSE;
-       else {
-	  sprintf (ErrorBuffer, "name %s is already used", 
-	  		NewLabel->GetName());
-	  WriteError (ErrorBuffer);
-	  delete CurEntry;
-	  return;
-       }
+	if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
+	    NewLabel->Undeclared = FALSE;
+	else {
+	    sprintf (ErrorBuffer, "name %s is already used", 
+		    NewLabel->GetName());
+	    WriteError (ErrorBuffer);
+	    delete CurEntry;
+	    return;
+	}
     }
     delete (CurEntry);
 
@@ -73,21 +75,82 @@ char ErrorBuffer [80];
     ParagraphList.Append (NewLabel);
 }
 
+void GenCall (void)
+{
+    typedef struct {
+	enum { constant, variable } id;
+	StackEntry*	pc;
+	CobolData*	pv;
+    } SArg;
+
+    int nArgs = CountIdentifiers();
+    SArg* argArray = NULL;
+    if (nArgs > 0) {
+	argArray = new SArg [nArgs];
+	assert (argArray != NULL);
+	for (int i = 0; i < nArgs; ++ i) {
+	    StackEntryPtr pEntry = SemStack.Pop();
+	    argArray[i].id = SArg::variable;
+	    if (pEntry->kind == SE_Identifier) {
+		argArray[i].pv = (CobolData*) SymTable.Lookup (pEntry->ident);
+		if (argArray[i].pv == NULL)
+		    WriteError ("unknown argument to CALL");
+	    }
+	    else if (pEntry->kind == SE_String)
+		argArray[i].pc = pEntry;
+	    else
+		WriteError ("invalid function name to CALL. Must be ID or String");
+	}
+    }
+    int nFuncs = CountIdentifiers();
+    if (nFuncs == 0)
+	WriteError ("no function names to CALL");
+    for (int i = 0; i < nFuncs; ++ i) {
+	StackEntryPtr pEntry = SemStack.Pop();
+	GenIndent();
+	if (pEntry->kind == SE_Identifier) {
+	    CobolData* pv = (CobolData*) SymTable.Lookup (pEntry->ident);
+	    if (pv == NULL) {
+		WriteError ("unknown argument to CALL");
+		continue;
+	    }
+	    codef << *pv;
+	}
+	else if (pEntry->kind == SE_String)
+	    codef << pEntry->ident;
+	else
+	    WriteError ("invalid argument to CALL");
+	codef << " (";
+	for (int j = 0; j < nArgs; ++ j) {
+	    if (argArray[j].id == SArg::variable && argArray[j].pv != NULL)
+		codef << *argArray[j].pv;
+	    else if (argArray[j].id == SArg::constant)
+		codef << argArray[j].pc->ident;
+	    if (j < nArgs - 1)
+		codef << ", ";
+	}
+	codef << ");\n";
+    }
+    for (int j = 0; j < nArgs; ++ j)
+	if (argArray[j].id == SArg::constant)
+	    delete argArray[j].pc;
+}
+
 void GenGoto (void)
 {
-CobolLabel * DestLabel;
-StackEntry * CurEntry;
+    CobolLabel * DestLabel;
+    StackEntry * CurEntry;
 
     CurEntry = SemStack.Pop();
 
     if ((DestLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
-       DestLabel = new CobolLabel;
-       DestLabel->SetName (CurEntry->ident);
+	DestLabel = new CobolLabel;
+	DestLabel->SetName (CurEntry->ident);
 #ifndef NDEBUG
-       cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
+	cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
 #endif
-       DestLabel->Undeclared = TRUE;
-       SymTable.Insert (CurEntry->ident, DestLabel);
+	DestLabel->Undeclared = TRUE;
+	SymTable.Insert (CurEntry->ident, DestLabel);
     }
     delete (CurEntry);
 
@@ -96,44 +159,86 @@ StackEntry * CurEntry;
 
 void GenPerform (void)
 {
-StackEntry * Proc, * Count;
-CobolLabel * ProcAttr;
+    StackEntry * Proc, * EndProc, * Count, * UntilOption;
+    CobolLabel * ProcAttr, * EndProcAttr = NULL;
 
+    UntilOption = SemStack.Pop();
     Count = SemStack.Pop();
+    EndProc = SemStack.Pop();
     Proc = SemStack.Pop();
 
     if ((ProcAttr = (CobolLabel*) SymTable.Lookup (Proc->ident)) == NULL) {
-       ProcAttr = new CobolLabel;
-       ProcAttr->SetName (Proc->ident);
-       ProcAttr->Undeclared = TRUE;
+	ProcAttr = new CobolLabel;
+	ProcAttr->SetName (Proc->ident);
+	ProcAttr->Undeclared = TRUE;
 #ifndef NDEBUG
-       cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
+	cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
 #endif
-       SymTable.Insert (Proc->ident, ProcAttr);
+	SymTable.Insert (Proc->ident, ProcAttr);
     }
 
+    if (EndProc->kind == SE_Identifier &&
+	    (EndProcAttr = (CobolLabel*) SymTable.Lookup (EndProc->ident)) == NULL)
+    {
+	EndProcAttr = new CobolLabel;
+	EndProcAttr->SetName (EndProc->ident);
+	EndProcAttr->Undeclared = TRUE;
+#ifndef NDEBUG
+	cout << "DBG: Forward declaring end proc " << EndProc->ident << "\n";
+#endif
+	SymTable.Insert (EndProc->ident, EndProcAttr);
+    }
+
+    if (UntilOption->kind == SE_Bool) {	// marking an UNTIL
+	GenIndent(); codef << "do\n";
+	GenIndent(); codef << "{\n";
+	++ NestingLevel;
+    }
     if (Count->ival > 1) {
-       GenIndent();
-       codef << "for (_index = 0; _index < " << Count->ival;
-       codef << "; ++ _index)\n";
-       ++ NestingLevel;
+	GenIndent();
+	codef << "for (_index = 0; _index < " << Count->ival;
+	codef << "; ++ _index)\n";
+	++ NestingLevel;
     }
 
     GenIndent();
-    ProcAttr->WriteTextStream (codef);
-    codef << "();\n";
+    if (EndProcAttr == NULL) {
+	ProcAttr->WriteTextStream (codef);
+	codef << "();\n";
+    }
+    else {
+	codef << "_CallParagraphSequence (_pi_";
+	ProcAttr->WriteTextStream (codef);
+	codef << ", _pi_";
+	EndProcAttr->WriteTextStream (codef);
+	codef << ");\n";
+    }
 
     if (Count->ival > 1)
-       -- NestingLevel;
+	-- NestingLevel;
+
+    // Close the UNTIL loop and prepare for the booleans
+    if (UntilOption->kind == SE_Bool) {
+	-- NestingLevel;
+	GenIndent(); codef << "}\n";
+	GenIndent(); codef << "while (";
+    }
 
     // Take care of the loops generated by VARYING statements
     while (LoopNesting > 0) {
-       -- LoopNesting;
-       -- NestingLevel;
+	-- LoopNesting;
+	-- NestingLevel;
     }
 
     delete Count;
     delete Proc;
+    delete EndProc;
+    delete UntilOption;
+}
+
+void GenEndPerformUntil (void)
+{
+    codef << ");\n";
 }
 
 // This ends either a procedure or a paragraph
@@ -192,67 +297,94 @@ void GenElse (void)
 
 void GenBool (void)
 {
-StackEntry *entry[3];
-CobolVar *attrs[2];
-int i;
+    StackEntry *entry[3];
+    CobolVar *attrs[2];
+    int i;
+#ifndef NDEBUG
+    cout << "\tIn GenBool\n";
+#endif
 
-    for (i = 0; i < 2; ++ i)
-       entry[i] = SemStack.Pop(); 
-    
-    if (!(strcmp(entry[0]->ident,"Alphabetic")) ||
-        !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
-        !(strcmp(entry[0]->ident,"Alphabetic-Lower")) )
+    entry[0] = SemStack.Pop(); 
+    entry[1] = SemStack.Pop();
+
+    if (!(strcmp(entry[0]->ident,"alphabetic")) ||
+	     !(strcmp(entry[0]->ident,"alphabetic-upper")) ||
+	     !(strcmp(entry[0]->ident,"alphabetic-lower")))
     {  
-       if ((attrs[0] = (CobolVar*) LookupIdentifier (entry[1]->ident)) == NULL)
-	  return;
+	if ((attrs[0] = (CobolVar*) LookupIdentifier (entry[1]->ident)) == NULL) {
+	    WriteError ("unknown identifier in boolean");
+	    return;
+	}
 
-       if (attrs[0]->IsNumeric()) {
-          WriteError ("cannot do alphabetic tests on non-strings");
-          return;
-       }
+	if (attrs[0]->IsNumeric()) {
+	    WriteError ("cannot do alphabetic tests on non-strings");
+	    return;
+	}
 
-       if (!strcmp(entry[0]->ident,"Alphabetic"))
-	  codef << "(_Alphabetic (" << entry[1]->ident << "))";
-       if (!strcmp(entry[0]->ident,"Alphabetic-Upper"))
-	  codef << "(_AlphabeticCase (" << entry[1]->ident << ",2))";
-       if (!strcmp(entry[0]->ident,"Alphabetic-Lower"))
-	  codef << "(_AlphabeticCase (" << entry[1]->ident << ",1))";
+	if (!strcmp(entry[0]->ident,"alphabetic"))
+	    codef << "(_Alphabetic (" << *attrs[0] << "))";
+	if (!strcmp(entry[0]->ident,"alphabetic-upper"))
+	    codef << "(_AlphabeticCase (" << *attrs[0] << ",2))";
+	if (!strcmp(entry[0]->ident,"alphabetic-lower"))
+	    codef << "(_AlphabeticCase (" << *attrs[0] << ",1))";
 
-       delete entry[0]; 
-       delete entry[1];
+	delete entry[0]; 
+	delete entry[1];
     }
     else {
-       entry[2] = SemStack.Pop();
-	 
-       if (entry[0]->kind == SE_Identifier)
-	  if ((attrs[0] = (CobolVar*) 
-	   		  LookupIdentifier (entry[0]->ident)) == NULL)
-	     return;
-       if (entry[2]->kind == SE_Identifier)
-	  if ((attrs[1] = (CobolVar*) 
-	   		  LookupIdentifier (entry[2]->ident)) == NULL)
-	     return;
+	entry[2] = SemStack.Pop();
 
-       codef << "(";
-       if (entry[2]->kind == SE_Identifier)
-	  attrs[1]->WriteTextStream (codef); 
-       else
-	  PrintConstant (entry[2], codef); 
-       codef << " " << entry[1]->ident << " ";
-       if (entry[0]->kind == SE_Identifier)
-	  attrs[0]->WriteTextStream (codef);
-       else
-	  PrintConstant (entry[0], codef);
-       codef << ")";
+	if (entry[0]->kind == SE_Identifier)
+	    if ((attrs[0] = (CobolVar*) LookupIdentifier (entry[0]->ident)) == NULL)
+		return;
+	if (entry[2]->kind == SE_Identifier)
+	    if ((attrs[1] = (CobolVar*) LookupIdentifier (entry[2]->ident)) == NULL)
+		return;
 
-       for (i = 0; i < 3; ++ i)
-	  delete entry[i];
+ 	if (attrs[0]->IsNumeric() != attrs[2]->IsNumeric())
+	    WriteError ("comparing numeric and non-numeric value");
+
+	if (entry[0]->kind == SE_Identifier && !attrs[0]->IsNumeric()) {
+	    #ifndef NDEBUG
+	        cout << "\tIn GenBool Character\n";
+	    #endif
+	    codef << "(strcmp(";
+	    if (entry[2]->kind == SE_Identifier)
+		attrs[1]->WriteTextStream (codef); 
+	    else
+		PrintConstant (entry[2], codef); 
+	    codef << " , ";
+	    if (entry[0]->kind == SE_Identifier)
+		attrs[0]->WriteTextStream (codef);
+	    else
+		PrintConstant (entry[0], codef);
+	    codef <<") " << entry[1]->ident << " 0 ";
+	    codef << ")";
+	}
+	else {
+	    #ifndef NDEBUG
+	    	cout << "\tIn GenBool Numeric\n";
+	    #endif
+	    codef << "(";
+	    if (entry[2]->kind == SE_Identifier)
+		attrs[1]->WriteTextStream (codef); 
+	    else
+		PrintConstant (entry[2], codef); 
+	    codef << " " << entry[1]->ident << " ";
+	    if (entry[0]->kind == SE_Identifier)
+		attrs[0]->WriteTextStream (codef);
+	    else
+		PrintConstant (entry[0], codef);
+	    codef << ")";
+	}
+	for (i = 0; i < 3; ++ i)
+	    delete entry[i];
     } 
 }
 
 void GenConnect (void)
 {
-StackEntry * CurEntry;
+    StackEntry * CurEntry;
 
     CurEntry = SemStack.Pop();
     codef << " " << CurEntry->ident << " ";
@@ -272,22 +404,23 @@ void GenStopRun (void)
 
 void GenParagraphCalls (void)
 {
-CobolLabel * CurLabel;
-Queue<CobolLabel> TempBufQueue;
-int pi = 0, nPars = 0;
+    CobolLabel * CurLabel;
+    Queue<CobolLabel> TempBufQueue;
+    long int pi = 0, nPars = 0;
 
     // First count the paragraphs
     while (!ParagraphList.IsEmpty()) {
-       TempBufQueue.Append (ParagraphList.Serve());
-       ++ nPars;
+	TempBufQueue.Append (ParagraphList.Serve());
+	++ nPars;
     }
     // Now make the references, restoring ParagraphList for further analysis
+    declf << "const int _pi__FirstParagraph = 0;\n";
     for (pi = 1; pi <= nPars; ++ pi) {
-       CurLabel = TempBufQueue.Serve();
-       declf << "const int _pi_";
-       CurLabel->WriteTextStream (declf);
-       declf << " = " << pi << ";\n";
-       ParagraphList.Append (CurLabel);
+	CurLabel = TempBufQueue.Serve();
+	declf << "const int _pi_";
+	CurLabel->WriteTextStream (declf);
+	declf << " = " << pi << ";\n";
+	ParagraphList.Append (CurLabel);
     }
 
     // The calling structure is basically a while loop with a switch statement
@@ -295,19 +428,20 @@ int pi = 0, nPars = 0;
     //	that switch statement to decide which paragraph to execute. This is
     //	done to support complex calling chains with gotos.
     //	And it is <= because you can call par 10 if there are 10 pars
-    GenIndent();
-    codef << "_cpi = _pi__FirstParagraph;\n";
-    GenIndent();
-    codef << "while (_cpi <= " << nPars << ")\n";
-    GenIndent();
-    codef << "{\n";
+    GenIndent(), codef << "_cpi = _startCpi;\n";
+    GenIndent(), codef << "if (_endCpi < 0 || _endCpi > " << nPars << ")\n";
+    ++ NestingLevel;
+    GenIndent(), codef << "_endCpi = " << nPars << ";\n";
+    -- NestingLevel;
+    GenIndent(), codef << "while (_cpi <= _endCpi)\n";
+    GenIndent(), codef << "{\n";
     ++ NestingLevel;
 
     // Debugging information is generated with -g switch
     if (CobcyConfig.GenDebug) {
-       GenIndent();
-       codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\"";
-       codef << ", _cpi, " << nPars << ");\n";
+	GenIndent();
+	codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\"";
+	codef << ", _cpi, " << nPars << ");\n";
     }
 
     // This is the switch statement
@@ -319,17 +453,17 @@ int pi = 0, nPars = 0;
 
     // Each paragraph call will return the displacement from current
     GenIndent();
-    codef << "case 0: _cpi += _FirstParagraph (); break;\n";
+    codef << "case 0: _cpi += _FirstParagraph(); break;\n";
     // Could use the above defined constants here, but they would just
     //	add more clutter :)
     pi = 0;
     while (!ParagraphList.IsEmpty()) {
-       ++ pi;
-       CurLabel = ParagraphList.Serve();
-       GenIndent();
-       codef << "case " << pi << ": _cpi += ";
-       CurLabel->WriteTextStream (codef);
-       codef << "(); break;\n";
+	++ pi;
+	CurLabel = ParagraphList.Serve();
+	GenIndent();
+	codef << "case " << pi << ": _cpi += ";
+	CurLabel->WriteTextStream (codef);
+	codef << "(); break;\n";
     }
 
     // This should never happen, but if it does, quit gracefully
@@ -363,8 +497,8 @@ void GenStartLoop (void)
 
 void GenLoopInit (void)
 {
-StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
-			    // 	initial value
+    StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
+    // 	initial value
 
     ival = SemStack.Pop();
     ivar = SemStack.Pop();
@@ -376,11 +510,11 @@ StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
 
     codef << " = ";
     if (ival->kind == SE_Identifier)
-       PrintIdentifier (ival->ident, codef);
+	PrintIdentifier (ival->ident, codef);
     else
-       PrintConstant (ival, codef);
+	PrintConstant (ival, codef);
     codef << "; ";
-    
+
     // This will be followed by a boolean or an end-value condition, which is
     //	a special case of a boolean.
 
@@ -394,16 +528,16 @@ StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
 //	The problem is that from, to, and increment values can be variables.
 void GenLoopCondition (void)
 {
-StackEntry * endval;
+    StackEntry * endval;
 
     endval = SemStack.Pop();
 
     PrintIdentifier (CurLoopVar, codef);
     codef << " <= ";
     if (endval->kind == SE_Identifier)
-       PrintIdentifier (endval->ident, codef);
+	PrintIdentifier (endval->ident, codef);
     else
-       PrintConstant (endval, codef);
+	PrintConstant (endval, codef);
 
     // Let GenLoopIncrement take care of the semicolon
 
@@ -414,7 +548,7 @@ StackEntry * endval;
 //	Note that the increment can be a variable
 void GenLoopIncrement (void)
 {
-StackEntry * incr;
+    StackEntry * incr;
 
     incr = SemStack.Pop();
 
@@ -424,9 +558,9 @@ StackEntry * incr;
     PrintIdentifier (CurLoopVar, codef);
     codef << " += ";
     if (incr->kind == SE_Identifier)
-       PrintIdentifier (incr->ident, codef);
+	PrintIdentifier (incr->ident, codef);
     else
-       PrintConstant (incr, codef);
+	PrintConstant (incr, codef);
     codef << ")\n";
     // No braces are needed, since there will only be one statement in the
     //	innermost loop (the procedure call)

@@ -15,6 +15,7 @@
 #include "semutil.h"
 #include "semconio.h"
 #include "semcontrol.h"
+#include "semscreen.h"
 
 #endif
 

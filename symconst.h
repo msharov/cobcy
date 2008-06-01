@@ -27,24 +27,31 @@ protected:
 
 public:
 				CobolConstant (void);
-				CobolConstant (char * cval);
+				CobolConstant (char* cval);
+				CobolConstant (StackEntry* cval);
 				CobolConstant (long int ival);
 				CobolConstant (double fval);
+    virtual		       ~CobolConstant (void);
     CobolConstant&		operator= (char * cval);
     CobolConstant&		operator= (long int ival);
     CobolConstant&		operator= (double fval);
     CobolConstant&		operator= (StackEntry * se);
     virtual void		WriteTextStream (ostream& os);
     void			GenWrite (ostream& os, char * stream);
-    inline BOOL			IsNumeric (void);
-    virtual		       ~CobolConstant (void);
+    inline BOOL			IsNumeric (void) const;
+    inline BOOL			IsInteger (void) const;
 };
 
 /*---------------------------------------------------------------------------*/
 
-inline BOOL CobolConstant :: IsNumeric (void)
+inline BOOL CobolConstant :: IsNumeric (void) const
 {
     return (CurKind == CC_Integer || CurKind == CC_Float);
+}
+
+inline BOOL CobolConstant :: IsInteger (void) const
+{
+    return (CurKind == CC_Integer);
 }
 
 #endif

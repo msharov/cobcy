@@ -23,7 +23,7 @@ void CobolRecord :: AddChild (CobolData * NewChild)
     ++ nChildren;
     ChildList.Tail();
     ChildList.InsertAfter (NewChild);
-    CSize += NewChild->GetSize();
+    Size += NewChild->GetSize();
 }
 
 CobolSymbolType CobolRecord :: Kind (void)
@@ -40,10 +40,13 @@ void CobolRecord :: GenDeclareBegin (ostream& os)
 void CobolRecord :: GenDeclareEnd (ostream& os)
 {
     GenIndent();
-    os << "} " << GetCName() << ";\n";
+    os << "} " << GetCName();
+    if (ArraySize > 1)
+	os << " [" << ArraySize << "]";
+    os << ";\n";
 }
 
-void CobolRecord :: GenRead (ostream& os, char * stream)
+void CobolRecord :: GenRead (ostream& os, const char * stream)
 {
 unsigned int i;
 CobolData * child;
@@ -63,7 +66,7 @@ CobolData * child;
     }
 }
 
-void CobolRecord :: GenWrite (ostream& os, char * stream)
+void CobolRecord :: GenWrite (ostream& os, const char * stream)
 {
 unsigned int i;
 CobolData * child;

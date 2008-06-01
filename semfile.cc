@@ -228,13 +228,35 @@ CobolSymbol * ToWrite;
 	WriteError ("cannot write that");
 }
 
+static void GenAdvanceLines (StackEntryPtr advanceLines, CobolFile* destStream)
+{
+    if (destStream->GetOrganization() != ORG_Sequential &&
+	destStream->GetOrganization() != ORG_Line_sequential)
+	WriteError ("AFTER ADVANCING only works with sequential files");
+    else {
+	GenIndent();
+	codef << "for (_index = 0; _index < ";
+	if (advanceLines->kind == SE_Identifier)
+	    PrintIdentifier (advanceLines->ident, codef);
+	else
+	    PrintConstant (advanceLines, codef);
+	codef << "; ++ _index)\n";
+	GenIndent(); GenIndent();
+	codef << "fprintf (" << *destStream << ", \"\\n\");\n";
+    }
+}
+
 void GenWrite (void)
 {
 CobolData * ToWriteFrom;
 CobolFile * DestStream;
-    
+StackEntryPtr advanceLines;
+
+    advanceLines = SemStack.Pop();
     FileWriteSetup (&DestStream, &ToWriteFrom);
     DestStream->GenSetupForAppend (codef);
+    GenAdvanceLines (advanceLines, DestStream);
+    delete advanceLines;
     DestStream->GenWriteData (codef, (CobolData*) ToWriteFrom);
     DestStream->GenWriteEnd (codef);
 }

@@ -25,7 +25,7 @@ CobolVar :: CobolVar (void)
 
 void CobolVar :: SetPicture (char * NewPicture)
 {
-    CSize = Picture.Set (NewPicture);
+    Size = Picture.Set (NewPicture);
 }
 
 CobolSymbolType CobolVar :: Kind (void)
@@ -38,11 +38,13 @@ void CobolVar :: GenDeclare (ostream& os)
     GenIndent();
     Picture.GenTypePrefix (os);
     os << " " << GetCName();
+    if (ArraySize > 1)
+	os << " [" << ArraySize << "]";
     Picture.GenTypeSuffix (os);
     os << ";\n";
 }
 
-void CobolVar :: GenRead (ostream& os, char * stream)
+void CobolVar :: GenRead (ostream& os, const char * stream)
 {
 #ifndef NDEBUG
     cout << "\t\tReading variable " << *this;
@@ -54,7 +56,7 @@ void CobolVar :: GenRead (ostream& os, char * stream)
     os << "\"" << Picture << "\");\n";
 }
 
-void CobolVar :: GenWrite (ostream& os, char * stream)
+void CobolVar :: GenWrite (ostream& os, const char * stream)
 {
 #ifndef NDEBUG
     cout << "\t\tWriting variable " << *this;

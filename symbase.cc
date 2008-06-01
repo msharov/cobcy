@@ -24,22 +24,26 @@ CobolSymbol :: CobolSymbol (void)
 
 void CobolSymbol :: CobolToCName (char * str)
 {
-unsigned int i;
-    for (i = 0; i < strlen(str); ++ i)
+    for (size_t i = 0; i < strlen(str); ++ i)
        if (str[i] == '-')
 	  str[i] = '_';
 }
 
-void CobolSymbol :: SetName (char * NewName)
+void CobolSymbol :: CreateFullCName (void)
 {
-    strcpy (CobolName, NewName);
-    strcpy (CName, NewName);
-    CobolToCName (CName); 
     strcpy (FullCName, Prefix);
     strcat (FullCName, CName);
 }
 
-void CobolSymbol :: SetParent (char * NewParent)
+void CobolSymbol :: SetName (const char * NewName)
+{
+    strcpy (CobolName, NewName);
+    strcpy (CName, NewName);
+    CobolToCName (CName); 
+    CreateFullCName();
+}
+
+void CobolSymbol :: SetParent (const char * NewParent)
 {
 CobolSymbol * pattr;
 char ErrorBuffer [80];
@@ -47,7 +51,6 @@ char ErrorBuffer [80];
     if (NewParent == NULL) {
        memset (ParentCobolName, MAX_SYMBOL_LENGTH, 0);
        memset (Prefix, MAX_PREFIX_LENGTH, 0);
-       strcpy (FullCName, CName);
     }
     else {
        if ((pattr = SymTable.Lookup (NewParent)) == NULL) {
@@ -58,13 +61,11 @@ char ErrorBuffer [80];
 	  return;
        }
 
-       strcpy (Prefix, pattr->Prefix);
-       strcat (Prefix, pattr->CName);
+       strcpy (Prefix, pattr->FullCName);
        strcat (Prefix, ".");
-
-       strcpy (FullCName, Prefix);
-       strcat (FullCName, CName);
+       strcpy (ParentCobolName, pattr->CobolName);
     }
+    CreateFullCName();
 }
 
 void CobolSymbol :: WriteBinaryStream (ostream& os)

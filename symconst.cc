@@ -13,7 +13,7 @@ CobolConstant :: CobolConstant (void)
     data.cval = NULL;
 }
 
-CobolConstant :: CobolConstant (char * cval)
+CobolConstant :: CobolConstant (char* cval)
 {
 int length;
     length = strlen (cval);
@@ -21,6 +21,13 @@ int length;
     strncpy (data.cval, cval, length);
     data.cval [length] = '\x0';
     CurKind = CC_String;
+}
+
+CobolConstant :: CobolConstant (StackEntry* pEntry)
+{
+    CurKind = CC_Undefined;
+    data.cval = NULL;
+    operator= (pEntry);
 }
 
 CobolConstant :: CobolConstant (long int ival)
@@ -120,7 +127,7 @@ void CobolConstant :: WriteTextStream (ostream& os)
 void CobolConstant :: GenWrite (ostream& os, char * stream)
 {
     GenIndent();
-    os << "fprintf (" << stream << ", \"";
+    os << "_WriteStringVar (" << stream << ", \"";
     switch (CurKind) {
        case CC_String:	os << data.cval;	break;
        case CC_Integer:	os << data.ival;	break;
@@ -128,7 +135,7 @@ void CobolConstant :: GenWrite (ostream& os, char * stream)
        default:		WriteError ("constant type unknown for writing");
        			break;
     }
-    os << "\");\n";
+    os << "\", NULL);\n";
 }
 
 CobolConstant :: ~CobolConstant (void)

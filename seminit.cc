@@ -11,6 +11,7 @@
 #include "semcontrol.h"
 #endif
 #include "semdecl.h"
+#include "semscreen.h"
 #include "semfile.h"
 #include "symfile.h"
 #include "symvar.h"
@@ -30,6 +31,7 @@ void FinishDecl (void)
     cout << "DBG: Finishing declarations\n";
 #endif
     CloseScopeLevels (0);
+    CloseScreenSection();
     AssociateRecordsWithFD();
     codef << "\n";
 }
@@ -46,7 +48,7 @@ void StartCode (void)
     cout << "DBG: Beginning first paragraph\n";
 #endif
     GenIndent();
-    codef << "int _FirstParagraph (void)\n";
+    codef << "static int _FirstParagraph (void)\n";
     codef << "{\n";
     ++ NestingLevel;
 
@@ -55,22 +57,42 @@ void StartCode (void)
 
 void EndCode (void)
 {
+    if (!SemStack.IsEmpty())
+	WriteError ("leftover stack entries");
 #ifndef NDEBUG
-    cout << "DBG: Finished code, genrating main()\n";
+    cout << "DBG: Finished code, generating main()\n";
 #endif
+    codef << "\n";
+    codef << "void _CallParagraphSequence (long int _startCpi, long int _endCpi)\n";
+    codef << "{\n";
+    ++ NestingLevel;
+    codef << "long int _cpi = 0;\n";
+    codef << "\n";
+    GenParagraphCalls();
+    -- NestingLevel;
+    codef << "}\n";
     codef << "\n";
     codef << "int main ()\n";
     codef << "{\n";
     ++ NestingLevel;
 
+    if (CobcyConfig.UseCurses && GetCursesUsed()) {
+	GenIndent(); codef << "_EnableCurses();\n";
+	GenIndent(); codef << "initscr();\n";
+	GenIndent(); codef << "if (has_colors())\n";
+	GenIndent(); GenIndent(); codef << "start_color();\n";
+	GenIndent(); codef << "echo(); nocbreak(); noraw();\n";
+    }
     GenIndent();
-    codef << "_SetVarValues();\n\n";
+    codef << "_SetVarValues();\n";
     OpenSpecialFiles();		// Generates code if there are any
-
-    GenParagraphCalls();
+    GenIndent();
+    codef << "_CallParagraphSequence (_pi__FirstParagraph, -1);\n";
     CloseSpecialFiles();
-
-    codef << "\n";
+    if (CobcyConfig.UseCurses && GetCursesUsed()) {
+	GenIndent();
+	codef << "endwin();\n";
+    }
     GenIndent();
     codef << "return (0);\n";
     -- NestingLevel;
@@ -100,23 +122,20 @@ CobolFile * NewFile;
     codef << "#include <stdio.h>\n";	// For files and IO
     codef << "#include <string.h>\n";	// For memset
     codef << "#include <cobfunc.h>\n";	// For internal functions
+    if (CobcyConfig.UseCurses)
+	codef << "#include <ncurses.h>\n";  // For AT in DISPLAY and ACCEPT
 
     // This is the file for forward function declarations, their indices, etc.
     codef << "#include \"" << CobcyConfig.DeclFile << "\"\n\n";
 
-    codef << "char _space_var [201];\n";
-    codef << "long int _zero_var = 0;\n";
-    codef << "long int _index = 0;\n";	// Loop iterator
+    codef << "static char _space_var [201];\n";
+    codef << "static long int _zero_var = 0;\n";
+    codef << "static long int _index = 0;\n";	// Loop iterator
+    codef << "\n";
+    codef << "static void _CallParagraphSequence (long int _startCpi, long int _endCpi);\n";
     codef << "\n";
 
-    // First paragraph's index is defined in the source file, since
-    //	in the future separate compilation is possible and first paragraph
-    //	is defined in every module.
-    codef << "const long int _pi__FirstParagraph = 0;\n";
     // This is Current Paragraph Index
-    codef << "long int _cpi;\n";	
-    codef << "\n";
-
     SymTable.Clear();
 
     // Space filler variable
