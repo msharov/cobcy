@@ -1,0 +1,55 @@
+
+			+-----------------------+
+			|       C O B C Y       |
+			+-----------------------+
+			|      Version 0.2      |
+			+-----------------------+
+
+Cobcy is a free (GPL) cobol compiler. It compiles cobol code into
+frequently messy, but readable C (confusion is mostly due to long 
+variable names). Turning wrapping off while viewing helps a lot.
+Current capabilities include a lot of basic COBOL, but several features,
+like arrays, strings, and record-record MOVEs are still missing.
+
+cleantest, cobol, and most the other scripts are for BASH. 
+They assume that /bin/sh is BASH-compatible. If that's not right - edit.
+If you use CC, the dependencies cannot be automatically created.
+Try using Makefile.CC
+
+	QuickStart:
+	-----------
+	* run the configure script
+	* run make depend
+	* run make
+	* compile things using 'cobol program.cob'
+
+There are some tests available in the 'tests' directory, the working 
+ones are listed in WORKING_TESTS file in this directory.
+You can run numbered tests [1-x] by typing 'run [1-x]'. For others,
+type in the full name. See the 'run' script for more info.
+
+Yes, there are some more docs available (Yippee!!), although still
+not very abundant; mostly code overview for hackers. Users may want
+to read the syntax guide and stop there.
+
+If you add code, I would appreciate it if you read CODE.STY file.
+
+If you have a problem, run cobcy with -g flag and no NDEBUG macro 
+(defined in the Makefile) and send me the output of
+thus generated program, the generated C code (.c and .h), and the
+test file you used. Feel free to find bugs on your own though :)
+
+-------------------------------------------------------------------------
+
+You can reach me at msharov@bev.net, the account valid until at least
+December of 1996. A PGP public key is available for privacy nuts like me:
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: 2.6.2
+
+mQBNAi9AGmEAAAECANxTRcdjDRoswqW+uWOh9NdKOqcqk/6Yut6qeQGiGRms8pGX
+j1R1gf9GcJ4u2kVtzrvM2WxBgk2lVwVJAQEk1A8ABRG0L01pa2UgU2hhcm92IDxt
+c2hhcm92QHJ1Y3MyLnN1bmxhYi5jcy5ydW5ldC5lZHU+
+=4BeI
+-----END PGP PUBLIC KEY BLOCK-----
+

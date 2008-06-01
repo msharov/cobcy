@@ -1,0 +1,9 @@
+#! /bin/sh
+rm -rf /tmp/cobcy
+mkdir /tmp/cobcy
+cp -r * /tmp/cobcy
+make -C /tmp/cobcy clean
+pushd /tmp
+tar cvf - cobcy | gzip -9 > ~/cobcy.tgz
+popd
+rm -rf /tmp/cobcy

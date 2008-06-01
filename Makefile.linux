@@ -1,0 +1,71 @@
+CPP	= g++
+CC	= gcc
+AR	= ar
+RANLIB	= ranlib
+
+#OPTIM	= -O2
+OPTIM	=
+
+CFLAGS	= -w $(OPTIM) -I./adtlib -DCAN_HAVE_STDIO
+
+LEX	= lex
+YACC	= yacc
+
+LIBS	= -ll
+
+EXE	= cobcy
+SRCS	= main.cc semdecl.cc symbol.cc semutil.cc semarith.cc seminfo.cc \
+	seminit.cc semfile.cc semconio.cc semcontrol.cc \
+	cobfunc.c
+OBJS	= main.o semdecl.o symbol.o semutil.o semarith.o seminfo.o \
+	seminit.o semfile.o semconio.o semcontrol.o \
+	cobol_lex.o cobol_yacc.o 
+
+CLIB	= libcobol.a
+COBJS	= cobfunc.o
+
+#############################################
+
+all:	$(EXE) $(CLIB)
+
+$(EXE):	$(OBJS)
+	$(CPP) -o $(EXE) $(OBJS) $(LIBS)
+	strip $(EXE)
+
+cobol_lex.c:	cobol.l y.tab.h
+	$(LEX) cobol.l 
+	mv lex.yy.c cobol_lex.c
+
+cobol_yacc.c:	cobol.y
+	$(YACC) cobol.y
+	mv y.tab.c cobol_yacc.c
+
+y.tab.h:
+	$(YACC) -d cobol.y
+	rm -f y.tab.c
+
+$(CLIB):	$(COBJS)
+	rm -f $(CLIB)
+	$(AR) rs $(CLIB) $(COBJS)
+	$(RANLIB) $(CLIB)
+
+cobfunc.o:	cobfunc.c
+	$(CC) $(CFLAGS) -c $<
+
+.cc.o:
+	$(CPP) $(CFLAGS) -c $<
+.c.o:
+	$(CPP) $(CFLAGS) -c $<
+
+checkin:
+	ci -l $(SRCS) *.h cobol.l cobol.y
+
+depend:
+	$(CPP) $(CFLAGS) -MM $(SRCS) > .depend
+
+clean:
+	rm -f $(OBJS) $(EXE) *.bak *~ y.tab.h cobol_lex.c cobol_yacc.c
+	rm -f $(CLIB) $(COBJS)
+
+include .depend
+

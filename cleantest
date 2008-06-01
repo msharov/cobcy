@@ -1,0 +1,10 @@
+#! /bin/sh
+for i in tests/*.cob; do
+   BASE=tests/`basename $i .cob`
+   rm -f ${BASE}
+   rm -f ${BASE}.c
+   rm -f ${BASE}.h
+done
+rm -f tests/output-file
+rm -f tests/*.dbf tests/*.ndx
+rm -f runall.out

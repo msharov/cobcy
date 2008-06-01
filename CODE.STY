@@ -1,0 +1,35 @@
+If you want to add code, it would be easier for me to read if you use the
+style already there (or at least make it look approximately like it):
+The rules are flexible; just make sure it looks readable.
+
+	* Statements are indented 4 spaces each level.
+		This is the most important one for me. I chose 4 spaces
+		because 3 is a little too short and 5 is a bit too long :)
+		A good reason is that two such indents make a tab,
+		a very convenient property. Using just tabs for indenting
+		takes me off the screen way too quickly. So there you are.
+	* Use tabs whenever possible.
+	* Use the supplied ADT library to save code and time. It is fairly
+		well documented. (If not, tell me what do you want to see)
+	* NEVER NEVER NEVER use gotos. Yes, I do use them in Cobcy output,
+		but that's just because COBOL has them and all programmers
+		used it. There is no excuse (almost) for using them in C++.
+	* Try to separate elements for readability. One space is usually
+		enough. One possible exception is the empty function call.
+		So here are some examples of good statements:
+		    func();, func (a, b);, func (func (1, 5, func()));
+		And BAD:
+		    func   ()->&tur.nuik[12*67-!hj+123/7%hs->r]
+		Get the picture? :)
+	* The braces are K&R style
+		if (x == 0) {
+		}
+	* Functions are named in the uppercase convention: ReadBigVar
+		internal variables in generated C code are
+		with prepended underscore: _ReadIntegerVar
+	* If you write a skeleton code generation function that does 
+		not do anything, include a call to NIY (defined in semutil.h)
+	* Read the docs in ./docs
+
+That's about it.
+

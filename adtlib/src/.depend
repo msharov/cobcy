@@ -1,0 +1,5 @@
+bitarray.o: bitarray.cc
+cdate.o: cdate.cc
+cstring.o: cstring.cc
+streamab.o: streamab.cc
+csocket.o: csocket.cc

@@ -1,0 +1,18 @@
+#! /bin/sh
+if [ "$1" = "" ]; then
+   echo Specify the number of test to run.
+   exit
+fi
+
+cd tests
+if [ -f test$1.cob ]; then
+	../cobol $2 $3 test$1.cob
+elif [ -f $1.cob ]; then
+	../cobol $2 $3 $1.cob
+elif [ -f $1 ]; then
+	../cobol $2 $3 $1
+else
+ 	echo That file does not exist!
+fi
+cd ..
+
