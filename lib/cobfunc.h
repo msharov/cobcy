@@ -6,8 +6,8 @@
 #ifndef __COBFUNC_H
 #define __COBFUNC_H
 
-#include "dbf/dbf.h"
-#include "dbf/ndx.h"
+#include "../dbf/dbf.h"
+#include "../dbf/ndx.h"
 
 /*----------------------------------------------------------------------------*/
   int 		_Alphabetic (char * str);

@@ -15,10 +15,11 @@ fi
 THIS_SCRIPT=`basename $0`
 
 # Cannot use basename because path is needed
-EXECUTABLE=`echo $1 | sed "s/.cob//"`
+EXECUTABLE=${1%.cob}
 
 # cobcy is assumed to be in the same directory as this script
-RUN_PATH=`echo $0 | sed "s/\/${THIS_SCRIPT}//g"`
+RUN_PATH=`dirname $0`
+LIB_PATH=${RUN_PATH}/lib
 
 # Check if debugging flag is present
 if [ "$2" = "-g" ]; then
@@ -30,9 +31,9 @@ fi
 CC=gcc
 
 if [ "$DEBUG" = "1" ]; then
-    CFLAGS="-Wall -g -pipe -I${RUN_PATH} -I${RUN_PATH}/adtlib/include -L${RUN_PATH}"
+    CFLAGS="-Wall -g -pipe -I${LIB_PATH} -L${LIB_PATH}"
 else
-    CFLAGS="-w -O6 -pipe -I${RUN_PATH} -I${RUN_PATH}/adtlib/include -L${RUN_PATH}"
+    CFLAGS="-w -Os -pipe -I${LIB_PATH} -L${LIB_PATH}"
 fi
 COBOL_LIB=-lcobol
 
