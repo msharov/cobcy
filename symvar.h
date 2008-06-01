@@ -6,7 +6,6 @@
 #ifndef __SYMVAR_H
 #define __SYMVAR_H
 
-#include <mdefs.h>
 #include "symdata.h"
 #include "symconst.h"
 #include "sympic.h"

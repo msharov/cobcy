@@ -6,10 +6,9 @@
 #ifndef __SYMREC_H
 #define __SYMREC_H
 
-#include <mdefs.h>
-#include <llist.h>
 #include "symdata.h"
 #include "symfile.h"
+#include "adtlib/llist.h"
 
 class CobolRecord : public CobolData {
 public:

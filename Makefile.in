@@ -47,7 +47,7 @@ CLIB	= libcobol.a
 COBJS	= cobfunc.o
 DBFOBJS	= dbf/dbf.o dbf/ndx.o
 
-ADTLIB	= adtlib/lib/libadt.a
+ADTLIB	= adtlib/libadt.a
 
 #############################################
 
@@ -59,7 +59,7 @@ $(ADTLIB):
 
 $(EXE):	$(OBJS)
 	@echo Linking cobcy ...
-	@$(CPP) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS)
+	@$(CPP) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS) ${ADTLIB}
 	@strip $(EXE)
 
 cobol_lex.c:	cobol.l y.tab.h
@@ -115,13 +115,13 @@ depend:
 clean:
 	@rm -f $(OBJS) *.bak *~ y.tab.h cobol_lex.c cobol_yacc.c
 	@rm -f $(COBJS)
+	@+make -C adtlib/src clean
+	@+make -C dbf clean
 
 spotless: clean
 	@./cleantest
 	@rm -f $(EXE) $(CLIB)
 	@rm -f $(ADTLIB)
-	@make -C adtlib/src clean
-	@make -C dbf clean
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

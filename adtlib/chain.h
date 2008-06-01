@@ -14,18 +14,17 @@
 #ifndef __CHAIN_H
 #define __CHAIN_H				   
 
-#include <mdefs.h>
+#include "mdefs.h"
 
 template <class ChainEl>
 class Chain;
 
 template <class DataType> 
 class ChainLink {
-private:
+public:
     DataType *			m_Data;
     ChainLink<DataType> *	m_Next;
     ChainLink<DataType> *	m_Prev;
-
 public:			   
     INLINE_CTOR			ChainLink (void) { 
 					m_Data = NULL; 
@@ -37,8 +36,6 @@ public:
     inline DataType *		GetData (void) const { 
 					return (m_Data);
 				};
-
-    friend			Chain<DataType>;
 };
     
 template <class ChainEl> 

@@ -7,8 +7,7 @@
 #ifndef __SYMPIC_H
 #define __SYMPIC_H
 
-#include <mdefs.h>
-#include <streamab.h>
+#include "adtlib/streamab.h"
 
 class PictureType : public Streamable {
 protected:

@@ -13,7 +13,7 @@
 #ifndef __VECTOR_H
 #define __VECTOR_H
 
-#include <matrix.h>
+#include "matrix.h"
 #include <math.h>
 
 typedef MatrixSizeType		VectorSizeType;

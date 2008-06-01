@@ -10,7 +10,7 @@
 #ifndef __LCLIST_H
 #define __LCLIST_H
 
-#include <llist.h>
+#include "llist.h"
 
 template <class LCListEl> 
 class LCList : public LList<LCListEl> {

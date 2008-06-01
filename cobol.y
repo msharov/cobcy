@@ -381,19 +381,13 @@ long int FillerIndex = 0;
 %token TOK_MINUS
 %token TOK_ASTERISK
 %token TOK_SLASH
-%token TOK_EQUAL
 %token TOK_DOLLAR
-%token TOK_COMMA
 %token TOK_SEMICOLON
 %token TOK_PERIOD
 %token TOK_LPAREN
 %token TOK_RPAREN
-%token TOK_GREATER
-%token TOK_LESS
-%token TOK_RPAREN
 %token TOK_INTEGER
 %token TOK_FLOAT
-%token TOK_STRING
 %token TOK_PIC_TEXT
 %%
 

@@ -6,8 +6,8 @@
 #ifndef __SYMBOL_H
 #define __SYMBOL_H
 
-#include <mdefs.h>
-#include <llist.h>
+#include "adtlib/mdefs.h"
+#include "adtlib/llist.h"
 
 #define MAX_SYMBOL_LENGTH	50
 #define MAX_PREFIX_LENGTH	80

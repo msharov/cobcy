@@ -7,11 +7,11 @@
 #ifndef __MDEFS_H
 #define __MDEFS_H
 
-#include <compat.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <limits.h>
 #include <assert.h>
+#include "compat.h"
 
 #ifndef NeedFunctionPrototypes
 #   define NeedFunctionPrototypes		1
@@ -42,9 +42,9 @@ typedef BYTE			BOOL;
 **	In C++ define them as templates for additional type checking.
 */    
 #ifndef __cplusplus
-#   include <macros.h>
+#   include "macros.h"
 #else
-#   include <templats.h>
+#   include "templats.h"
 #endif
 
 #endif

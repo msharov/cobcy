@@ -14,15 +14,12 @@
 #ifndef __STREAMABLE_H
 #define __STREAMABLE_H		 
 
-#include <iostream.h>
-#include <fstream.h>
-#ifndef __MSDOS__
-#include <strstream.h>
-#else
-#include <strstrea.h>
-#endif
-#include <mdefs.h>
-#include <csocket.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include "mdefs.h"
+#include "csocket.h"
+using namespace std;
 
 class Streamable {
 public:

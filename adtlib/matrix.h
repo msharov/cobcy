@@ -13,9 +13,8 @@
 #ifndef __MATRIX_H
 #define __MATRIX_H
 
-#include <mdefs.h>	 
-#include <array2d.h>
-#include <stdlib.h>
+#include "mdefs.h"
+#include "array2d.h"
 			  
 typedef Array2dSizeType			MatrixSizeType;
 

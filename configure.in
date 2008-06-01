@@ -21,6 +21,4 @@ AC_CACHE_VAL(can_have_stdio, can_have_stdio_res)
 
 AC_MSG_RESULT($can_have_stdio_res)
 
-AC_DECL_YYTEXT
-
 AC_OUTPUT(Makefile)

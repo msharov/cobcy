@@ -6,7 +6,7 @@
 #ifndef __BITARRAY_H
 #define __BITARRAY_H
    
-#include <array.h>
+#include "array.h"
 
 #ifndef BITS_PER_BYTE
 #define BITS_PER_BYTE		8

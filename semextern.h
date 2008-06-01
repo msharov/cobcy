@@ -6,11 +6,10 @@
 #ifndef __SEMEXTERN_H
 #define __SEMEXTERN_H
 
-#include <iostream.h>
-#include <stack.h>
-#include <queue.h>
-#include <hash.h>
-#include <string.h>
+#include "adtlib/mdefs.h"
+#include "adtlib/stack.h"
+#include "adtlib/queue.h"
+#include "adtlib/hash.h"
 #include "semtypes.h"
 #include "semutil.h"
 

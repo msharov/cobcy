@@ -8,9 +8,9 @@
 
 #include <string.h>
 #include <assert.h>
-#include <mdefs.h>
-#include <streamab.h>
-#include <array.h>
+#include "mdefs.h"
+#include "streamab.h"
+#include "array.h"
 
 class CString : public Streamable {
 private:

@@ -1,0 +1,11 @@
+Makefile
+.depend
+autom4te.cache
+config.log
+config.status
+configure
+*.[oa]
+cobcy
+y.tab.h
+cobol_lex.c
+cobol_yacc.c

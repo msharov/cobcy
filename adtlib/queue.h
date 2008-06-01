@@ -9,7 +9,7 @@
 #ifndef __QUEUE_H
 #define __QUEUE_H		      
 
-#include <chain.h>
+#include "chain.h"
 
 template <class QueueEl>
 class Queue : public Chain<QueueEl> {
@@ -29,7 +29,7 @@ ChainLink<QueueEl> * NewLink;
  
     NewLink = new ChainLink<QueueEl>;
     NewLink->SetData (element);
-    ConnectBefore (MoveToHead(), NewLink);
+    ConnectBefore (this->MoveToHead(), NewLink);
 }
 
 template <class QueueEl>
@@ -40,7 +40,7 @@ QueueEl * data;
 
     assert (!IsEmpty());
 
-    ptr = MoveToTail();
+    ptr = this->MoveToTail();
     assert (ptr != NULL);
     Disconnect (ptr);
     data = ptr->GetData();
@@ -54,7 +54,7 @@ inline QueueEl * Queue<QueueEl> :: Front (void)
 ChainLink<QueueEl> * ptr;
 QueueEl * data = NULL;
 
-    ptr = MoveToTail();
+    ptr = this->MoveToTail();
     if (ptr != NULL)
 	data = ptr->GetData();
     return (data);

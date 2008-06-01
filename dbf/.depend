@@ -1,2 +1,0 @@
-dbf.o: dbf.c dbf.h
-ndx.o: ndx.c ndx.h

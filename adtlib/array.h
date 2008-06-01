@@ -11,8 +11,8 @@
 #ifndef __ARRAY_H
 #define __ARRAY_H
 				    
-#include <set.h>
-#include <llist.h>
+#include "set.h"
+#include "llist.h"
 
 typedef SetSizeType 		ArraySizeType;
 
@@ -55,8 +55,8 @@ inline Array<ArrayEl> :: Array
 template <class ArrayEl>
 inline ArrayEl& Array<ArrayEl> :: operator[] (ArraySizeType index) const
 { 
-    assert (index < m_Size);
-    return (m_Data [index]);
+    assert (index < this->m_Size);
+    return (this->m_Data [index]);
 };
 
 template <class ArrayEl>
@@ -64,19 +64,19 @@ inline void Array<ArrayEl> :: InsertAt
 (ArraySizeType index, const ArrayEl& NewEl)
 {
 ArraySizeType i;
-    Resize (m_Size + 1);
-    for (i = m_Size - 1; i > index; -- i)
-	m_Data[i] = m_Data[i - 1];
-    m_Data[index] = NewEl;
+    this->Resize (this->m_Size + 1);
+    for (i = this->m_Size - 1; i > index; -- i)
+	this->m_Data[i] = this->m_Data[i - 1];
+    this->m_Data[index] = NewEl;
 }
 
 template <class ArrayEl>
 inline void Array<ArrayEl> :: RemoveAt (ArraySizeType index)
 {
 ArraySizeType i;
-    for (i = index; i < m_Size - 1; ++ i)
-	m_Data[i] = m_Data[i + 1];
-    Resize (m_Size - 1);
+    for (i = index; i < this->m_Size - 1; ++ i)
+	this->m_Data[i] = this->m_Data[i + 1];
+    this->Resize (this->m_Size - 1);
 }
 
 template <class ArrayEl>
@@ -85,10 +85,10 @@ inline Array<ArrayEl>& Array<ArrayEl> :: operator= (LList<ArrayEl>& ToBe)
 ArraySizeType NewSize, i;
 
     NewSize = ToBe.Size();
-    Array<ArrayEl> :: Resize (NewSize);
+    this->Resize (NewSize);
     ToBe.Head();
     for (i = 0; i < NewSize; ++ i) {
-	m_Data[i] = *(ToBe.LookAt());
+	this->m_Data[i] = *(ToBe.LookAt());
 	ToBe.Next();
     }
 
@@ -103,21 +103,21 @@ ArrayEl v, t;
 
     // To allow calling Sort() without knowing the size of the array
     if (End < 0)
-	End = m_Size;
+	End = this->m_Size;
 
     if (End > Start) {
-	assert (Start >= 0 && End <= (int) m_Size);
-	v = m_Data[End];
+	assert (Start >= 0 && End <= (int) this->m_Size);
+	v = this->m_Data[End];
 	i = Start - 1;
 	j = End;
 	while (TRUE) {
-	    while (i < (int) m_Size && m_Data [++i] < v);
-	    while (j >= 0 && m_Data [--j] > v);
+	    while (i < (int) this->m_Size && this->m_Data [++i] < v);
+	    while (j >= 0 && this->m_Data [--j] > v);
 	    if (i >= j)
 		break;
-	    t = m_Data[i];
-	    m_Data[i] = m_Data[j];
-	    m_Data[j] = t;
+	    t = this->m_Data[i];
+	    this->m_Data[i] = this->m_Data[j];
+	    this->m_Data[j] = t;
 	}
 	Sort (Start, i - 1);
 	Sort (i + 1, End);

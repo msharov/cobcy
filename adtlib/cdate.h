@@ -6,8 +6,8 @@
 #ifndef __CDATE_H
 #define __CDATE_H
 
-#include <mdefs.h>
-#include <streamab.h>
+#include "mdefs.h"
+#include "streamab.h"
 
 class CDate : public Streamable {
 public:

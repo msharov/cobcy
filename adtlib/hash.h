@@ -7,7 +7,7 @@
 #ifndef __HASH_H
 #define __HASH_H
 
-#include <mdefs.h>
+#include "mdefs.h"
 #include <string.h>
 
 // This seems reasonable (covers the alphabet)
@@ -29,14 +29,11 @@ class HashTable;
 
 template <class HashAttr>
 class Bucket {
-private:
+public:
     StringSpaceEntry	m_Name;  	// This is actually an index to m_StringSpace 
-
 public:
     HashAttr *		m_Attr;
     Bucket<HashAttr> *	m_Next;
-
-    friend		HashTable<HashAttr>;
 };
 
 // Keys are generated internally, so do not assume anything
@@ -96,7 +93,7 @@ inline HashTable<HashAttr> :: HashTable (WORD NewTableSize)
 {
 HashKeyType i;
     TableSize = NewTableSize;
-    Table = new (Bucket<HashAttr>*) [TableSize];
+    Table = new Bucket<HashAttr>* [TableSize];
     assert (Table != NULL);
     for (i = 0; i < TableSize; ++ i)
 	Table[i] = NULL;

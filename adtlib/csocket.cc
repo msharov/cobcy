@@ -5,7 +5,7 @@
 
 #include <sys/param.h>
 #include <string.h>
-#include <csocket.h>
+#include "csocket.h"
 
 CSocket :: CSocket (void)
 {

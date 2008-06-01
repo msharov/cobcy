@@ -6,8 +6,8 @@
 #ifndef __SYMCONST_H
 #define __SYMCONST_H
 
-#include <mdefs.h>
-#include <streamab.h>
+#include "adtlib/mdefs.h"
+#include "adtlib/streamab.h"
 
 #include "semtypes.h"
 

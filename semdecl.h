@@ -6,7 +6,7 @@
 #ifndef __SEMDECL_H
 #define __SEMDECL_H
 
-#include <mdefs.h>
+#include "adtlib/mdefs.h"
 
 #define STACK_IDENT_LENGTH	50
 

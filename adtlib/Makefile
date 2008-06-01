@@ -1,5 +1,5 @@
 CC	= g++
-CFLAGS	= -Wall -O6 -m486 -pipe -I ../include
+CFLAGS	= -Wall -O6 -pipe
 AR	= ar
 RANLIB	= ranlib
 RM	= rm -f

@@ -6,7 +6,7 @@
 #ifndef __DBF_H
 #define __DBF_H
 
-#include <mdefs.h>
+#include "../adtlib/mdefs.h"
 #include <stdio.h>
 
 #define HEADER_END_CHAR		'\x0D'

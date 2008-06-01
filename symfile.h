@@ -6,8 +6,6 @@
 #ifndef __SYMFILE_H
 #define __SYMFILE_H
 
-#include <mdefs.h>
-#include <llist.h>
 #include "symbase.h"
 #include "symdata.h"
 #include "semtypes.h"

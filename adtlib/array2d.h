@@ -11,10 +11,9 @@
 #ifndef __ARRAY2D_H
 #define __ARRAY2D_H
 
-#include <mdefs.h>	 
-#include <set.h>
-#include <stdlib.h>
-			  
+#include "mdefs.h"
+#include "set.h"
+
 typedef SetSizeType			Array2dSizeType;
 
 template <class Array2dEl>

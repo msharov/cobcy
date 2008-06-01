@@ -4,8 +4,8 @@
 */
 
 #include <time.h>
-#include <cdate.h>
-#include <bitarray.h>
+#include "cdate.h"
+#include "bitarray.h"
 
 const char WeekdayNames[7][4]= {"Sun", "Mon", "Tue", "Wed", 
 				"Thu", "Fri", "Sat"};

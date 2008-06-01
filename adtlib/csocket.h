@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <sys/wait.h>
 
-#include <mdefs.h>
+#include "mdefs.h"
 
 /* Set platform-independent types. Winsock should work with these */
 #ifndef __MSDOS__

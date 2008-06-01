@@ -9,9 +9,9 @@
 #ifndef __SET_H
 #define __SET_H		  
 
-#include <mdefs.h>
-#include <streamab.h>
-#include <chain.h>
+#include "mdefs.h"
+#include "streamab.h"
+#include "chain.h"
 
 typedef unsigned long 	SetSizeType;
 

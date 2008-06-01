@@ -3,40 +3,39 @@
 **	Base class for file-active class.
 */
 
-#include <streamab.h>
-#include <cendian.h>
+#include "streamab.h"
+#include "cendian.h"
 
 void ReadByte (istream& is, BYTE * buffer)
 {
-    is.read (buffer, sizeof(BYTE));
+    is.read ((char*) buffer, sizeof(BYTE));
 }
 
 void WriteByte (ostream& os, const BYTE * buffer) 
 {
-    os.write (buffer, sizeof(BYTE));
+    os.write ((const char*) buffer, sizeof(BYTE));
 }
 
 void ReadRaw (istream& is, void * buffer, WORD size)
 {
-    is.read ((BYTE*) buffer, size);
+    is.read ((char*) buffer, size);
 }
 
 void WriteRaw (ostream& os, const void * buffer, WORD size) 
 {
-    os.write ((BYTE*) buffer, size);
+    os.write ((const char*) buffer, size);
 }
 
 void ReadWord (istream& is, WORD * buffer)
 {
-    is.read (buffer, sizeof(WORD)); 
+    is.read ((char*) buffer, sizeof(WORD)); 
     *buffer = LittleEndianToLong (*buffer);
 }
 
 void WriteWord (ostream& os, const WORD * buffer) 
 {
-WORD TempBuf;
-    TempBuf = LongToLittleEndian (*buffer);
-    os.write (&TempBuf, sizeof(WORD)); 
+    WORD TempBuf = LongToLittleEndian (*buffer);
+    os.write ((const char*) &TempBuf, sizeof(WORD)); 
 }
 
 void ReadString (istream& is, char * buffer, WORD s)
@@ -54,23 +53,13 @@ void WriteString (ostream& os, const char * buffer, WORD s)
 
 void Streamable :: Load (char * filename)
 {
-#ifdef __MSDOS__
-ifstream is (filename, ios::bin | ios::nocreate);
-#else
-ifstream is (filename, ios::bin);
-#endif
-
+    ifstream is (filename, ios::binary);
     ReadBinaryStream (is);
 }
 
 void Streamable :: Save (char * filename)
 {
-#ifdef __MSDOS__
-ofstream os (filename, ios::bin);
-#else
-ofstream os (filename, ios::bin);
-#endif
-
+    ofstream os (filename, ios::binary);
     WriteBinaryStream (os);
 }
 
@@ -114,28 +103,28 @@ void Streamable :: WriteTextStream (ostream& os)
 
 void Streamable :: ReadBinaryStringStream (const char * StringBuf, WORD StrSize)
 {
-istrstream is (StringBuf, StrSize);
+    istringstream is (string (StringBuf, StrSize));
     ReadBinaryStream (is);
 }
 
 void Streamable :: WriteBinaryStringStream (char * StringBuf, WORD StrSize)
 {
-ostrstream os (StringBuf, StrSize);
+    ostringstream os;
     WriteBinaryStream (os);
-    memcpy (StringBuf, os.rdbuf()->str(), StrSize);
+    memcpy (StringBuf, os.rdbuf()->str().c_str(), StrSize);
 }
 
 void Streamable :: ReadTextStringStream (const char * StringBuf, WORD StrSize)
 {
-istrstream is (StringBuf, StrSize);
+    istringstream is (string (StringBuf, StrSize));
     ReadTextStream (is);
 }
 
 void Streamable :: WriteTextStringStream (char * StringBuf, WORD StrSize)
 {
-ostrstream os (StringBuf, StrSize);
+    ostringstream os;
     WriteTextStream (os);
-    memcpy (StringBuf, os.rdbuf()->str(), StrSize);
+    memcpy (StringBuf, os.rdbuf()->str().c_str(), StrSize);
 }
 
 istream& operator>> (istream& is, Streamable& obj)

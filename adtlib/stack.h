@@ -9,7 +9,7 @@
 #ifndef __STACK_H
 #define __STACK_H
 
-#include <chain.h>
+#include "chain.h"
 
 template <class StackEl>
 class Stack : public Chain<StackEl> {
@@ -29,7 +29,7 @@ ChainLink<StackEl> * NewLink;
  
     NewLink = new ChainLink<StackEl>;
     NewLink->SetData (element);
-    ConnectBefore (MoveToHead(), NewLink);
+    ConnectBefore (this->MoveToHead(), NewLink);
 }
 
 template <class StackEl>
@@ -39,7 +39,7 @@ ChainLink<StackEl> * ptr;
 StackEl * data;
 
     assert (!IsEmpty());
-    ptr = MoveToHead();
+    ptr = this->MoveToHead();
     assert (ptr != NULL);
     Disconnect (ptr);
     data = ptr->GetData();
@@ -53,7 +53,7 @@ inline StackEl * Stack<StackEl> :: Top (void)
 ChainLink<StackEl> * ptr;
 StackEl * data = NULL;
 
-    ptr = MoveToHead();
+    ptr = this->MoveToHead();
     if (ptr != NULL)
 	data = ptr->GetData();
     return (data);

@@ -6,7 +6,6 @@
 #ifndef __SYMLABEL_H
 #define __SYMLABEL_H
 
-#include <mdefs.h>
 #include "symbase.h"
 
 class CobolLabel : public CobolSymbol {

@@ -7,8 +7,8 @@
 #ifndef __SYMBASE_H
 #define __SYMBASE_H
 
-#include <mdefs.h>
-#include <streamab.h>
+#include "adtlib/mdefs.h"
+#include "adtlib/streamab.h"
 
 #define MAX_SYMBOL_LENGTH	50
 #define MAX_PREFIX_LENGTH	80

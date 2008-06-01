@@ -3,11 +3,7 @@
 **	Implements semantic utilities for COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"		// includes semutil.h
-#else
 #include "semextern.h"
-#endif
 #ifdef CAN_HAVE_STDIO
 #include <stdio.h>
 #endif

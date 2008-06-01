@@ -6,7 +6,6 @@
 #ifndef __SYMDATA_H
 #define __SYMDATA_H
 
-#include <mdefs.h>
 #include "symbase.h"
 
 class CobolFile;	// They are cross-linked

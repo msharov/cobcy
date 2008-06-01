@@ -16,18 +16,6 @@
 #undef diff
 #undef member
 
-template <class MinVal>
-inline MinVal min (MinVal a, MinVal b)
-{   
-    return (a < b ? a : b);
-}      
-
-template <class MaxVal>
-inline MaxVal max (MaxVal a, MaxVal b)
-{   
-    return (a > b ? a : b);
-}      
-
 template <class DiffVal>
 inline DiffVal diff (DiffVal a, DiffVal b)
 {

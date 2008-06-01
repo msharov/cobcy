@@ -6,8 +6,6 @@
 #ifndef __SEMUTIL_H
 #define __SEMUTIL_H
 
-#include <fstream.h>
-#include <mdefs.h>
 #include "semtypes.h"
 #include "symbase.h"
 

@@ -3,8 +3,7 @@
 **       Defines the main module of the COBOL compiler.
 */
 
-#include <iostream.h>
-#include <mdefs.h>
+#include "adtlib/mdefs.h"
 #ifdef CAN_HAVE_STDIO
 #ifndef __MSDOS__
 #include <unistd.h>

@@ -12,8 +12,8 @@
 #ifndef __LLIST_H
 #define __LLIST_H
  	 
-#include <mdefs.h>
-#include <chain.h>
+#include "mdefs.h"
+#include "chain.h"
 
 // The following constant sets the number of m_Windows available
 #define  MaxWindows		10
@@ -84,14 +84,14 @@ template <class LListEl>
 inline void LList<LListEl> :: Head 
 (ListWin wid)
 { 
-    m_Windows [wid] = MoveToHead ();
+    m_Windows [wid] = this->MoveToHead();
 }
 
 template <class LListEl>
 inline void LList<LListEl> :: Tail
 (ListWin wid)
 { 
-    m_Windows [wid] = MoveToTail ();
+    m_Windows [wid] = this->MoveToTail();
 }
 
 template <class LListEl>
@@ -147,10 +147,10 @@ inline LListEl * LList<LListEl> :: Remove
 ChainLink<LListEl> * ObtainedLink;
 LListEl * ObtainedData;
 
-    assert (!IsEmpty());
+    assert (!this->IsEmpty());
     Disconnect (m_Windows [wid]);
     ObtainedLink = m_Windows [wid];
-    m_Windows [wid] = MoveToHead();
+    m_Windows [wid] = this->MoveToHead();
     ObtainedData = ObtainedLink->GetData();
     delete ObtainedLink;
     -- m_Size;

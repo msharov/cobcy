@@ -3,16 +3,13 @@
 **	Implements declaratory semantic actions for COBOL compiler.
 */
 
-#ifdef __MSDOS__
-#include "semexter.h"
-#else
 #include "semextern.h"
-#endif
 #include "semdecl.h"
 #include "semfile.h"
 #include "symrec.h"
 #include "symvar.h"
 #include "symconst.h"
+#include "adtlib/queue.h"
 
 /*---------------------| Globals |------------------------------*/
   Stack<CobolRecord> 		NestedRecordList;

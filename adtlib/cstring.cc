@@ -3,7 +3,7 @@
 **	Named to avoid conflict with ANSI string.h . Stands for class CString.
 */
 
-#include <cstring.h>
+#include "cstring.h"
 
 CString :: CString (void)
 {
@@ -147,7 +147,7 @@ int islen;
     m_MemUsed += islen;
 }
 
-void CString :: DeleteAt (WORD idx, WORD Count = 1)
+void CString :: DeleteAt (WORD idx, WORD Count)
 {
     assert (idx + Count < m_MemUsed);
     Resize (m_MemUsed - Count);

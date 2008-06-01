@@ -3,8 +3,8 @@
 **	Defines a bit-level array. based on Array template <BYTE>.
 */
 
-#include <bitarray.h>
-#include <cendian.h>
+#include "bitarray.h"
+#include "cendian.h"
 
 BitArray :: BitArray (ArraySizeType nElem)
 : Array<BYTE> (nElem / BITS_PER_BYTE + 1)
