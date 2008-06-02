@@ -6,12 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifdef __MSDOS__
-#include "semactio.h"
-#else
 #include "semactions.h"
-#endif
-#include "lyextern.h"
 
 extern int CurrentLine;
 extern long int ival;
@@ -23,9 +18,12 @@ long int FillerIndex = 0;
 #define TRUE		1
 #endif
 
-/*-----------------------------------*/
-  int 	yyerror (char * msg);
-/*-----------------------------------*/
+//----------------------------------------------------------------------
+
+static int yyerror (const char* msg);
+extern int yylex (void);
+
+//----------------------------------------------------------------------
 
 %}
 %token TOK_ACCEPT
@@ -1101,10 +1099,9 @@ float:		TOK_FLOAT { Push (SE_Float); }
 	;
 %%
 
-int yyerror (char * msg)
+static int yyerror (const char* msg)
 {
-char ErrorBuffer [80];
-
+    char ErrorBuffer [80];
     sprintf (ErrorBuffer, "%s, (%d, %s)", msg, yychar, StringBuffer);
     WriteError (ErrorBuffer);
     return (0);

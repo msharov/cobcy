@@ -27,15 +27,15 @@ protected:
 
 public:
 				CobolConstant (void);
-				CobolConstant (char * cval);
+				CobolConstant (const char* cval);
 				CobolConstant (long int ival);
 				CobolConstant (double fval);
-    CobolConstant&		operator= (char * cval);
+    CobolConstant&		operator= (const char* cval);
     CobolConstant&		operator= (long int ival);
     CobolConstant&		operator= (double fval);
     CobolConstant&		operator= (StackEntry * se);
     virtual void		WriteTextStream (ostream& os);
-    void			GenWrite (ostream& os, char * stream);
+    void			GenWrite (ostream& os, const char* stream);
     inline BOOL			IsNumeric (void);
     virtual		       ~CobolConstant (void);
 };

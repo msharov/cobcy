@@ -7,7 +7,6 @@
 #define __SEMINIT_H
 
 /*-------------------------------------------------*/
-  void 	InitializeVariables (void);
   void 	FinishDecl (void);
   void 	StartCode (void);
   void 	EndCode (void);

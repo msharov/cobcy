@@ -40,13 +40,13 @@ private:
 public:
 				CobolFile (void);
     CobolSymbolType		Kind (void);
-    void			SetFilename (char * filename);
+    void			SetFilename (const char* filename);
     void			SetAccessMode (AccessModeType mode);
     void			SetOrganization (OrganizationType org);
-    void			SetKey (char * keyname);
-    void			SetStatusVar (char * varname);
-    void			SetRecord (char * recname);
-    void			SetFlushCommand (char * NewCommand);
+    void			SetKey (const char* keyname);
+    void			SetStatusVar (const char* varname);
+    void			SetRecord (const char* recname);
+    void			SetFlushCommand (const char* NewCommand);
     void			SetNewlineFlag (BOOL NewFlag);
     void			SetUnlinkOnClose (BOOL NewFlag);
     void			AssociateRecord (void);

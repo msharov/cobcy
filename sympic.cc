@@ -19,7 +19,7 @@ PictureType :: PictureType (void)
 }
 
 // The purpose of this function is to convert X(3) to XXX
-void PictureType :: Expand (char * APic, char * Expanded)
+void PictureType :: Expand (const char* APic, char * Expanded)
 {
 unsigned int i, j, k;
 char buffer[5];
@@ -52,7 +52,7 @@ char filler;
     Expanded[j] = '\x0';
 }
 
-WORD PictureType :: Set (char * NewPicture)
+WORD PictureType :: Set (const char* NewPicture)
 {
 char Expanded [500];
 unsigned int i;

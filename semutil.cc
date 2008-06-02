@@ -18,7 +18,7 @@ extern BOOL CodeBegan;
 
 BOOL ErrorFlag = FALSE;
 
-void WriteError (char * str)
+void WriteError (const char* str)
 {
     if (CodeBegan && CurPar != NULL) {
        cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
@@ -33,7 +33,7 @@ void WriteError (char * str)
     ErrorFlag = TRUE;
 }
 
-void WriteWarning (char * str)
+void WriteWarning (const char* str)
 {
     if (CodeBegan && CurPar != NULL) {
        cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
@@ -95,7 +95,7 @@ int index = 1;
 }
 #endif
 
-void NIY (char * str)
+void NIY (const char* str)
 {
 char MessageBuf [80];
 
@@ -105,7 +105,7 @@ char MessageBuf [80];
     WriteWarning (MessageBuf);
 }
 
-void GenComment (char * str)
+void GenComment (const char* str)
 {
     GenIndent();
     codef << "/* " << str << " */\n";
@@ -128,7 +128,7 @@ CobolConstant ctp;	// Just to keep all the stuff in one place
     os << ctp;
 }
 
-CobolSymbol * LookupIdentifier (char * id)
+CobolSymbol * LookupIdentifier (const char* id)
 {
 CobolSymbol * sym;
 char ErrorBuffer [80];
@@ -141,7 +141,7 @@ char ErrorBuffer [80];
     return (sym);
 }
 
-void PrintIdentifier (char * id, ostream& os)
+void PrintIdentifier (const char* id, ostream& os)
 {
 CobolSymbol * sym;
 
@@ -225,7 +225,7 @@ StackEntry * NewEntry;
     SemStack.Push (NewEntry);
 }
 
-BOOL IsInSet (char c, char * set)
+BOOL IsInSet (char c, const char* set)
 {
 register int i, sl;
 

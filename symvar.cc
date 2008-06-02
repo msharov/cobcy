@@ -16,7 +16,7 @@ CobolVar :: CobolVar (void)
 {
 }
 
-void CobolVar :: SetPicture (char * NewPicture)
+void CobolVar :: SetPicture (const char* NewPicture)
 {
     CSize = Picture.Set (NewPicture);
 }
@@ -35,7 +35,7 @@ void CobolVar :: GenDeclare (ostream& os)
     os << ";\n";
 }
 
-void CobolVar :: GenRead (ostream& os, char * stream)
+void CobolVar :: GenRead (ostream& os, const char* stream)
 {
 #ifndef NDEBUG
     cout << "\t\tReading variable " << *this;
@@ -47,7 +47,7 @@ void CobolVar :: GenRead (ostream& os, char * stream)
     os << "\"" << Picture << "\");\n";
 }
 
-void CobolVar :: GenWrite (ostream& os, char * stream)
+void CobolVar :: GenWrite (ostream& os, const char* stream)
 {
 #ifndef NDEBUG
     cout << "\t\tWriting variable " << *this;

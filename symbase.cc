@@ -15,15 +15,14 @@ CobolSymbol :: CobolSymbol (void)
     memset (FullCName, 0, MAX_FULLNAME_LENGTH);
 }
 
-void CobolSymbol :: CobolToCName (char * str)
+void CobolSymbol :: CobolToCName (char* str)
 {
-unsigned int i;
-    for (i = 0; i < strlen(str); ++ i)
-       if (str[i] == '-')
-	  str[i] = '_';
+    for (unsigned i = 0; i < strlen(str); ++ i)
+	if (str[i] == '-')
+	    str[i] = '_';
 }
 
-void CobolSymbol :: SetName (char * NewName)
+void CobolSymbol :: SetName (const char* NewName)
 {
     strcpy (CobolName, NewName);
     strcpy (CName, NewName);
@@ -32,7 +31,7 @@ void CobolSymbol :: SetName (char * NewName)
     strcat (FullCName, CName);
 }
 
-void CobolSymbol :: SetParent (char * NewParent)
+void CobolSymbol :: SetParent (const char* NewParent)
 {
 CobolSymbol * pattr;
 char ErrorBuffer [80];

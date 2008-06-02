@@ -10,19 +10,19 @@
 #include "symbase.h"
 
 /*-----------------------------------------------------------------------*/
-  void 	WriteError (char * str);
-  void 	WriteWarning (char * str);
-  void	NIY (char * str);
-  void  GenComment (char * str);
+  void 	WriteError (const char* str);
+  void 	WriteWarning (const char* str);
+  void	NIY (const char* str);
+  void  GenComment (const char* str);
   BOOL	ErrorOccured (void);
   void 	PrintConstant (StackEntry * entry, ostream& os);
-  CobolSymbol *	LookupIdentifier (char * id);
-  void	PrintIdentifier (char * id, ostream& os);
+  CobolSymbol *	LookupIdentifier (const char* id);
+  void	PrintIdentifier (const char* id, ostream& os);
   void 	GenIndent (void);
   WORD 	CountIdentifiers (void);
   void 	ReverseIdentifiers (WORD nIds);
   void	Push (StackEntryKind kind);
-  BOOL	IsInSet (char c, char * set);
+  BOOL	IsInSet (char c, const char* set);
 #ifndef NDEBUG
   void	PrintStackEntry (StackEntry * se);
   void	PrintStack (void);

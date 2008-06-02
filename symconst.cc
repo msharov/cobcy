@@ -13,7 +13,7 @@ CobolConstant :: CobolConstant (void)
     data.cval = NULL;
 }
 
-CobolConstant :: CobolConstant (char * cval)
+CobolConstant :: CobolConstant (const char* cval)
 {
 int length;
     length = strlen (cval);
@@ -35,7 +35,7 @@ CobolConstant :: CobolConstant (double fval)
     CurKind = CC_Float;
 }
 
-CobolConstant& CobolConstant :: operator= (char * cval)
+CobolConstant& CobolConstant :: operator= (const char* cval)
 {
 int length;
     length = strlen (cval);
@@ -117,7 +117,7 @@ void CobolConstant :: WriteTextStream (ostream& os)
     }
 }
 
-void CobolConstant :: GenWrite (ostream& os, char * stream)
+void CobolConstant :: GenWrite (ostream& os, const char* stream)
 {
     GenIndent();
     os << "fprintf (" << stream << ", \"";

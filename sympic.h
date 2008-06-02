@@ -31,11 +31,11 @@ protected:
     char *		Text;
 
 protected:
-    void		Expand (char * pic, char * expanded);
+    void		Expand (const char* pic, char* expanded);
 
 public:
 			PictureType (void);
-    WORD		Set (char * NewPicture);
+    WORD		Set (const char* NewPicture);
     void		GenTypePrefix (ostream& os);
     void		GenTypeSuffix (ostream& os);
     void		GenReadFunction (ostream& os);

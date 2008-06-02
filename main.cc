@@ -8,16 +8,20 @@
 #include "lyextern.h"
 #include "semextern.h"
 
-/*---------------------| Globals |------------------------------*/
-  extern FILE * 	yyin;
-  CobcyConfigType 	CobcyConfig;
-/*--------------------------------------------------------------*/
-  void 	Usage (char * progname);
-  int 	ProcessFlags (int argc, char ** argv);
-  void	SetInitialConfiguration (void);
-/*--------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
-int main (int argc, char ** argv)
+extern FILE* yyin;
+CobcyConfigType CobcyConfig;
+
+//----------------------------------------------------------------------
+
+static void Usage (const char* progname);
+static int ProcessFlags (int argc, const char* const* argv);
+static void SetInitialConfiguration (void);
+
+//----------------------------------------------------------------------
+
+int main (int argc, const char* const* argv)
 {
     SetInitialConfiguration();
     if (ProcessFlags (argc, argv) == S_ERROR) {
@@ -43,7 +47,7 @@ int main (int argc, char ** argv)
     return (0);
 }
 
-void Usage (char * progname)
+static void Usage (const char* progname)
 {
     cout << "\n";
     cout << "Cobol to C compiler v0.1, Copyright (c) Mike Sharov, 1996\n";
@@ -59,7 +63,7 @@ void Usage (char * progname)
     cout << "\n";
 }
 
-int ProcessFlags (int argc, char ** argv)
+static int ProcessFlags (int argc, const char* const* argv)
 {
 int i, NameLength;
 enum {

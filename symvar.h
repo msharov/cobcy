@@ -16,13 +16,13 @@ protected:
 
 public:
 			CobolVar (void);
-    void		SetPicture (char * NewPic);
+    void		SetPicture (const char* NewPic);
     virtual CobolSymbolType	Kind (void);
     inline BOOL		IsNumeric (void);
 
     void		GenDeclare (ostream& os);
-    void		GenRead (ostream& os, char * stream);
-    void		GenWrite (ostream& os, char * stream);
+    void		GenRead (ostream& os, const char* stream);
+    void		GenWrite (ostream& os, const char* stream);
     void		GenMove (ostream& os, CobolVar * data);
     void		GenMove (ostream& os, CobolConstant& data);
     void		GenArith (ostream& os, Streamable * op1,

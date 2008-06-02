@@ -51,29 +51,27 @@ protected:
     WORD		TableSize;
 
 protected:
-    inline HashKeyType	GetKey (char * Name); 
-    inline BOOL		IsEqual (char * Name, 
-    				 Bucket<HashAttr> * ABucket);
+    inline HashKeyType	GetKey (const char* Name);
+    inline BOOL		IsEqual (const char* Name, Bucket<HashAttr>* ABucket);
 
 public:
     INLINE_CTOR		HashTable (WORD NewTableSize = DEFAULT_TABLE_SIZE);
-    inline void		Insert (char * Name, HashAttr * Attr);
-    inline void 	Remove (char * Name);
-    inline HashAttr *	Lookup (char * Name);
+    inline void		Insert (const char* Name, HashAttr * Attr);
+    inline void 	Remove (const char* Name);
+    inline HashAttr *	Lookup (const char* Name);
     inline void		Clear (void);
     inline             ~HashTable (void);
 };
 
 template <class HashAttr>
-inline HashKeyType HashTable<HashAttr> :: GetKey (char * Name)
+inline HashKeyType HashTable<HashAttr> :: GetKey (const char* Name)
 {
     // Key = (Name[First] + Name[Last]) % TableSize
     return ((HashKeyType)((Name[0] + Name[strlen(Name)]) % TableSize));
 };
 
 template <class HashAttr>
-inline BOOL HashTable<HashAttr> :: IsEqual 
-(char * Name, Bucket<HashAttr> * ABucket )
+inline BOOL HashTable<HashAttr> :: IsEqual (const char* Name, Bucket<HashAttr>* ABucket )
 {
 WORD NameLength, i, ssi;
     NameLength = strlen (Name);
@@ -104,7 +102,7 @@ HashKeyType i;
 };
 
 template <class HashAttr>
-inline void HashTable<HashAttr> :: Insert (char * Name, HashAttr * Attr)
+inline void HashTable<HashAttr> :: Insert (const char* Name, HashAttr * Attr)
 {
 HashKeyType NewKey;
 Bucket<HashAttr> * NewBucket;
@@ -143,7 +141,7 @@ WORD NameLength, NewSSIndex, NeedAllocate;
 };
 
 template <class HashAttr>
-inline void HashTable<HashAttr> :: Remove (char * Name)
+inline void HashTable<HashAttr> :: Remove (const char* Name)
 {
 HashKeyType Key;
 Bucket<HashAttr> * Current, * Parent = NULL;
@@ -165,7 +163,7 @@ Bucket<HashAttr> * Current, * Parent = NULL;
 };
 
 template <class HashAttr>
-inline HashAttr * HashTable<HashAttr> :: Lookup (char * Name)
+inline HashAttr * HashTable<HashAttr> :: Lookup (const char* Name)
 {
 HashKeyType Key;
 Bucket<HashAttr> * Current;

@@ -33,7 +33,7 @@ CobolSymbolType CobolFile :: Kind (void)
     return (CS_FileDesc);
 }
 
-void CobolFile :: SetFilename (char * filename)
+void CobolFile :: SetFilename (const char* filename)
 {
     strcpy (DataFileName, filename);
 }
@@ -78,19 +78,19 @@ void CobolFile :: SetOrganization (OrganizationType org)
        IsDBF = TRUE;
 }
 
-void CobolFile :: SetKey (char * keyname)
+void CobolFile :: SetKey (const char* keyname)
 {
     strcpy (RecordKey, keyname);
     strcpy (IndexFileName, RecordKey);
     strcat (IndexFileName, ".ndx");
 }
 
-void CobolFile :: SetStatusVar (char * varname)
+void CobolFile :: SetStatusVar (const char* varname)
 {
     strcpy (StatusVar, varname);
 }
 
-void CobolFile :: SetRecord (char * recname)
+void CobolFile :: SetRecord (const char* recname)
 {
     strcpy (RecordName, recname);
 }
@@ -105,7 +105,7 @@ void CobolFile :: SetUnlinkOnClose (BOOL NewFlag)
     UnlinkOnClose = NewFlag;
 }
 
-void CobolFile :: SetFlushCommand (char * NewCommand)
+void CobolFile :: SetFlushCommand (const char* NewCommand)
 {
     strcpy (FlushCommand, NewCommand);
 }

@@ -32,15 +32,15 @@ private:
     char		CobolName [MAX_SYMBOL_LENGTH];	   // Cobol name
 
 protected:
-    void		CobolToCName (char * str);
+    void		CobolToCName (char* str);
 
 public:
 				CobolSymbol (void);
-    void			SetName (char * NewName);
-    inline char *		GetName (void);
-    inline char *		GetCName (void);
-    inline char *		GetFullCName (void);
-    void			SetParent (char * NewParent);
+    void			SetName (const char* NewName);
+    inline const char*		GetName (void);
+    inline const char*		GetCName (void);
+    inline const char*		GetFullCName (void);
+    void			SetParent (const char* NewParent);
     virtual CobolSymbolType	Kind (void) = 0;
     virtual void		WriteBinaryStream (ostream& os);
     virtual void		WriteTextStream (ostream& os);
@@ -49,17 +49,17 @@ public:
 
 /*------------------------------------------------------------------------*/
 
-inline char * CobolSymbol :: GetName (void)
+inline const char* CobolSymbol :: GetName (void)
 {
     return (CobolName);
 }
 
-inline char * CobolSymbol :: GetCName (void)
+inline const char* CobolSymbol :: GetCName (void)
 {
     return (CName);
 }
 
-inline char * CobolSymbol :: GetFullCName (void)
+inline const char* CobolSymbol :: GetFullCName (void)
 {
     return (FullCName);
 }

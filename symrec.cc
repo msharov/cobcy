@@ -36,7 +36,7 @@ void CobolRecord :: GenDeclareEnd (ostream& os)
     os << "} " << GetCName() << ";\n";
 }
 
-void CobolRecord :: GenRead (ostream& os, char * stream)
+void CobolRecord :: GenRead (ostream& os, const char* stream)
 {
 unsigned int i;
 CobolData * child;
@@ -56,7 +56,7 @@ CobolData * child;
     }
 }
 
-void CobolRecord :: GenWrite (ostream& os, char * stream)
+void CobolRecord :: GenWrite (ostream& os, const char* stream)
 {
 unsigned int i;
 CobolData * child;

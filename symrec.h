@@ -21,8 +21,8 @@ public:
     CobolSymbolType		Kind (void);
     void			GenDeclareBegin (ostream& os);
     void			GenDeclareEnd (ostream& os);
-    void			GenRead (ostream& os, char * stream);
-    void			GenWrite (ostream& os, char * stream);
+    void			GenRead (ostream& os, const char* stream);
+    void			GenWrite (ostream& os, const char* stream);
     void			GenSignature (ostream& os);
     virtual		       ~CobolRecord (void);
 };

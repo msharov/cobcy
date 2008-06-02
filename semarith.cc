@@ -76,7 +76,7 @@ void SetResultRounding (void)
     RoundResult = TRUE;
 }
 
-static void GenericArithmetic (char * OpName, BOOL SourceFirst, char OpChar)
+static void GenericArithmetic (const char* OpName, BOOL SourceFirst, char OpChar)
 {
 WORD nIds, i;
 CobolVar * dest = NULL;

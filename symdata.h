@@ -21,8 +21,8 @@ public:
     inline virtual WORD	GetDeclLevel (void);
     void		AssociateWithStream (CobolFile * NewStream);
     CobolFile *		GetStream (void);
-    virtual void	GenRead (ostream& os, char * stream) = 0;
-    virtual void	GenWrite (ostream& os, char * stream) = 0;
+    virtual void	GenRead (ostream& os, const char* stream) = 0;
+    virtual void	GenWrite (ostream& os, const char* stream) = 0;
     virtual void	GenSignature (ostream& os) = 0;
     void		GenRead (ostream& os);
     void		GenWrite (ostream& os);
