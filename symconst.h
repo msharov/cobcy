@@ -36,13 +36,13 @@ public:
     CobolConstant&		operator= (StackEntry * se);
     virtual void		WriteTextStream (ostream& os);
     void			GenWrite (ostream& os, const char* stream);
-    inline BOOL			IsNumeric (void);
+    inline bool			IsNumeric (void);
     virtual		       ~CobolConstant (void);
 };
 
 /*---------------------------------------------------------------------------*/
 
-inline BOOL CobolConstant :: IsNumeric (void)
+inline bool CobolConstant :: IsNumeric (void)
 {
     return (CurKind == CC_Integer || CurKind == CC_Float);
 }

@@ -50,13 +50,12 @@ inline int sign (Num x)
 }
 
 template <class ArrayEl>
-inline BOOL member (ArrayEl el, ArrayEl * arr, size_t size)
-{   
-size_t n;	  
-    for (n = 0; n < size; ++ n)
+inline bool member (ArrayEl el, ArrayEl* arr, size_t size)
+{
+    for (size_t n = 0; n < size; ++ n)
        	if (arr[n] == el)
-            return (TRUE);
-    return (FALSE);	   
+            return (true);
+    return (false);
 }
 
 #endif

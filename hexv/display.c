@@ -109,8 +109,8 @@ void DisplayOpen (void)
     initscr();
     noecho();
     cbreak();
-    leaveok (stdscr, TRUE);
-    keypad (stdscr, TRUE);
+    leaveok (stdscr, true);
+    keypad (stdscr, true);
     if (has_colors()) {
        start_color();
        init_pair (1, COLOR_WHITE, COLOR_BLUE);
@@ -123,8 +123,8 @@ void DisplayClose (void)
 {
     echo();
     nocbreak();
-    keypad (stdscr, FALSE);
-    leaveok (stdscr, FALSE);
+    keypad (stdscr, false);
+    leaveok (stdscr, false);
     attrset (A_NORMAL);
     clear();
     refresh();

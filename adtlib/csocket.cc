@@ -160,7 +160,7 @@ CSocketClient :: ~CSocketClient (void)
 
 CSocketServer :: CSocketServer (void)
 {
-    m_IsForking = FALSE;
+    m_IsForking = false;
 }
 
 int CSocketServer :: Open (int port, int socktype, int strtype)
@@ -212,7 +212,7 @@ SOCKET t, os;
     listen (m_SockId, 5);
 
     /* Loop forever waiting for connections */
-    while (TRUE) { 
+    while (true) {
 	if ((t = accept (m_SockId, NULL, NULL)) < 0) {
 	    if (errno == EINTR)
 		continue; 

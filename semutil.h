@@ -14,7 +14,7 @@
   void 	WriteWarning (const char* str);
   void	NIY (const char* str);
   void  GenComment (const char* str);
-  BOOL	ErrorOccured (void);
+  bool	ErrorOccured (void);
   void 	PrintConstant (StackEntry * entry, ostream& os);
   CobolSymbol *	LookupIdentifier (const char* id);
   void	PrintIdentifier (const char* id, ostream& os);
@@ -22,7 +22,7 @@
   WORD 	CountIdentifiers (void);
   void 	ReverseIdentifiers (WORD nIds);
   void	Push (StackEntryKind kind);
-  BOOL	IsInSet (char c, const char* set);
+  bool	IsInSet (char c, const char* set);
 #ifndef NDEBUG
   void	PrintStackEntry (StackEntry * se);
   void	PrintStack (void);

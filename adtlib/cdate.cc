@@ -103,14 +103,14 @@ WORD CDate :: GetYearDay (void) const
     return (tm_yday);
 }
 
-BOOL CDate :: IsValid (void) const
+bool CDate :: IsValid (void) const
 {
     if (tm_sec <= 61 && tm_min <= 61 && tm_hour <= 24 &&
 	tm_mday >= 1 && tm_mday <= 31 && tm_mon <= 61 &&
 	tm_year >= 1900)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
 CDate& CDate :: operator= (const CDate& ToBe)
@@ -126,54 +126,54 @@ CDate& CDate :: operator= (const CDate& ToBe)
     return (*this);
 }
 
-BOOL CDate :: operator== (const CDate& ToCompare)
+bool CDate :: operator== (const CDate& ToCompare)
 {
     if (tm_sec == ToCompare.tm_sec && tm_min == ToCompare.tm_min &&
 	tm_hour == ToCompare.tm_hour && tm_mday == ToCompare.tm_mday &&
 	tm_mon == ToCompare.tm_mon && tm_year == ToCompare.tm_year)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
-BOOL CDate :: operator> (const CDate& ToCompare)
+bool CDate :: operator> (const CDate& ToCompare)
 {
     if (tm_sec > ToCompare.tm_sec && tm_min >= ToCompare.tm_min &&
 	tm_hour >= ToCompare.tm_hour && tm_mday >= ToCompare.tm_mday &&
 	tm_mon >= ToCompare.tm_mon && tm_year >= ToCompare.tm_year)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
-BOOL CDate :: operator< (const CDate& ToCompare)
+bool CDate :: operator< (const CDate& ToCompare)
 {
     if (tm_sec < ToCompare.tm_sec && tm_min <= ToCompare.tm_min &&
 	tm_hour <= ToCompare.tm_hour && tm_mday <= ToCompare.tm_mday &&
 	tm_mon <= ToCompare.tm_mon && tm_year <= ToCompare.tm_year)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
-BOOL CDate :: operator>= (const CDate& ToCompare)
+bool CDate :: operator>= (const CDate& ToCompare)
 {
     if (tm_sec >= ToCompare.tm_sec && tm_min >= ToCompare.tm_min &&
 	tm_hour >= ToCompare.tm_hour && tm_mday >= ToCompare.tm_mday &&
 	tm_mon >= ToCompare.tm_mon && tm_year >= ToCompare.tm_year)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
-BOOL CDate :: operator<= (const CDate& ToCompare)
+bool CDate :: operator<= (const CDate& ToCompare)
 {
     if (tm_sec <= ToCompare.tm_sec && tm_min <= ToCompare.tm_min &&
 	tm_hour <= ToCompare.tm_hour && tm_mday <= ToCompare.tm_mday &&
 	tm_mon <= ToCompare.tm_mon && tm_year <= ToCompare.tm_year)
-	return (TRUE);
+	return (true);
     else
-	return (FALSE);
+	return (false);
 }
 
 CDate& CDate :: operator+ (const CDate& ToAdd)

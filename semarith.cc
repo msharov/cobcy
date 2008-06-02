@@ -8,7 +8,7 @@
 #include "symrec.h"
 #include "symconst.h"
 
-BOOL RoundResult = FALSE;
+bool RoundResult = false;
 
 void GenMove (void)
 {
@@ -17,7 +17,7 @@ CobolVar * src = NULL, * dest = NULL;
 CobolConstant csrc;
 StackEntry ** prms, * CurEntry = NULL;
 typedef StackEntry * StackEntryPtr;
-BOOL ConstantSource = FALSE;
+bool ConstantSource = false;
 
 #ifndef NDEBUG
     cout << "\tIn GenMove\n";
@@ -42,7 +42,7 @@ BOOL ConstantSource = FALSE;
     }
     else {
        csrc = CurEntry;
-       ConstantSource = TRUE;
+       ConstantSource = true;
     }
 
     for (i = 0; i < nIds; ++ i) {
@@ -73,10 +73,10 @@ BOOL ConstantSource = FALSE;
 
 void SetResultRounding (void)
 {
-    RoundResult = TRUE;
+    RoundResult = true;
 }
 
-static void GenericArithmetic (const char* OpName, BOOL SourceFirst, char OpChar)
+static void GenericArithmetic (const char* OpName, bool SourceFirst, char OpChar)
 {
 WORD nIds, i;
 CobolVar * dest = NULL;
@@ -85,7 +85,7 @@ Streamable * src1, * src2;
 StackEntry ** prms, * SrcEntry = NULL, * CurEntry = NULL, * DestEntry = NULL;
 char ErrorBuffer[80];
 typedef StackEntry * StackEntryPtr;
-BOOL ConstantSource = FALSE;
+bool ConstantSource = false;
 
 #ifndef NDEBUG
     cout << "\tIn GenericArithmetic " << OpName << "\n";
@@ -125,7 +125,7 @@ BOOL ConstantSource = FALSE;
 		break;
        default:
        		ConstSrc = SrcEntry;
-		ConstantSource = TRUE;
+		ConstantSource = true;
        		break;
     }
 
@@ -172,27 +172,27 @@ BOOL ConstantSource = FALSE;
 
     delete SrcEntry;
     delete [] prms;
-    RoundResult = FALSE;
+    RoundResult = false;
 }
 
 void GenAdd (void)
 {
-    GenericArithmetic ("ADD", TRUE, '+');
+    GenericArithmetic ("ADD", true, '+');
 }
 
 void GenSubtract (void)
 {
-    GenericArithmetic ("SUBTRACT", TRUE, '-');
+    GenericArithmetic ("SUBTRACT", true, '-');
 }
 
 void GenMultiply (void)
 {
-    GenericArithmetic ("MULTIPLY", FALSE, '*');
+    GenericArithmetic ("MULTIPLY", false, '*');
 }
 
 void GenDivide (void)
 {
-    GenericArithmetic ("DIVIDE", FALSE, '/');
+    GenericArithmetic ("DIVIDE", false, '/');
 }
 
 void GenCompute (void)
@@ -260,7 +260,7 @@ CobolVar * dest;
        if (dest != NULL)
 	  dest->WritePicture (codef);
        codef << ")";
-       RoundResult = FALSE;
+       RoundResult = false;
     }
     codef << ";\n";
     

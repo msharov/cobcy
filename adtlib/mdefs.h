@@ -11,16 +11,8 @@
 #include <stddef.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdbool.h>
 #include "compat.h"
-
-#ifndef NeedFunctionPrototypes
-#   define NeedFunctionPrototypes		1
-#endif
-
-#ifndef TRUE
-#   define TRUE			1
-#   define FALSE		0
-#endif				 
 
 #ifndef S_OK
 #define S_OK			0
@@ -30,9 +22,6 @@
 #ifndef BYTE
 typedef	unsigned char		BYTE;
 typedef unsigned long int	WORD;
-#endif
-#ifndef BOOL
-typedef BYTE			BOOL;
 #endif
 
 #define BYTE_MAX		UCHAR_MAX

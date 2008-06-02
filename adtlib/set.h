@@ -3,7 +3,7 @@
 **	Defines a generic set template.
 **
 ** includes:
-**	mdefs.h	- for BOOL
+**	mdefs.h	- for bool
 */
 
 #ifndef __SET_H
@@ -27,7 +27,7 @@ public:
     INLINE_CTOR				Set (const SetEl * ASet, SetSizeType nElem);
     virtual inline Set<SetEl>&		operator= (const Set<SetEl>& toBe);
     virtual inline Set<SetEl>&		operator= (const SetEl * toBe);
-    virtual inline BOOL			operator== (const Set<SetEl>& toCompare) const;
+    virtual inline bool			operator== (const Set<SetEl>& toCompare) const;
     virtual inline 			operator const SetEl * () const;
 
     virtual inline void			Resize (SetSizeType NewSize);
@@ -112,24 +112,21 @@ SetSizeType i;
 }
 
 template <class SetEl>
-inline BOOL Set<SetEl> :: operator==
-(const Set<SetEl>& toCompare) const
+inline bool Set<SetEl> :: operator== (const Set<SetEl>& toCompare) const
 {
-SetSizeType i;
-
     if (m_Size != toCompare.m_Size)
-	return (FALSE);
-    for (i = 0; i < m_Size; ++ i)
+	return (false);
+    for (SetSizeType i = 0; i < m_Size; ++ i)
 	if (!(m_Data[i] == toCompare.m_Data[i])) // to require only == in m_Data
-	    return (FALSE);
-    return (TRUE);    
+	    return (false);
+    return (true);
 }
 
 template <class SetEl>
-inline Set<SetEl> :: operator const SetEl * () const
+inline Set<SetEl> :: operator const SetEl* (void) const
 { 
     return (m_Data);
-};
+}
 
 template <class SetEl>
 inline void Set<SetEl> :: Fill (SetEl value)

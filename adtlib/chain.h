@@ -58,7 +58,7 @@ protected:
     
 public:
     INLINE_CTOR 		Chain (void);
-    inline BOOL			IsEmpty (void) const;
+    inline bool			IsEmpty (void) const;
     virtual inline 	       ~Chain (void);
 };
 
@@ -71,12 +71,12 @@ inline Chain<ChainEl> :: Chain (void)
 }
 
 template <class ChainEl>
-inline BOOL Chain<ChainEl> :: IsEmpty (void) const
+inline bool Chain<ChainEl> :: IsEmpty (void) const
 {
     if (m_Head == NULL && m_Tail == NULL)
-	return (TRUE);
+	return (true);
     assert (!((m_Head == NULL || m_Tail == NULL) && m_Head != m_Tail));
-    return (FALSE);
+    return (false);
 }
 
 template <class ChainEl> 

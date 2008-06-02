@@ -29,7 +29,7 @@ public:
     					Array2dSizeType AHeight, 
 					Array2dSizeType AWidth);
 			
-    inline BOOL		operator== (const Array2d<Array2dEl>& toCompare) const;
+    inline bool		operator== (const Array2d<Array2dEl>& toCompare) const;
     inline virtual Array2dEl *	operator[] (Array2dSizeType index) const;
     inline Array2d<Array2dEl>&	operator= (const Array2d<Array2dEl>& toBe);
 
@@ -73,19 +73,14 @@ inline Array2d<Array2dEl> :: Array2d
 };
  
 template <class Array2dEl>
-inline BOOL Array2d<Array2dEl> :: operator== 
-(const Array2d<Array2dEl>& toCompare) const
-{    
-Array2dSizeType i;
-
+inline bool Array2d<Array2dEl> :: operator== (const Array2d<Array2dEl>& toCompare) const
+{
     if (toCompare.m_Height != m_Height || toCompare.m_Width != m_Width)
-	return (FALSE);
-	    
-    for (i = 0; i < m_Size; ++ i)
+	return (false);
+    for (Array2dSizeType i = 0; i < m_Size; ++ i)
 	if (m_Data[i] != toCompare.m_Data[i])
-	    return (FALSE);
-
-    return (TRUE); 
+	    return (false);
+    return (true);
 }	       
 
 template <class Array2dEl>

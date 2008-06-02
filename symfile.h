@@ -19,17 +19,17 @@ private:
     char			RecordKey [MAX_SYMBOL_LENGTH];
 
     char			FlushCommand [PATH_MAX];
-    BOOL			NewlineFlag;
+    bool			NewlineFlag;
     AccessModeType		AccessMode;
     OrganizationType		Organization;
 
-    BOOL			Changed;
-    BOOL			Open;
+    bool			Changed;
+    bool			Open;
     OpenModeType		OpenMode;
-    BOOL			UnlinkOnClose;
+    bool			UnlinkOnClose;
 
-    BOOL			IsDBF;		// To avoid 'if Organization ==
-    BOOL			IsFormatted;
+    bool			IsDBF;		// To avoid 'if Organization ==
+    bool			IsFormatted;
 
 private:
     void			GenRecordSignature (ostream& os);
@@ -47,8 +47,8 @@ public:
     void			SetStatusVar (const char* varname);
     void			SetRecord (const char* recname);
     void			SetFlushCommand (const char* NewCommand);
-    void			SetNewlineFlag (BOOL NewFlag);
-    void			SetUnlinkOnClose (BOOL NewFlag);
+    void			SetNewlineFlag (bool NewFlag);
+    void			SetUnlinkOnClose (bool NewFlag);
     void			AssociateRecord (void);
     virtual void		WriteTextStream (ostream& os);
 

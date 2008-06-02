@@ -10,7 +10,7 @@
 
 class CobolLabel : public CobolSymbol {
 public:
-    BOOL		Undeclared;	// For forward references
+    bool		Undeclared;	// For forward references
 
 public:
 			CobolLabel (void);

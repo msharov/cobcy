@@ -9,7 +9,7 @@
 #include "semcontrol.h"
 
 /*-----------------------------------------------*/
-  extern BOOL RoundResult;
+  extern bool RoundResult;
 /*-----------------------------------------------*/
 
 CobolVar :: CobolVar (void)

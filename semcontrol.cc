@@ -42,7 +42,7 @@ char ErrorBuffer [80];
     }
     else {
        if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
-	  NewLabel->Undeclared = FALSE;
+	  NewLabel->Undeclared = false;
        else {
 	  sprintf (ErrorBuffer, "name %s is already used", 
 	  		NewLabel->GetName());
@@ -78,7 +78,7 @@ StackEntry * CurEntry;
 #ifndef NDEBUG
        cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
 #endif
-       DestLabel->Undeclared = TRUE;
+       DestLabel->Undeclared = true;
        SymTable.Insert (CurEntry->ident, DestLabel);
     }
     delete (CurEntry);
@@ -97,7 +97,7 @@ CobolLabel * ProcAttr;
     if ((ProcAttr = (CobolLabel*) SymTable.Lookup (Proc->ident)) == NULL) {
        ProcAttr = new CobolLabel;
        ProcAttr->SetName (Proc->ident);
-       ProcAttr->Undeclared = TRUE;
+       ProcAttr->Undeclared = true;
 #ifndef NDEBUG
        cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
 #endif

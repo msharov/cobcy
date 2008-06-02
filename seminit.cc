@@ -16,7 +16,7 @@
   Stack<StackEntry> 		SemStack;
   HashTable<CobolSymbol> 	SymTable;
   int 				NestingLevel = 0;
-  BOOL				CodeBegan = FALSE;
+  bool				CodeBegan = false;
 /*--------------------------------------------------*/
 
 void FinishDecl (void)
@@ -45,7 +45,7 @@ void StartCode (void)
     codef << "{\n";
     ++ NestingLevel;
 
-    CodeBegan = TRUE;
+    CodeBegan = true;
 }
 
 void EndCode (void)

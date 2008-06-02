@@ -52,7 +52,7 @@ protected:
 
 protected:
     inline HashKeyType	GetKey (const char* Name);
-    inline BOOL		IsEqual (const char* Name, Bucket<HashAttr>* ABucket);
+    inline bool		IsEqual (const char* Name, Bucket<HashAttr>* ABucket);
 
 public:
     INLINE_CTOR		HashTable (WORD NewTableSize = DEFAULT_TABLE_SIZE);
@@ -71,19 +71,19 @@ inline HashKeyType HashTable<HashAttr> :: GetKey (const char* Name)
 };
 
 template <class HashAttr>
-inline BOOL HashTable<HashAttr> :: IsEqual (const char* Name, Bucket<HashAttr>* ABucket )
+inline bool HashTable<HashAttr> :: IsEqual (const char* Name, Bucket<HashAttr>* ABucket )
 {
 WORD NameLength, i, ssi;
     NameLength = strlen (Name);
     ssi = ABucket->m_Name.Index;	// String space index
     if (NameLength != ABucket->m_Name.Length)
-	return (FALSE);
+	return (false);
     for (i = 0; i < NameLength; ++ i) {
 	if (Name[i] != m_StringSpace[ssi])
-	    return (FALSE);
+	    return (false);
 	++ ssi;
     }
-    return (TRUE);
+    return (true);
 };
 
 template <class HashAttr>

@@ -12,7 +12,7 @@ PictureType :: PictureType (void)
     Size = 0;
     CSize = 0;
     Sign = PictureType::NoSign;
-    SignSeparate = FALSE;
+    SignSeparate = false;
     nDigitsBDP = 0;
     nDigitsADP = 0;
     nFillerZeroes = 0;
@@ -59,7 +59,7 @@ unsigned int i;
 int j = 0;
 int length;
 unsigned int oldlength;
-BOOL FoundPoint = FALSE;
+bool FoundPoint = false;
 
     Expand (NewPicture, Expanded);
 
@@ -102,7 +102,7 @@ BOOL FoundPoint = FALSE;
 	  ++ nFillerZeroes;
        else if (Expanded[i] == 'v') {
 	  Kind = PictureType::Float;
-	  FoundPoint = TRUE;
+	  FoundPoint = true;
        }
     }
 
@@ -191,14 +191,14 @@ void PictureType :: GenWriteFunction (ostream& os)
     }
 }
 
-// Returns TRUE if a cast is needed, so that (...) can be written
-BOOL PictureType :: GenCastFrom (ostream& os, PictureType& pic)
+// Returns true if a cast is needed, so that (...) can be written
+bool PictureType :: GenCastFrom (ostream& os, PictureType& pic)
 {
     if (Kind == pic.Kind)
-	return (FALSE);
+	return (false);
 
     if (IsNumeric() == pic.IsNumeric())
-	return (FALSE);
+	return (false);
 
     if (pic.IsNumeric()) {
 	if (pic.Kind == PictureType::Integer)
@@ -212,17 +212,17 @@ BOOL PictureType :: GenCastFrom (ostream& os, PictureType& pic)
 	else
 	    os << "_FloatToString";
     }
-    return (TRUE);
+    return (true);
 }
 
-// Returns TRUE if a cast is needed, so that (...) can be written
-BOOL PictureType :: GenCastTo (ostream& os, PictureType& pic)
+// Returns true if a cast is needed, so that (...) can be written
+bool PictureType :: GenCastTo (ostream& os, PictureType& pic)
 {
     if (Kind == pic.Kind)
-       return (FALSE);
+       return (false);
 
     if (IsNumeric() == pic.IsNumeric())
-       return (FALSE);
+       return (false);
 
     if (IsNumeric()) {
        if (Kind == PictureType::Integer)
@@ -236,7 +236,7 @@ BOOL PictureType :: GenCastTo (ostream& os, PictureType& pic)
        else
 	  os << "_StringToFloat";
     }
-    return (TRUE);
+    return (true);
 }
 
 // Writes type character, size of field, and number of digits after d.p.

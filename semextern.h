@@ -23,7 +23,7 @@ typedef struct {
     char 	DeclFile [MAX_FILENAME];	/* Output .h file */
 
     /* Build options */
-    BOOL	GenDebug;	/* Generate debugging code? */
+    bool	GenDebug;	/* Generate debugging code? */
 } CobcyConfigType;
 
 // All of these are defined in seminit.cc

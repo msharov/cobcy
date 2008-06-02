@@ -32,7 +32,7 @@ CobolFile * NewFD;
 	NewFD->SetFlushCommand (PRINTER_COMMAND);
 	NewFD->SetOrganization (ORG_Sequential);
 	NewFD->SetAccessMode (AM_Sequential);
-	NewFD->SetUnlinkOnClose (TRUE);
+	NewFD->SetUnlinkOnClose (true);
     }
     else
 	NewFD->SetFilename (CurEntry->ident);

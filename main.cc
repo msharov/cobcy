@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 
 extern FILE* yyin;
+extern int yyparse (void);
 CobcyConfigType CobcyConfig;
 
 //----------------------------------------------------------------------
@@ -32,8 +33,7 @@ int main (int argc, const char* const* argv)
     if ((yyin = fopen (CobcyConfig.SourceFile, "r")) == NULL) {
 	cerr << "FATAL: Could not open '" << CobcyConfig.SourceFile << "'!\n";
 	return (1);
-    }
-    else
+    } else
 	cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
     
     yyparse();
@@ -43,38 +43,37 @@ int main (int argc, const char* const* argv)
 	unlink (CobcyConfig.CodeFile);
 	unlink (CobcyConfig.DeclFile);
     }
-
     return (0);
 }
 
 static void Usage (const char* progname)
 {
-    cout << "\n";
-    cout << "Cobol to C compiler v0.1, Copyright (c) Mike Sharov, 1996\n";
-    cout << "Usage:\n";
-    cout << "\t" << progname << " [options] <file.cob>\n";
-    cout << "\n";
-    cout << "\tOptions:\n";
-    cout << "\t-g\t\tGenerate compiler debugging info (_cpi trace)\n";
-    cout << "\t-o <file.c>\tFile where to put the C code\n";
-    cout << "\t\t\t<file.c>.h will also be made with decls.\n";
-    cout << "\t\t\tIf this is not specified, Cobcy uses\n";
-    cout << "\t\t\t<file.cob>.c and <file.cob>.h\n";
-    cout << "\n";
+    cout << "\n"
+	    "Cobol to C compiler v0.1, Copyright (c) Mike Sharov, 1996\n"
+	    "Usage:\n"
+	    "\t" << progname << " [options] <file.cob>\n"
+	    "\n"
+	    "\tOptions:\n"
+	    "\t-g\t\tGenerate compiler debugging info (_cpi trace)\n"
+	    "\t-o <file.c>\tFile where to put the C code\n"
+	    "\t\t\t<file.c>.h will also be made with decls.\n"
+	    "\t\t\tIf this is not specified, Cobcy uses\n"
+	    "\t\t\t<file.cob>.c and <file.cob>.h\n"
+	    "\n";
 }
 
 static int ProcessFlags (int argc, const char* const* argv)
 {
-int i, NameLength;
-enum {
-    FlagMode,
-    SourceFileMode,	/* This will be the default */
-    OutputFileMode
-} mode = FlagMode;
-BOOL SourceSet = FALSE, OutputSet = FALSE;
+    int NameLength;
+    enum {
+	FlagMode,
+	SourceFileMode,	/* This will be the default */
+	OutputFileMode
+    } mode = FlagMode;
+    bool SourceSet = false, OutputSet = false;
 
     mode = SourceFileMode;
-    for (i = 1; i < argc; ++ i) {
+    for (int i = 1; i < argc; ++ i) {
 	if (argv[i][0] == '-')
 	    mode = FlagMode;
 
@@ -83,7 +82,7 @@ BOOL SourceSet = FALSE, OutputSet = FALSE;
 		if (strcmp (argv[i], "-o") == 0)
 		    mode = OutputFileMode;
 		else if (strcmp (argv[i], "-g") == 0)
-		    CobcyConfig.GenDebug = TRUE;
+		    CobcyConfig.GenDebug = true;
 
 		// If not -o, revert to looking for the source file
 		if (mode != OutputFileMode)
@@ -98,7 +97,7 @@ BOOL SourceSet = FALSE, OutputSet = FALSE;
 			strcpy (CobcyConfig.DeclFile, CobcyConfig.SourceFile);
 			strcat (CobcyConfig.DeclFile, ".h");
 		    }
-		    SourceSet = TRUE;
+		    SourceSet = true;
 		}
 		break;
 	    case OutputFileMode:
@@ -114,7 +113,7 @@ BOOL SourceSet = FALSE, OutputSet = FALSE;
 
 		    strcat (CobcyConfig.DeclFile, ".h");
 		    mode = SourceFileMode;
-		    OutputSet = TRUE;
+		    OutputSet = true;
 		}
 		break;
 	}
@@ -130,15 +129,14 @@ BOOL SourceSet = FALSE, OutputSet = FALSE;
 	cerr << "No cobol file specified\n";
 	return (S_ERROR);
     }
-    else
-	return (S_OK);
+    return (S_OK);
 }
 
-void SetInitialConfiguration (void)
+static void SetInitialConfiguration (void)
 {
     memset (CobcyConfig.SourceFile, 0, MAX_FILENAME);
     memset (CobcyConfig.CodeFile, 0, MAX_FILENAME);
     memset (CobcyConfig.DeclFile, 0, MAX_FILENAME);
-    CobcyConfig.GenDebug = FALSE;
+    CobcyConfig.GenDebug = false;
 }
 

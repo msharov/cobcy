@@ -18,7 +18,7 @@ public:
 			CobolVar (void);
     void		SetPicture (const char* NewPic);
     virtual CobolSymbolType	Kind (void);
-    inline BOOL		IsNumeric (void);
+    inline bool		IsNumeric (void);
 
     void		GenDeclare (ostream& os);
     void		GenRead (ostream& os, const char* stream);
@@ -36,7 +36,7 @@ public:
 
 /*-----------------------------------------------------------------------*/
 
-inline BOOL CobolVar :: IsNumeric (void)
+inline bool CobolVar :: IsNumeric (void)
 {
     return (Picture.IsNumeric());
 }

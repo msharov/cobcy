@@ -44,17 +44,17 @@ public:
     int			Index (const char ToFind) const;
     int			Index (const char * ToFind) const;
     int			Index (const CString& ToFind) const;
-    inline BOOL		Contains (const char ToFind) const;
-    inline BOOL		Contains (const char * ToFind) const;
-    inline BOOL		Contains (const CString& ToFind) const;
+    inline bool		Contains (const char ToFind) const;
+    inline bool		Contains (const char * ToFind) const;
+    inline bool		Contains (const CString& ToFind) const;
     Array<CString>	Split (const CString& delim = " \n\t") const;
 
     CString&		operator= (const CString& ToBe);
     CString&		operator= (const char ToBe);
     CString&		operator= (const char * ToBe);
-    inline BOOL		operator== (const CString& ToCompare) const;
-    inline BOOL		operator< (const CString& ToCompare) const;
-    inline BOOL		operator> (const CString& ToCompare) const;
+    inline bool		operator== (const CString& ToCompare) const;
+    inline bool		operator< (const CString& ToCompare) const;
+    inline bool		operator> (const CString& ToCompare) const;
     inline char&	operator[] (WORD idx);
     inline const char&	operator[] (WORD idx) const;
     inline		operator const char * (void) const;
@@ -79,32 +79,32 @@ inline WORD CString :: Size (void) const
     return (m_MemUsed);
 }
 
-inline BOOL CString :: Contains (const char ToFind) const
+inline bool CString :: Contains (const char ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL CString :: Contains (const char * ToFind) const
+inline bool CString :: Contains (const char * ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL CString :: Contains (const CString& ToFind) const
+inline bool CString :: Contains (const CString& ToFind) const
 {
     return (Index (ToFind) >= 0);
 }
 
-inline BOOL CString :: operator== (const CString& ToCompare) const
+inline bool CString :: operator== (const CString& ToCompare) const
 {
     return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) == 0);
 }
 
-inline BOOL CString :: operator> (const CString& ToCompare) const
+inline bool CString :: operator> (const CString& ToCompare) const
 {
     return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) > 0);
 }
 
-inline BOOL CString :: operator< (const CString& ToCompare) const
+inline bool CString :: operator< (const CString& ToCompare) const
 {
     return (memcmp (m_Data, ToCompare.m_Data, m_MemUsed) < 0);
 }

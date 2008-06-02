@@ -6,7 +6,7 @@
 **	The location of window #0 is undefined after all function calls.
 **
 ** This file includes chain.h	- base class
-**		      mdefs.h	- for BOOL
+**		      mdefs.h	- for bool
 */
 
 #ifndef __LLIST_H
@@ -43,7 +43,7 @@ public:
     inline void        		Head (ListWin wid = 0); 
     inline void	       		Tail (ListWin wid = 0); 
     inline void			Skip (int count, ListWin wid = 0);
-    inline BOOL	      		OnList (ListWin wid = 0) const;
+    inline bool	      		OnList (ListWin wid = 0) const;
 					
     inline void			InsertBefore (LListEl * data, ListWin wid = 0);
     inline void			InsertAfter (LListEl * data, ListWin wid = 0);
@@ -111,7 +111,7 @@ int i;
 }
 
 template <class LListEl>
-inline BOOL LList<LListEl> :: OnList
+inline bool LList<LListEl> :: OnList
 (ListWin wid) const
 { 
     return (m_Windows[wid] != NULL);

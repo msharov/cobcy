@@ -10,7 +10,6 @@
 extern "C" {
 #endif
 
-int yyparse (void);
 int yylex (void);
 
 #ifdef _cplusplus

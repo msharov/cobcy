@@ -14,9 +14,9 @@ extern char StringBuffer[];
 extern SEOperatorKind opkind;
 extern int CurrentLine;
 extern CobolLabel * CurPar;
-extern BOOL CodeBegan;
+extern bool CodeBegan;
 
-BOOL ErrorFlag = FALSE;
+bool ErrorFlag = false;
 
 void WriteError (const char* str)
 {
@@ -30,7 +30,7 @@ void WriteError (const char* str)
 #ifndef NDEBUG
     PrintStack();
 #endif
-    ErrorFlag = TRUE;
+    ErrorFlag = true;
 }
 
 void WriteWarning (const char* str)
@@ -111,11 +111,11 @@ void GenComment (const char* str)
     codef << "/* " << str << " */\n";
 }
 
-BOOL ErrorOccured (void)
+bool ErrorOccured (void)
 {
 #ifndef NDEBUG
     cerr << "ErrorOccured: ";
-    cerr << (ErrorFlag ? "TRUE" : "FALSE");
+    cerr << (ErrorFlag ? "true" : "false");
     cerr << "\n";
 #endif
     return (ErrorFlag);
@@ -225,15 +225,15 @@ StackEntry * NewEntry;
     SemStack.Push (NewEntry);
 }
 
-BOOL IsInSet (char c, const char* set)
+bool IsInSet (char c, const char* set)
 {
 register int i, sl;
 
     sl = strlen (set);
     for (i = 0; i < sl; ++ i) {
        if (c == set[i])
-	  return (TRUE);
+	  return (true);
     }
-    return (FALSE);
+    return (false);
 }
 

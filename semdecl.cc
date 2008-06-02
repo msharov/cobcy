@@ -30,7 +30,7 @@ enum {
 };
 typedef StackEntry * StackEntryPtr;
 StackEntryPtr entry[4];
-BOOL NoPicture = FALSE;
+bool NoPicture = false;
 CobolRecord * NewRec;
 CobolVar * NewVar;
 struct {
@@ -58,7 +58,7 @@ int i;
     if (entry[RecPicture]->kind != SE_Null)
        strcpy (NewSymbol.Picture, entry [RecPicture]->ident);
     else
-       NoPicture = TRUE;
+       NoPicture = true;
 
     // ... and dispose of them here. Name and value were appended to 
     //	variable init queue so only delete these
@@ -226,7 +226,7 @@ CobolFile * DevStream;
        DevStream->SetFlushCommand (PRINTER_COMMAND);
        DevStream->SetOrganization (ORG_Sequential);
        DevStream->SetAccessMode (AM_Sequential);
-       DevStream->SetUnlinkOnClose (TRUE);
+       DevStream->SetUnlinkOnClose (true);
     }
     else
        DevStream->SetFilename (DevName->ident);

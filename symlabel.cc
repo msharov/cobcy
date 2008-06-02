@@ -9,7 +9,7 @@
 
 CobolLabel :: CobolLabel (void)
 {
-    Undeclared = TRUE;
+    Undeclared = true;
 }
 
 void CobolLabel :: GenDeclare (ostream& os)

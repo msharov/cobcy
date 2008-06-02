@@ -110,7 +110,7 @@ ArrayEl v, t;
 	v = this->m_Data[End];
 	i = Start - 1;
 	j = End;
-	while (TRUE) {
+	while (true) {
 	    while (i < (int) this->m_Size && this->m_Data [++i] < v);
 	    while (j >= 0 && this->m_Data [--j] > v);
 	    if (i >= j)

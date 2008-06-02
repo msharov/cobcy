@@ -20,11 +20,11 @@ protected:
        String 
     } 			Kind;
     enum {
-       NoSign = FALSE,
-       TrailingSign = TRUE,
+       NoSign = false,
+       TrailingSign = true,
        LeadingSign
     }			Sign;
-    BOOL		SignSeparate;
+    bool		SignSeparate;
     WORD		nDigitsBDP;	// Before Decimal Point
     WORD		nDigitsADP;	// After Decimal Point
     WORD		nFillerZeroes;	// Zeroes after DP
@@ -41,17 +41,17 @@ public:
     void		GenReadFunction (ostream& os);
     void		GenWriteFunction (ostream& os);
     void		GenSignature (ostream& os);
-    BOOL		GenCastFrom (ostream& os, PictureType& pic);
-    BOOL		GenCastTo (ostream& os, PictureType& pic);
+    bool		GenCastFrom (ostream& os, PictureType& pic);
+    bool		GenCastTo (ostream& os, PictureType& pic);
     virtual void	WriteTextStream (ostream& os);
-    inline BOOL		IsNumeric (void);
+    inline bool		IsNumeric (void);
     inline WORD		GetSize (void);
     virtual	       ~PictureType (void);
 };
 
 /*------------------------------------------------------------------------*/
 
-inline BOOL PictureType :: IsNumeric (void)
+inline bool PictureType :: IsNumeric (void)
 {
     return (Kind == Integer || Kind == Float);
 }

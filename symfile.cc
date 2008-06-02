@@ -23,9 +23,9 @@ CobolFile :: CobolFile (void)
     memset (FlushCommand, 0, PATH_MAX);
     AccessMode = AM_Sequential;
     Organization = ORG_Sequential;
-    NewlineFlag = TRUE;
-    Changed = FALSE;
-    IsDBF = FALSE;
+    NewlineFlag = true;
+    Changed = false;
+    IsDBF = false;
 }
 
 CobolSymbolType CobolFile :: Kind (void)
@@ -41,12 +41,12 @@ void CobolFile :: SetFilename (const char* filename)
 void CobolFile :: SetAccessMode (AccessModeType mode)
 {
     // Only sequential access files have newline breaks
-    NewlineFlag = FALSE;
+    NewlineFlag = false;
 
     // This is not yet complete, since I am not sure what AM_Dynamic should be
     switch (Organization) {
         case ORG_Sequential:
-		NewlineFlag = TRUE;
+		NewlineFlag = true;
 	case ORG_Line_sequential:
        		if (mode != AM_Sequential)
 	  	   WriteWarning ("access mode reset to sequential");
@@ -75,7 +75,7 @@ void CobolFile :: SetOrganization (OrganizationType org)
 
     // Set the DBF flag
     if (Organization == ORG_Relative || Organization == ORG_Indexed)
-       IsDBF = TRUE;
+       IsDBF = true;
 }
 
 void CobolFile :: SetKey (const char* keyname)
@@ -95,12 +95,12 @@ void CobolFile :: SetRecord (const char* recname)
     strcpy (RecordName, recname);
 }
 
-void CobolFile :: SetNewlineFlag (BOOL NewFlag)
+void CobolFile :: SetNewlineFlag (bool NewFlag)
 {
     NewlineFlag = NewFlag;
 }
 
-void CobolFile :: SetUnlinkOnClose (BOOL NewFlag)
+void CobolFile :: SetUnlinkOnClose (bool NewFlag)
 {
     UnlinkOnClose = NewFlag;
 }
@@ -228,9 +228,9 @@ void CobolFile :: GenOpen (ostream& os, OpenModeType mode)
 	  os << ");\n";
        }
 
-       Open = TRUE;
+       Open = true;
        if (mode != OM_Input)
-	  Changed = TRUE;
+	  Changed = true;
     }
 }
 
@@ -344,7 +344,7 @@ char StreamName[80];
        data = (CobolData*) LookupIdentifier (RecordName);
        data->GenWrite (os, StreamName);
     }
-    Changed = TRUE;
+    Changed = true;
 }
 
 void CobolFile :: GenReadData (ostream& os, CobolData * data)

@@ -24,15 +24,15 @@ public:
     			BitArray (const BitArray& AnArray);
     			BitArray (const BYTE * AnArray, ArraySizeType nElem);
 
-    inline const BOOL		GetAt (ArraySizeType index) const;
+    inline const bool		GetAt (ArraySizeType index) const;
     WORD			GetAt (ArraySizeType iStart, 
     					ArraySizeType iEnd) const;
-    inline void			SetAt (ArraySizeType index, BOOL Value);
+    inline void			SetAt (ArraySizeType index, bool Value);
     void			SetAt (ArraySizeType iStart,
     					ArraySizeType iEnd, WORD Value);
     inline void			FlipAt (ArraySizeType index);
 
-    inline virtual void		Fill (BOOL Value);
+    inline virtual void		Fill (bool Value);
     virtual void		Resize (ArraySizeType NewSize);
     inline virtual ArraySizeType	Size (void) const;
 
@@ -44,14 +44,14 @@ public:
 
 /*--------------------------------------------------------------------------*/
 
-inline const BOOL BitArray :: GetAt (ArraySizeType index) const
+inline const bool BitArray :: GetAt (ArraySizeType index) const
 {
     assert (index < m_nBits);
     return ((m_Data [index >> BPB_SHIFT] & 
     	     (1 << (index % BITS_PER_BYTE))) != 0);
 }
 
-inline void BitArray ::	SetAt (ArraySizeType index, BOOL Value)
+inline void BitArray ::	SetAt (ArraySizeType index, bool Value)
 {
     assert (index < m_nBits);
     if (Value)
@@ -66,9 +66,9 @@ inline void BitArray ::	FlipAt (ArraySizeType index)
     m_Data [index >> BPB_SHIFT] ^= (BYTE) 1 << (index % BITS_PER_BYTE);
 }
 
-inline void BitArray :: Fill (BOOL Value)
+inline void BitArray :: Fill (bool Value)
 {
-    if (Value == TRUE)
+    if (Value == true)
 	Array<BYTE> :: Fill (0xFF);
     else
 	Array<BYTE> :: Fill (0x00);

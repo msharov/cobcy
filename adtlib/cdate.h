@@ -39,14 +39,14 @@ public:
     void		SetDate (WORD year, WORD month, WORD day);
     WORD		GetWeekday (void) const;
     WORD		GetYearDay (void) const;
-    BOOL		IsValid (void) const;
+    bool		IsValid (void) const;
 
     CDate&		operator= (const CDate& ToBe);
-    BOOL		operator== (const CDate& ToCompare);
-    BOOL		operator> (const CDate& ToCompare);
-    BOOL		operator< (const CDate& ToCompare);
-    BOOL		operator>= (const CDate& ToCompare);
-    BOOL		operator<= (const CDate& ToCompare);
+    bool		operator== (const CDate& ToCompare);
+    bool		operator> (const CDate& ToCompare);
+    bool		operator< (const CDate& ToCompare);
+    bool		operator>= (const CDate& ToCompare);
+    bool		operator<= (const CDate& ToCompare);
     CDate&		operator+ (const CDate& ToAdd);
     CDate&		operator- (const CDate& ToSub);
 

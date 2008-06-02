@@ -61,7 +61,7 @@ public:
 
 class CSocketServer : public CSocket {
 private:
-    BOOL		m_IsForking;
+    bool		m_IsForking;
 
 public:
 			CSocketServer (void);
@@ -77,7 +77,7 @@ public:
 
 inline void CSocketServer :: EnableForking (void)
 {
-    m_IsForking = TRUE;
+    m_IsForking = true;
 }
 
 #endif
