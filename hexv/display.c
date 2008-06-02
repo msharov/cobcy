@@ -10,12 +10,12 @@
 
 void ViewBin (FILE * df)
 {
-WORD Field = 0, Row = 0, TopRow = 0;
-WORD maxx, maxy, MaxVisRecords;
-WORD key = 0, i;
+uint32_t Field = 0, Row = 0, TopRow = 0;
+uint32_t maxx, maxy, MaxVisRecords;
+uint32_t key = 0, i;
 const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
-WORD FileLength;
-WORD MaxRows;
+uint32_t FileLength;
+uint32_t MaxRows;
 typedef char	OneRowType [16];
 OneRowType * FileBuffer;
 
@@ -166,7 +166,7 @@ int x, y;
           mvwaddch (win, y, x, ' ');
 }
 
-void DisplayHeader (WINDOW * win, WORD row, FILE * df)
+void DisplayHeader (WINDOW * win, uint32_t row, FILE * df)
 {
 char OutputBuffer [81];
 
@@ -175,10 +175,10 @@ char OutputBuffer [81];
     mvwaddstr (win, row, 0, OutputBuffer);
 }
 
-void IntToHex (WORD num, int dp, char * strbuf)
+void IntToHex (uint32_t num, int dp, char * strbuf)
 {
 int i = 0;
-WORD PowOfSixteen, Mask, Digit;
+uint32_t PowOfSixteen, Mask, Digit;
 const char HexDigits [16] = "0123456789ABCDEF";
 
     for (i = dp - 1; i >= 0; -- i) {
@@ -188,7 +188,7 @@ const char HexDigits [16] = "0123456789ABCDEF";
     }
 }
 
-void DisplayRecord (WINDOW * win, WORD row, char FileBuffer[16], WORD offset)
+void DisplayRecord (WINDOW * win, uint32_t row, char FileBuffer[16], uint32_t offset)
 {
 int i, j, opp = 0;
 char OutputBuffer[128], NumInAscii[10];
@@ -210,7 +210,7 @@ int maxx, maxy;
     opp += 2;
 
     for (i = 0; i < 16; ++ i) {
-	IntToHex ((WORD) FileBuffer[i], 2, NumInAscii);
+	IntToHex ((uint32_t) FileBuffer[i], 2, NumInAscii);
 	NumInAscii[2] = ' ';
 	strncpy (&OutputBuffer [opp], NumInAscii, 3);
 	opp += 3;

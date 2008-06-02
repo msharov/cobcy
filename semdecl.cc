@@ -136,7 +136,7 @@ int i;
     }
 }
 
-void CloseScopeLevels (WORD LastLevel)
+void CloseScopeLevels (uint32_t LastLevel)
 {
 CobolData * ChildRecord;
 

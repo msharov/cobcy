@@ -8,9 +8,9 @@
 
 void ViewDBF (DBF_FILE * df)
 {
-WORD Field = 0, Row = 0, TopRow = 0;
-WORD maxx, maxy, MaxVisRecords;
-WORD key = 0, i;
+uint32_t Field = 0, Row = 0, TopRow = 0;
+uint32_t maxx, maxy, MaxVisRecords;
+uint32_t key = 0, i;
 const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
 
     getmaxyx (stdscr, maxy, maxx);
@@ -152,7 +152,7 @@ int x, y;
           mvwaddch (win, y, x, ' ');
 }
 
-void DisplayDBFHeader (WINDOW * win, WORD row, WORD field, DBF_FILE * df)
+void DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df)
 {
 int i, j, x = 0, maxy, maxx;
 char OutputBuffer[128], dummy[5];
@@ -181,8 +181,7 @@ int NameLength, FieldLength;
     mvwaddstr (win, row, 0, OutputBuffer);
 }
 
-void DisplayDBFRecord (WINDOW * win, WORD row, WORD field, 
-			DBF_FILE * df, WORD record)
+void DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df, uint32_t record)
 {
 int i, j, ri, x = 0;
 char OutputBuffer[128], dummy[5];

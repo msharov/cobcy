@@ -17,8 +17,8 @@
   void 	SetAttrHighlight (WINDOW *win);
   void 	SetAttrHeader (WINDOW *win);
   void 	ClearCursesWindow (WINDOW *win);
-  void 	DisplayHeader (WINDOW * win, WORD row, FILE * df);
-  void 	DisplayRecord (WINDOW * win, WORD row, char FileBuffer[16], WORD offset);
+  void 	DisplayHeader (WINDOW * win, uint32_t row, FILE * df);
+  void 	DisplayRecord (WINDOW * win, uint32_t row, char FileBuffer[16], uint32_t offset);
 /*---------------------------------------------------------------------------*/
 
 #endif

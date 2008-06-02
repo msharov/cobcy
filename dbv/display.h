@@ -18,9 +18,8 @@
   void 	SetAttrHighlight (WINDOW *win);
   void 	SetAttrHeader (WINDOW *win);
   void 	ClearCursesWindow (WINDOW *win);
-  void 	DisplayDBFHeader (WINDOW * win, WORD row, WORD field, DBF_FILE * df);
-  void 	DisplayDBFRecord (WINDOW * win, WORD row, WORD field, 
-			  DBF_FILE * df, WORD record);
+  void 	DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df);
+  void 	DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df, uint32_t record);
 /*---------------------------------------------------------------------------*/
 
 #endif

@@ -22,7 +22,7 @@
 typedef unsigned int		ListWin;
 
 // Define the type for m_Size of the list
-typedef WORD		ListSizeType;
+typedef uint32_t		ListSizeType;
 
 /*
 ** Here is the actual LList template

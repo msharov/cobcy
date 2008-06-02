@@ -12,7 +12,7 @@ bool RoundResult = false;
 
 void GenMove (void)
 {
-WORD nIds, i;
+uint32_t nIds, i;
 CobolVar * src = NULL, * dest = NULL;
 CobolConstant csrc;
 StackEntry ** prms, * CurEntry = NULL;
@@ -78,7 +78,7 @@ void SetResultRounding (void)
 
 static void GenericArithmetic (const char* OpName, bool SourceFirst, char OpChar)
 {
-WORD nIds, i;
+uint32_t nIds, i;
 CobolVar * dest = NULL;
 CobolConstant ConstSrc;
 Streamable * src1, * src2;

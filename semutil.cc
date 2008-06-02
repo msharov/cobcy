@@ -149,11 +149,11 @@ CobolSymbol * sym;
     os << *sym;
 }
 
-WORD CountIdentifiers (void)
+uint32_t CountIdentifiers (void)
 {
 Stack<StackEntry> TempStack;
 StackEntry * CurEntry;
-WORD count = 0;
+uint32_t count = 0;
 
     do {
        CurEntry = SemStack.Pop();
@@ -174,10 +174,10 @@ WORD count = 0;
     return (count);
 }
 
-void ReverseIdentifiers (WORD nIds)
+void ReverseIdentifiers (uint32_t nIds)
 {
 Queue<StackEntry> TempQueue;
-WORD i;
+uint32_t i;
 
     for (i = 0; i < nIds; ++ i)
        TempQueue.Append (SemStack.Pop());

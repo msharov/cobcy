@@ -52,7 +52,7 @@ char filler;
     Expanded[j] = '\x0';
 }
 
-WORD PictureType :: Set (const char* NewPicture)
+uint32_t PictureType :: Set (const char* NewPicture)
 {
 char Expanded [500];
 unsigned int i;

@@ -12,7 +12,7 @@
 
 class CobolRecord : public CobolData {
 public:
-    WORD			nChildren;
+    uint32_t			nChildren;
     LList<CobolData>		ChildList;
 
 public:

@@ -25,7 +25,7 @@ static void SetInitialConfiguration (void);
 int main (int argc, const char* const* argv)
 {
     SetInitialConfiguration();
-    if (ProcessFlags (argc, argv) == S_ERROR) {
+    if (ProcessFlags (argc, argv) == -1) {
 	Usage (argv[0]);
 	return (2);
     }
@@ -127,9 +127,9 @@ static int ProcessFlags (int argc, const char* const* argv)
 
     if (!SourceSet) {
 	cerr << "No cobol file specified\n";
-	return (S_ERROR);
+	return (-1);
     }
-    return (S_OK);
+    return (0);
 }
 
 static void SetInitialConfiguration (void)

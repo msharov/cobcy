@@ -12,7 +12,7 @@
 
 /*------------------------------------------------*/
   void 	DeclareRecordLevel (void);
-  void 	CloseScopeLevels (WORD LastLevel);
+  void 	CloseScopeLevels (uint32_t LastLevel);
   void 	InitializeVariables (void);
   void	DeclareSpecialName (void);
 /*------------------------------------------------*/

@@ -22,16 +22,16 @@ using namespace std;
 
 class Streamable {
 public:
-    virtual WORD	StreamSize (void) const;
+    virtual uint32_t	StreamSize (void) const;
     virtual void 	ReadBinaryStream (istream& is);
     virtual void 	ReadTextStream (istream& is);
     virtual void 	WriteBinaryStream (ostream& os);
     virtual void 	WriteTextStream (ostream& os);
 
-    void	ReadBinaryStringStream (const char * StreamBuf, WORD StrSize);
-    void 	ReadTextStringStream (const char * StreamBuf, WORD StrSize);
-    void 	WriteBinaryStringStream (char * StreamBuf, WORD StrSize);
-    void 	WriteTextStringStream (char * StreamBuf, WORD StrSize);
+    void	ReadBinaryStringStream (const char * StreamBuf, uint32_t StrSize);
+    void 	ReadTextStringStream (const char * StreamBuf, uint32_t StrSize);
+    void 	WriteBinaryStringStream (char * StreamBuf, uint32_t StrSize);
+    void 	WriteTextStringStream (char * StreamBuf, uint32_t StrSize);
 };
 
 /*------------------------------------------------------------------------*/

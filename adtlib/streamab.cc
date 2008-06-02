@@ -5,7 +5,7 @@
 
 #include "streamab.h"
 
-WORD Streamable :: StreamSize (void) const
+uint32_t Streamable :: StreamSize (void) const
 {
     cerr << "WARNING: Default GetStreamSize activated!\n";
     return (0);
@@ -43,26 +43,26 @@ void Streamable :: WriteTextStream (ostream& os)
 	cerr << "WARNING: Default WriteTextStream activated!\n";
 }
 
-void Streamable :: ReadBinaryStringStream (const char * StringBuf, WORD StrSize)
+void Streamable :: ReadBinaryStringStream (const char * StringBuf, uint32_t StrSize)
 {
     istringstream is (string (StringBuf, StrSize));
     ReadBinaryStream (is);
 }
 
-void Streamable :: WriteBinaryStringStream (char * StringBuf, WORD StrSize)
+void Streamable :: WriteBinaryStringStream (char * StringBuf, uint32_t StrSize)
 {
     ostringstream os;
     WriteBinaryStream (os);
     memcpy (StringBuf, os.rdbuf()->str().c_str(), StrSize);
 }
 
-void Streamable :: ReadTextStringStream (const char * StringBuf, WORD StrSize)
+void Streamable :: ReadTextStringStream (const char * StringBuf, uint32_t StrSize)
 {
     istringstream is (string (StringBuf, StrSize));
     ReadTextStream (is);
 }
 
-void Streamable :: WriteTextStringStream (char * StringBuf, WORD StrSize)
+void Streamable :: WriteTextStringStream (char * StringBuf, uint32_t StrSize)
 {
     ostringstream os;
     WriteTextStream (os);

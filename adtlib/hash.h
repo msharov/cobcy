@@ -18,8 +18,8 @@
 #define STRING_SPACE_PAGE	100
 
 typedef struct {
-    WORD	Index;
-    WORD	Length;
+    uint32_t	Index;
+    uint32_t	Length;
 } StringSpaceEntry;
 
 // The bucket structure is accessible only to the hash table to
@@ -37,25 +37,25 @@ public:
 };
 
 // Keys are generated internally, so do not assume anything
-typedef WORD		HashKeyType;
+typedef uint32_t		HashKeyType;
     
 template <class HashAttr>
 class HashTable {
 private:
     char *		m_StringSpace;
-    WORD		m_StringSpaceIndex;
-    WORD		m_PagesAllocated;
+    uint32_t		m_StringSpaceIndex;
+    uint32_t		m_PagesAllocated;
 
 protected:
     Bucket<HashAttr> **	Table;
-    WORD		TableSize;
+    uint32_t		TableSize;
 
 protected:
     inline HashKeyType	GetKey (const char* Name);
     inline bool		IsEqual (const char* Name, Bucket<HashAttr>* ABucket);
 
 public:
-    inline		HashTable (WORD NewTableSize = DEFAULT_TABLE_SIZE);
+    inline		HashTable (uint32_t NewTableSize = DEFAULT_TABLE_SIZE);
     inline void		Insert (const char* Name, HashAttr * Attr);
     inline void 	Remove (const char* Name);
     inline HashAttr *	Lookup (const char* Name);
@@ -73,7 +73,7 @@ inline HashKeyType HashTable<HashAttr> :: GetKey (const char* Name)
 template <class HashAttr>
 inline bool HashTable<HashAttr> :: IsEqual (const char* Name, Bucket<HashAttr>* ABucket )
 {
-WORD NameLength, i, ssi;
+uint32_t NameLength, i, ssi;
     NameLength = strlen (Name);
     ssi = ABucket->m_Name.Index;	// String space index
     if (NameLength != ABucket->m_Name.Length)
@@ -87,7 +87,7 @@ WORD NameLength, i, ssi;
 };
 
 template <class HashAttr>
-inline HashTable<HashAttr> :: HashTable (WORD NewTableSize)
+inline HashTable<HashAttr> :: HashTable (uint32_t NewTableSize)
 {
 HashKeyType i;
     TableSize = NewTableSize;
@@ -106,7 +106,7 @@ inline void HashTable<HashAttr> :: Insert (const char* Name, HashAttr * Attr)
 {
 HashKeyType NewKey;
 Bucket<HashAttr> * NewBucket;
-WORD NameLength, NewSSIndex, NeedAllocate;
+uint32_t NameLength, NewSSIndex, NeedAllocate;
 
     // Check if the name is already here
     if (Lookup (Name) != NULL)

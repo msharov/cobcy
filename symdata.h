@@ -11,14 +11,14 @@
 class CobolFile;	// They are cross-linked
 class CobolData : public CobolSymbol {
 protected:
-    WORD		CSize;
-    WORD		DeclLevel;			// >01< ID IS RECORD
+    uint32_t		CSize;
+    uint32_t		DeclLevel;			// >01< ID IS RECORD
     CobolFile *		AssociatedStream;
 
 public:
 			CobolData (void);
-    inline virtual void	SetDeclLevel (WORD NewLevel);
-    inline virtual WORD	GetDeclLevel (void);
+    inline virtual void	SetDeclLevel (uint32_t NewLevel);
+    inline virtual uint32_t	GetDeclLevel (void);
     void		AssociateWithStream (CobolFile * NewStream);
     CobolFile *		GetStream (void);
     virtual void	GenRead (ostream& os, const char* stream) = 0;
@@ -26,23 +26,23 @@ public:
     virtual void	GenSignature (ostream& os) = 0;
     void		GenRead (ostream& os);
     void		GenWrite (ostream& os);
-    inline WORD		GetSize (void);
+    inline uint32_t		GetSize (void);
 		       ~CobolData (void);
 };
 
 /*---------------------------------------------------------------------------*/
 
-inline void CobolData :: SetDeclLevel (WORD NewLevel)
+inline void CobolData :: SetDeclLevel (uint32_t NewLevel)
 {
     DeclLevel = NewLevel;
 }
 
-inline WORD CobolData :: GetDeclLevel (void)
+inline uint32_t CobolData :: GetDeclLevel (void)
 {
     return (DeclLevel);
 }
 
-inline WORD CobolData :: GetSize (void)
+inline uint32_t CobolData :: GetSize (void)
 {
     return (CSize);
 }

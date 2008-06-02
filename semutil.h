@@ -19,8 +19,8 @@
   CobolSymbol *	LookupIdentifier (const char* id);
   void	PrintIdentifier (const char* id, ostream& os);
   void 	GenIndent (void);
-  WORD 	CountIdentifiers (void);
-  void 	ReverseIdentifiers (WORD nIds);
+  uint32_t 	CountIdentifiers (void);
+  void 	ReverseIdentifiers (uint32_t nIds);
   void	Push (StackEntryKind kind);
   bool	IsInSet (char c, const char* set);
 #ifndef NDEBUG

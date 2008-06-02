@@ -11,8 +11,8 @@
 
 class PictureType : public Streamable {
 protected:
-    WORD		Size;
-    WORD		CSize;
+    uint32_t		Size;
+    uint32_t		CSize;
     enum { 
        Undefined,
        Integer, 
@@ -25,9 +25,9 @@ protected:
        LeadingSign
     }			Sign;
     bool		SignSeparate;
-    WORD		nDigitsBDP;	// Before Decimal Point
-    WORD		nDigitsADP;	// After Decimal Point
-    WORD		nFillerZeroes;	// Zeroes after DP
+    uint32_t		nDigitsBDP;	// Before Decimal Point
+    uint32_t		nDigitsADP;	// After Decimal Point
+    uint32_t		nFillerZeroes;	// Zeroes after DP
     char *		Text;
 
 protected:
@@ -35,7 +35,7 @@ protected:
 
 public:
 			PictureType (void);
-    WORD		Set (const char* NewPicture);
+    uint32_t		Set (const char* NewPicture);
     void		GenTypePrefix (ostream& os);
     void		GenTypeSuffix (ostream& os);
     void		GenReadFunction (ostream& os);
@@ -45,7 +45,7 @@ public:
     bool		GenCastTo (ostream& os, PictureType& pic);
     virtual void	WriteTextStream (ostream& os);
     inline bool		IsNumeric (void);
-    inline WORD		GetSize (void);
+    inline uint32_t	GetSize (void);
     virtual	       ~PictureType (void);
 };
 
@@ -56,7 +56,7 @@ inline bool PictureType :: IsNumeric (void)
     return (Kind == Integer || Kind == Float);
 }
 
-inline WORD PictureType :: GetSize (void)
+inline uint32_t PictureType :: GetSize (void)
 {
     return (Size);
 }
