@@ -26,7 +26,7 @@ public:
     ChainLink<DataType> *	m_Next;
     ChainLink<DataType> *	m_Prev;
 public:			   
-    INLINE_CTOR			ChainLink (void) { 
+    inline			ChainLink (void) {
 					m_Data = NULL; 
 					m_Next = m_Prev = NULL;
 				};
@@ -57,7 +57,7 @@ protected:
     					       ChainLink<ChainEl> * newLink);
     
 public:
-    INLINE_CTOR 		Chain (void);
+    inline	 		Chain (void);
     inline bool			IsEmpty (void) const;
     virtual inline 	       ~Chain (void);
 };

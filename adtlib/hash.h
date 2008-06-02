@@ -55,7 +55,7 @@ protected:
     inline bool		IsEqual (const char* Name, Bucket<HashAttr>* ABucket);
 
 public:
-    INLINE_CTOR		HashTable (WORD NewTableSize = DEFAULT_TABLE_SIZE);
+    inline		HashTable (WORD NewTableSize = DEFAULT_TABLE_SIZE);
     inline void		Insert (const char* Name, HashAttr * Attr);
     inline void 	Remove (const char* Name);
     inline HashAttr *	Lookup (const char* Name);

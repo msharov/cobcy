@@ -12,7 +12,6 @@
 #include <limits.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "compat.h"
 
 #ifndef S_OK
 #define S_OK			0
@@ -26,15 +25,6 @@ typedef unsigned long int	WORD;
 
 #define BYTE_MAX		UCHAR_MAX
 #define WORD_MAX		ULONG_MAX
-
-/*	In plain C define min and max as macros.
-**	In C++ define them as templates for additional type checking.
-*/    
-#ifndef __cplusplus
-#   include "macros.h"
-#else
-#   include "templats.h"
-#endif
 
 #endif
 

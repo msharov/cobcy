@@ -18,13 +18,10 @@
 #include <fstream>
 #include <sstream>
 #include "mdefs.h"
-#include "csocket.h"
 using namespace std;
 
 class Streamable {
 public:
-    virtual void	Load (char * filename);
-    virtual void	Save (char * filename);
     virtual WORD	StreamSize (void) const;
     virtual void 	ReadBinaryStream (istream& is);
     virtual void 	ReadTextStream (istream& is);
@@ -36,17 +33,6 @@ public:
     void 	WriteBinaryStringStream (char * StreamBuf, WORD StrSize);
     void 	WriteTextStringStream (char * StreamBuf, WORD StrSize);
 };
-
-/*------------------------------------------------------------------------*/
-
-void	ReadByte (istream& is, BYTE * buffer);
-void	ReadWord (istream& is, WORD * buffer);
-void 	ReadString (istream& is, char * buffer, WORD s);
-void	ReadRaw (istream& is, void * buffer, WORD s);
-void	WriteByte (ostream& os, const BYTE * buffer);
-void	WriteWord (ostream& os, const WORD * buffer);
-void 	WriteString (ostream& os, const char * buffer, WORD s = 0);
-void	WriteRaw (ostream& os, const void * buffer, WORD s);
 
 /*------------------------------------------------------------------------*/
 

@@ -4,64 +4,6 @@
 */
 
 #include "streamab.h"
-#include "cendian.h"
-
-void ReadByte (istream& is, BYTE * buffer)
-{
-    is.read ((char*) buffer, sizeof(BYTE));
-}
-
-void WriteByte (ostream& os, const BYTE * buffer) 
-{
-    os.write ((const char*) buffer, sizeof(BYTE));
-}
-
-void ReadRaw (istream& is, void * buffer, WORD size)
-{
-    is.read ((char*) buffer, size);
-}
-
-void WriteRaw (ostream& os, const void * buffer, WORD size) 
-{
-    os.write ((const char*) buffer, size);
-}
-
-void ReadWord (istream& is, WORD * buffer)
-{
-    is.read ((char*) buffer, sizeof(WORD)); 
-    *buffer = LittleEndianToLong (*buffer);
-}
-
-void WriteWord (ostream& os, const WORD * buffer) 
-{
-    WORD TempBuf = LongToLittleEndian (*buffer);
-    os.write ((const char*) &TempBuf, sizeof(WORD)); 
-}
-
-void ReadString (istream& is, char * buffer, WORD s)
-{
-    is.read (buffer, sizeof(char) * s);
-}
-
-void WriteString (ostream& os, const char * buffer, WORD s) 
-{
-    if (s == 0)
-	os.write (buffer, sizeof(char) * strlen(buffer));
-    else
-	os.write (buffer, sizeof(BYTE) * s);
-}
-
-void Streamable :: Load (char * filename)
-{
-    ifstream is (filename, ios::binary);
-    ReadBinaryStream (is);
-}
-
-void Streamable :: Save (char * filename)
-{
-    ofstream os (filename, ios::binary);
-    WriteBinaryStream (os);
-}
 
 WORD Streamable :: StreamSize (void) const
 {

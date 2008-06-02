@@ -36,7 +36,7 @@ protected:
     ChainLink<LListEl> **	m_Windows;
   
 public:
-    INLINE_CTOR			LList (void);
+    inline			LList (void);
 				
     virtual inline void	        Next (ListWin wid = 0);
     virtual inline void	      	Prev (ListWin wid = 0); 
