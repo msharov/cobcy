@@ -1,7 +1,7 @@
-/* symconst.h
-**
-**	Defines a constant data type. This never enters the symbol table.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include <string.h>
 #include "symconst.h"
@@ -106,7 +106,7 @@ int length;
     return (*this);
 }
 
-void CobolConstant :: WriteTextStream (ostream& os)
+void CobolConstant :: text_write (ostringstream& os) const
 {
     switch (CurKind) {
        case CC_String:	os << "\"" << data.cval << "\"";	break;
@@ -117,7 +117,7 @@ void CobolConstant :: WriteTextStream (ostream& os)
     }
 }
 
-void CobolConstant :: GenWrite (ostream& os, const char* stream)
+void CobolConstant :: GenWrite (ostringstream& os, const char* stream)
 {
     GenIndent();
     os << "fprintf (" << stream << ", \"";

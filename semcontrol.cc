@@ -1,12 +1,13 @@
-/* semcontrol.cc
-**
-**	Control statement semantics.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "semcontrol.h"
 #include "symlabel.h"
 #include "symvar.h"
+#include <stdio.h>
 
 // This is just a very rough estimate of the maximum
 //	It will not really place the limit on how many paragraphs
@@ -15,7 +16,7 @@
 #define MAX_PARAGRAPHS		32000
 
 /*-----------------------| Globals |--------------------------*/
-  Queue<CobolLabel> 	ParagraphList;
+  static vector<CobolLabel*> 	ParagraphList;
   CobolLabel *		CurPar = NULL;
   char			CurLoopVar [32] = "";
   int			LoopNesting = 0;
@@ -27,9 +28,9 @@ CobolLabel * NewLabel;
 StackEntry * CurEntry;
 char ErrorBuffer [80];
 
-    CurEntry = SemStack.Pop();
+    CurEntry = SemStack.back(); SemStack.pop_back();
 
-    if ((NewLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
+    if ((NewLabel = (CobolLabel*) SymTable [CurEntry->ident]) == NULL) {
        // Allocate new symbol table entry
        NewLabel = new CobolLabel;
        NewLabel->SetName (CurEntry->ident);
@@ -38,7 +39,7 @@ char ErrorBuffer [80];
        cout << "DBG: Inserting paragraph " << CurEntry->ident;
        cout << " into symbol table.\n";
 #endif
-       SymTable.Insert (CurEntry->ident, NewLabel);
+       SymTable[CurEntry->ident] = NewLabel;
     }
     else {
        if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
@@ -62,7 +63,7 @@ char ErrorBuffer [80];
     CurPar = NewLabel;
 
     // Setup for insertion in main proc
-    ParagraphList.Append (NewLabel);
+    ParagraphList.push_back (NewLabel);
 }
 
 void GenGoto (void)
@@ -70,16 +71,16 @@ void GenGoto (void)
 CobolLabel * DestLabel;
 StackEntry * CurEntry;
 
-    CurEntry = SemStack.Pop();
+    CurEntry = SemStack.back(); SemStack.pop_back();
 
-    if ((DestLabel = (CobolLabel*) SymTable.Lookup (CurEntry->ident)) == NULL) {
+    if ((DestLabel = (CobolLabel*) SymTable [CurEntry->ident]) == NULL) {
        DestLabel = new CobolLabel;
        DestLabel->SetName (CurEntry->ident);
 #ifndef NDEBUG
        cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
 #endif
        DestLabel->Undeclared = true;
-       SymTable.Insert (CurEntry->ident, DestLabel);
+       SymTable[CurEntry->ident] = DestLabel;
     }
     delete (CurEntry);
 
@@ -91,17 +92,17 @@ void GenPerform (void)
 StackEntry * Proc, * Count;
 CobolLabel * ProcAttr;
 
-    Count = SemStack.Pop();
-    Proc = SemStack.Pop();
+    Count = SemStack.back(); SemStack.pop_back();
+    Proc = SemStack.back(); SemStack.pop_back();
 
-    if ((ProcAttr = (CobolLabel*) SymTable.Lookup (Proc->ident)) == NULL) {
+    if ((ProcAttr = (CobolLabel*) SymTable [Proc->ident]) == NULL) {
        ProcAttr = new CobolLabel;
        ProcAttr->SetName (Proc->ident);
        ProcAttr->Undeclared = true;
 #ifndef NDEBUG
        cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
 #endif
-       SymTable.Insert (Proc->ident, ProcAttr);
+       SymTable[Proc->ident] = ProcAttr;
     }
 
     if (Count->ival > 1) {
@@ -112,7 +113,7 @@ CobolLabel * ProcAttr;
     }
 
     GenIndent();
-    ProcAttr->WriteTextStream (codef);
+    ProcAttr->text_write (codef);
     codef << "();\n";
 
     if (Count->ival > 1)
@@ -188,8 +189,9 @@ StackEntry *entry[3];
 CobolVar *attrs[2];
 int i;
 
-    for (i = 0; i < 2; ++ i)
-       entry[i] = SemStack.Pop(); 
+    for (i = 0; i < 2; ++ i) {
+       entry[i] = SemStack.back(); SemStack.pop_back();
+    }
     
     if (!(strcmp(entry[0]->ident,"Alphabetic")) ||
         !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
@@ -214,7 +216,7 @@ int i;
        delete entry[1];
     }
     else {
-       entry[2] = SemStack.Pop();
+       entry[2] = SemStack.back(); SemStack.pop_back();
 	 
        if (entry[0]->kind == SE_Identifier)
 	  if ((attrs[0] = (CobolVar*) 
@@ -227,12 +229,12 @@ int i;
 
        codef << "(";
        if (entry[2]->kind == SE_Identifier)
-	  attrs[1]->WriteTextStream (codef); 
+	  attrs[1]->text_write (codef); 
        else
 	  PrintConstant (entry[2], codef); 
        codef << " " << entry[1]->ident << " ";
        if (entry[0]->kind == SE_Identifier)
-	  attrs[0]->WriteTextStream (codef);
+	  attrs[0]->text_write (codef);
        else
 	  PrintConstant (entry[0], codef);
        codef << ")";
@@ -246,7 +248,7 @@ void GenConnect (void)
 {
 StackEntry * CurEntry;
 
-    CurEntry = SemStack.Pop();
+    CurEntry = SemStack.back(); SemStack.pop_back();
     codef << " " << CurEntry->ident << " ";
     delete (CurEntry);
 }
@@ -264,23 +266,12 @@ void GenStopRun (void)
 
 void GenParagraphCalls (void)
 {
-CobolLabel * CurLabel;
-Queue<CobolLabel> TempBufQueue;
-int pi = 0, nPars = 0;
+    int pi = 0;
 
-    // First count the paragraphs
-    while (!ParagraphList.IsEmpty()) {
-       TempBufQueue.Append (ParagraphList.Serve());
-       ++ nPars;
-    }
-    // Now make the references, restoring ParagraphList for further analysis
-    for (pi = 1; pi <= nPars; ++ pi) {
-       CurLabel = TempBufQueue.Serve();
-       declf << "const int _pi_";
-       CurLabel->WriteTextStream (declf);
-       declf << " = " << pi << ";\n";
-       ParagraphList.Append (CurLabel);
-    }
+    const size_t nPars = ParagraphList.size();
+    // Now make the references
+    foreach (vector<CobolLabel*>::const_iterator, i, ParagraphList)
+       declf << "const int _pi_" << **i << " = " << ++pi << ";\n";
 
     // The calling structure is basically a while loop with a switch statement
     //	inside. There is a current paragraph variable _cpi, which is parsed in
@@ -315,14 +306,13 @@ int pi = 0, nPars = 0;
     // Could use the above defined constants here, but they would just
     //	add more clutter :)
     pi = 0;
-    while (!ParagraphList.IsEmpty()) {
-       ++ pi;
-       CurLabel = ParagraphList.Serve();
-       GenIndent();
-       codef << "case " << pi << ": _cpi += ";
-       CurLabel->WriteTextStream (codef);
-       codef << "(); break;\n";
+    foreach (vector<CobolLabel*>::iterator, i, ParagraphList) {
+	++ pi;
+	GenIndent();
+	codef << "case " << pi << ": _cpi += " << **i << "(); break;\n";
+	delete *i;
     }
+    ParagraphList.clear();
 
     // This should never happen, but if it does, quit gracefully
     GenIndent();
@@ -358,8 +348,8 @@ void GenLoopInit (void)
 StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
 			    // 	initial value
 
-    ival = SemStack.Pop();
-    ivar = SemStack.Pop();
+    ival = SemStack.back(); SemStack.pop_back();
+    ivar = SemStack.back(); SemStack.pop_back();
     strcpy (CurLoopVar, ivar->ident);
 
     // Generate the x = 0 type assignment in the beginning of the loop
@@ -388,7 +378,7 @@ void GenLoopCondition (void)
 {
 StackEntry * endval;
 
-    endval = SemStack.Pop();
+    endval = SemStack.back(); SemStack.pop_back();
 
     PrintIdentifier (CurLoopVar, codef);
     codef << " <= ";
@@ -408,7 +398,7 @@ void GenLoopIncrement (void)
 {
 StackEntry * incr;
 
-    incr = SemStack.Pop();
+    incr = SemStack.back(); SemStack.pop_back();
 
     // First, close the booleans
     codef << "; ";

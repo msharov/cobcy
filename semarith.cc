@@ -1,12 +1,13 @@
-/* semarith.cc
-**
-**	Implements semantic arithmetic for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "symvar.h"
 #include "symrec.h"
 #include "symconst.h"
+#include <stdio.h>
 
 bool RoundResult = false;
 
@@ -26,9 +27,11 @@ bool ConstantSource = false;
     // Pop all stack entries
     nIds = CountIdentifiers();
     prms = new StackEntryPtr [nIds + 1];
-    for (i = 0; i < nIds; ++ i)		// the move to
-       prms[i + 1] = SemStack.Pop();
-    prms[0] = SemStack.Pop();		// the move from
+    for (i = 0; i < nIds; ++i) {		// the move to
+	prms[i + 1] = SemStack.back();
+	SemStack.pop_back();
+    }
+    prms[0] = SemStack.back(); SemStack.pop_back();		// the move from
 
     // First get the value (or identifier) to assign to everything
     CurEntry = prms[0];
@@ -81,7 +84,6 @@ static void GenericArithmetic (const char* OpName, bool SourceFirst, char OpChar
 uint32_t nIds, i;
 CobolVar * dest = NULL;
 CobolConstant ConstSrc;
-Streamable * src1, * src2;
 StackEntry ** prms, * SrcEntry = NULL, * CurEntry = NULL, * DestEntry = NULL;
 char ErrorBuffer[80];
 typedef StackEntry * StackEntryPtr;
@@ -91,10 +93,11 @@ bool ConstantSource = false;
     cout << "\tIn GenericArithmetic " << OpName << "\n";
 #endif
 
-    DestEntry = SemStack.Pop();
+    DestEntry = SemStack.back(); SemStack.pop_back();
 
-    if (!SourceFirst)
-       SrcEntry = SemStack.Pop();
+    if (!SourceFirst) {
+	SrcEntry = SemStack.back(); SemStack.pop_back();
+    }
 
     nIds = CountIdentifiers();
 
@@ -112,13 +115,16 @@ bool ConstantSource = false;
 
     // If giving option is present, the source is last in prms array
     prms = new StackEntryPtr [nIds];
-    for (i = 0; i < nIds; ++ i)
-       prms[i] = SemStack.Pop();
+    for (i = 0; i < nIds; ++ i) {
+	prms[i] = SemStack.back(); SemStack.pop_back();
+    }
 
-    if (SourceFirst)
-       SrcEntry = SemStack.Pop();
+    if (SourceFirst) {
+	SrcEntry = SemStack.back(); SemStack.pop_back();
+    }
 
     // First get the value (or identifier) of source
+    CobolSymbol *src1, *src2;
     switch (SrcEntry->kind) {
        case SE_Identifier:
        		src1 = (CobolVar*) LookupIdentifier (SrcEntry->ident);
@@ -133,7 +139,7 @@ bool ConstantSource = false;
        // Perform the operation on every dest parameter
        for (i = 0; i < nIds; ++ i) {
 	  CurEntry = prms[i];
-	  if ((dest = (CobolVar*) SymTable.Lookup (CurEntry->ident)) == NULL) {
+	  if ((dest = (CobolVar*) SymTable [CurEntry->ident]) == NULL) {
 	     sprintf (ErrorBuffer, "Bad dest operand %s to %s", 
 			   CurEntry->ident, OpName);
 	     WriteError (ErrorBuffer);
@@ -148,7 +154,7 @@ bool ConstantSource = false;
        }
     }
     else {
-       if ((dest = (CobolVar*) SymTable.Lookup (DestEntry->ident)) == NULL) {
+       if ((dest = (CobolVar*) SymTable [DestEntry->ident]) == NULL) {
 	  sprintf (ErrorBuffer, "Bad dest operand %s to %s", 
 			CurEntry->ident, OpName);
 	  WriteError (ErrorBuffer);
@@ -157,7 +163,7 @@ bool ConstantSource = false;
 
        CurEntry = prms[0];
        if (CurEntry->kind == SE_Identifier) {
-	  if ((src2 = SymTable.Lookup (CurEntry->ident)) == NULL) {
+	  if ((src2 = SymTable [CurEntry->ident]) == NULL) {
 	     sprintf (ErrorBuffer, "Bad src operand %s to %s", 
 			   CurEntry->ident, OpName);
 	     WriteError (ErrorBuffer);
@@ -212,8 +218,9 @@ CobolVar * dest;
 
     // Pop them so that prms will have them in the same order as in cobol code
     // i.e. prms[0] prms[1] prms[2] ...
-    for (i = 0; i < nArgs; ++ i)
-       prms[nArgs - (i + 1)] = SemStack.Pop();
+    for (i = 0; i < nArgs; ++ i) {
+	prms[nArgs - (i + 1)] = SemStack.back(); SemStack.pop_back();
+    }
 
     // Corresponding C code is almost identical :)
     GenIndent();

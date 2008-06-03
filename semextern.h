@@ -1,15 +1,12 @@
-/* semextern.h
-**
-**	External structures common to all modules.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMEXTERN_H
-#define __SEMEXTERN_H
+#ifndef SEMEXTERN_H_00C77BAD5E27EA510B548B8E1FFD9409
+#define SEMEXTERN_H_00C77BAD5E27EA510B548B8E1FFD9409
 
-#include "adtlib/mdefs.h"
-#include "adtlib/stack.h"
-#include "adtlib/queue.h"
-#include "adtlib/hash.h"
+#include "config.h"
 #include "semtypes.h"
 #include "semutil.h"
 
@@ -27,8 +24,9 @@ typedef struct {
 } CobcyConfigType;
 
 // All of these are defined in seminit.cc
-extern Stack<StackEntry> SemStack;
-extern HashTable<CobolSymbol> SymTable;
+extern vector<StackEntry*> SemStack;
+typedef map<string,CobolSymbol*> symtable_t;
+extern symtable_t SymTable;
 extern int NestingLevel;
 extern ofstream codef, declf;
 extern CobcyConfigType CobcyConfig;

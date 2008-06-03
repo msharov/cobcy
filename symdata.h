@@ -1,14 +1,15 @@
-/* symdata.h
-**
-**	Defines an abstract data thing.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SYMDATA_H
-#define __SYMDATA_H
+#ifndef SYMDATA_H_73C9E3D93146C9CF2676EF61361A60DF
+#define SYMDATA_H_73C9E3D93146C9CF2676EF61361A60DF
 
 #include "symbase.h"
 
 class CobolFile;	// They are cross-linked
+/// Defines an abstract data thing.
 class CobolData : public CobolSymbol {
 protected:
     uint32_t		CSize;
@@ -21,11 +22,11 @@ public:
     inline virtual uint32_t	GetDeclLevel (void);
     void		AssociateWithStream (CobolFile * NewStream);
     CobolFile *		GetStream (void);
-    virtual void	GenRead (ostream& os, const char* stream) = 0;
-    virtual void	GenWrite (ostream& os, const char* stream) = 0;
-    virtual void	GenSignature (ostream& os) = 0;
-    void		GenRead (ostream& os);
-    void		GenWrite (ostream& os);
+    virtual void	GenRead (ostringstream& os, const char* stream) = 0;
+    virtual void	GenWrite (ostringstream& os, const char* stream) = 0;
+    virtual void	GenSignature (ostringstream& os) = 0;
+    void		GenRead (ostringstream& os);
+    void		GenWrite (ostringstream& os);
     inline uint32_t		GetSize (void);
 		       ~CobolData (void);
 };

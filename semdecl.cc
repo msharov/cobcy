@@ -1,7 +1,7 @@
-/* semdecl.cc
-**
-**	Implements declaratory semantic actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "semdecl.h"
@@ -9,13 +9,12 @@
 #include "symrec.h"
 #include "symvar.h"
 #include "symconst.h"
-#include "adtlib/queue.h"
 
 /*---------------------| Globals |------------------------------*/
-  Stack<CobolRecord> 		NestedRecordList;
-  Queue<StackEntry> 		VarInit;
+  static vector<CobolRecord*>	NestedRecordList;
+  vector<StackEntry*> 		VarInit;
   CobolRecord * 		ParentRecord = NULL;
-  extern Queue<CobolFile>	SFQueue;
+  extern vector<CobolFile*>	SFQueue;
 /*--------------------------------------------------------------*/
 
 void DeclareRecordLevel (void)
@@ -41,15 +40,16 @@ struct {
 int i;
 
     // Pop the entries off the stack. There are 4 of them.
-    for (i = RecFirst; i < RecLast; ++ i)
-       entry[i] = SemStack.Pop();
+    for (i = RecFirst; i < RecLast; ++ i) {
+       entry[i] = SemStack.back(); SemStack.pop_back();
+    }
 
     // If a default value was given, append the name and the value
     //	to the variable initialization queue, which will be processed
     //	in InitializeVariables()
     if (entry [RecValue]->kind != SE_Null) {
-       VarInit.Append (entry [RecName]);
-       VarInit.Append (entry [RecValue]);
+       VarInit.push_back (entry [RecName]);
+       VarInit.push_back (entry [RecValue]);
     }
 
     // Save other variables so that the stack entries can be disposed of ...
@@ -81,7 +81,7 @@ int i;
 	  // line. To keep the child happy, tell it who the parent will be.
 	  NewRec->SetParent (ParentRecord->GetName());
 	  // Since this is a record, start a new parent scope
-	  NestedRecordList.Push (ParentRecord);
+	  NestedRecordList.push_back (ParentRecord);
        }
        else {	// No parent = I am parent
 	  ParentRecord = NewRec;
@@ -97,7 +97,7 @@ int i;
        cout << "Declaring record " << NewSymbol.Name;
        cout << ", dl = " << NewSymbol.DeclLevel << "\n";
 #endif
-       SymTable.Insert (NewSymbol.Name, NewRec);
+       SymTable[NewSymbol.Name] = NewRec;
 
        // Generate the actual field declaration
        NewRec->GenDeclareBegin (codef);
@@ -132,7 +132,7 @@ int i;
        cout << "Declaring variable " << NewSymbol.Name;
        cout << ", dl = " << NewSymbol.DeclLevel << "\n";
 #endif
-       SymTable.Insert (NewSymbol.Name, NewVar);
+       SymTable[NewSymbol.Name] = NewVar;
     }
 }
 
@@ -142,7 +142,7 @@ CobolData * ChildRecord;
 
     // Check if a record before us was finished by checking
     //	the declaration number. If it is less, the record is done.
-    while (!NestedRecordList.IsEmpty() && ParentRecord != NULL &&
+    while (!NestedRecordList.empty() && ParentRecord != NULL &&
 	   ParentRecord->GetDeclLevel() >= LastLevel) 
     {
 #ifndef NDEBUG
@@ -152,7 +152,7 @@ CobolData * ChildRecord;
        -- NestingLevel;
        ParentRecord->GenDeclareEnd (codef);
        ChildRecord = ParentRecord;
-       ParentRecord = NestedRecordList.Pop();
+       ParentRecord = NestedRecordList.back(); NestedRecordList.pop_back();
        if (ParentRecord != NULL) {
           ChildRecord->SetParent (ParentRecord->GetName());
           ParentRecord->AddChild (ChildRecord);
@@ -173,13 +173,7 @@ CobolData * ChildRecord;
 
 void InitializeVariables (void)
 {
-StackEntry * VarName, * VarValue;
-CobolVar * attr;
-CobolVar * ValueAttr;
-CobolConstant ValueConst;
-
-    codef << "void _SetVarValues (void)\n";
-    codef << "{\n";
+    codef << "void _SetVarValues (void)\n{\n";
     ++ NestingLevel;
     // Initialize predefined variables
     GenIndent();
@@ -188,21 +182,23 @@ CobolConstant ValueConst;
     codef << "_space_var[200] = 0;\n";
 
     // Initialize user-defined variables
-    while (!VarInit.IsEmpty()) {
-       VarName = VarInit.Serve();
-       VarValue = VarInit.Serve();
-       attr = (CobolVar*) SymTable.Lookup (VarName->ident);
-       if (VarValue->kind == SE_Identifier) {
-	  ValueAttr = (CobolVar*) SymTable.Lookup (VarValue->ident);
-	  attr->GenMove (codef, ValueAttr);
-       }
-       else {
-	  ValueConst = VarValue;
-	  attr->GenMove (codef, ValueConst);
-       }
-       delete VarName;
-       delete VarValue;
+    assert (VarInit.size() % 2 == 0);
+    foreach (vector<StackEntry*>::iterator, i, VarInit) {
+	StackEntry* VarName = *i;
+	StackEntry* VarValue = *++i;
+	CobolVar* attr = (CobolVar*) SymTable [VarName->ident];
+	if (VarValue->kind == SE_Identifier) {
+	    CobolVar* ValueAttr = (CobolVar*) SymTable [VarValue->ident];
+	    attr->GenMove (codef, ValueAttr);
+	} else {
+	    CobolConstant ValueConst;
+	    ValueConst = VarValue;
+	    attr->GenMove (codef, ValueConst);
+	}
+	delete VarName;
+	delete VarValue;
     }
+    VarInit.clear();
 
     -- NestingLevel;
     GenIndent();
@@ -215,8 +211,8 @@ void DeclareSpecialName (void)
 StackEntry * SpName, * DevName;
 CobolFile * DevStream;
 
-    SpName = SemStack.Pop();
-    DevName = SemStack.Pop();
+    SpName = SemStack.back(); SemStack.pop_back();
+    DevName = SemStack.back(); SemStack.pop_back();
 
     DevStream = new CobolFile;
     DevStream->SetName (SpName->ident);
@@ -237,8 +233,8 @@ CobolFile * DevStream;
 #ifndef NDEBUG
     cout << "DBG: Declaring special name " << SpName->ident << "\n";
 #endif
-    SymTable.Insert (SpName->ident, DevStream);
-    SFQueue.Append (DevStream);
+    SymTable[SpName->ident] = DevStream;
+    SFQueue.push_back (DevStream);
 
     delete DevName;
     delete SpName;

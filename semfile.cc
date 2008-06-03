@@ -1,7 +1,7 @@
-/* semfile.cc
-**
-**	Implements file semantic actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "semcontrol.h"
@@ -14,8 +14,8 @@
 /*---------------------| Globals |------------------------------*/
   CobolFile * 			FileToAssociate = NULL;
   CobolFile * 			FileToSelect = NULL;
-  Queue<CobolFile>		FDInit;
-  Queue<CobolFile>		SFQueue;
+  vector<CobolFile*>		FDInit;
+  vector<CobolFile*>		SFQueue;
 /*--------------------------------------------------------------*/
 
 void BeginFileDecl (void)
@@ -23,7 +23,7 @@ void BeginFileDecl (void)
 StackEntry * CurEntry;
 CobolFile * NewFD;
 
-    CurEntry = SemStack.Pop();	// Pop file name
+    CurEntry = SemStack.back(); SemStack.pop_back();	// Pop file name
     NewFD = new CobolFile;
 
     // Printer is a special file: spool and print on close
@@ -41,9 +41,9 @@ CobolFile * NewFD;
     delete (CurEntry);
 
     // Pop file descriptor name
-    CurEntry = SemStack.Pop();
+    CurEntry = SemStack.back(); SemStack.pop_back();
     NewFD->SetName (CurEntry->ident);
-    SymTable.Insert (CurEntry->ident, NewFD);
+    SymTable[CurEntry->ident] = NewFD;
     delete (CurEntry);
 
     // This used here only
@@ -60,9 +60,9 @@ void GenFileDesc (void)
 StackEntry * CurEntry, * FileNameEntry;
 CobolFile * NewFD;
 
-    FileNameEntry = SemStack.Pop();
-    CurEntry = SemStack.Pop();
-    if ((NewFD = (CobolFile*) SymTable.Lookup (CurEntry->ident)) == NULL) {
+    FileNameEntry = SemStack.back(); SemStack.pop_back();
+    CurEntry = SemStack.back(); SemStack.pop_back();
+    if ((NewFD = (CobolFile*) SymTable [CurEntry->ident]) == NULL) {
 	WriteError ("Cannot create unselected file descriptor");
 	delete (CurEntry);
 	return;
@@ -76,7 +76,7 @@ CobolFile * NewFD;
 	NewFD->SetFilename (FileNameEntry->ident);
     delete (FileNameEntry);
 
-    FDInit.Append (NewFD);
+    FDInit.push_back (NewFD);
 
     if (FileToAssociate != NULL)
 	WriteError ("No record found for file descriptor");
@@ -92,7 +92,7 @@ void AssociateFileRecord (void)
 StackEntry * CurEntry;
 
     if (FileToAssociate != NULL) {
-	CurEntry = SemStack.Pop();
+	CurEntry = SemStack.back(); SemStack.pop_back();
 #ifndef NDEBUG
 	cout << "\tAssociating record " << CurEntry->ident;
 	cout << " to " << *FileToAssociate << "\n";
@@ -102,7 +102,7 @@ StackEntry * CurEntry;
 	FileToAssociate = NULL;
 	// Push it back for further declaration. The record is not
 	//	fully defined at this point.
-	SemStack.Push (CurEntry);
+	SemStack.push_back (CurEntry);
     }
 }
 
@@ -114,8 +114,8 @@ int nIds, i;
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
-	entry = SemStack.Pop();
-	if ((fattr = (CobolFile*) SymTable.Lookup (entry->ident)) == NULL) {
+	entry = SemStack.back(); SemStack.pop_back();
+	if ((fattr = (CobolFile*) SymTable [entry->ident]) == NULL) {
 	    WriteError ("Unknown file descriptor");
 	    delete entry;
 	    return;
@@ -133,8 +133,8 @@ int nIds, i;
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
-	entry = SemStack.Pop();
-	if ((fattr = (CobolFile*) SymTable.Lookup (entry->ident)) == NULL) {
+	entry = SemStack.back(); SemStack.pop_back();
+	if ((fattr = (CobolFile*) SymTable [entry->ident]) == NULL) {
 	    WriteError ("Unknown file descriptor");
 	    delete entry;
 	    return;
@@ -155,7 +155,7 @@ StackEntry * entry;
 CobolSymbol * ToRead;
 CobolFile * DestStream;
 
-    entry = SemStack.Pop();
+    entry = SemStack.back(); SemStack.pop_back();
 
     if ((ToRead = LookupIdentifier (entry->ident)) == NULL) {
 	delete entry;
@@ -185,8 +185,8 @@ static void FileWriteSetup (CobolFile ** DestStream, CobolData ** ToWriteFrom)
 StackEntry * FileEntry, * SrcEntry;
 CobolSymbol * ToWrite;
 
-    SrcEntry = SemStack.Pop();
-    FileEntry = SemStack.Pop();
+    SrcEntry = SemStack.back(); SemStack.pop_back();
+    FileEntry = SemStack.back(); SemStack.pop_back();
 
     if ((ToWrite = LookupIdentifier (FileEntry->ident)) == NULL) {
 	delete FileEntry;
@@ -195,7 +195,7 @@ CobolSymbol * ToWrite;
     }
     delete FileEntry;
 
-    *ToWriteFrom = (CobolData*) SymTable.Lookup (SrcEntry->ident);
+    *ToWriteFrom = (CobolData*) SymTable [SrcEntry->ident];
     delete SrcEntry;
 
 #ifndef NDEBUG
@@ -242,18 +242,16 @@ CobolFile * DestStream;
 
 void AssociateRecordsWithFD (void)
 {
-CobolFile * FD;
-    while (!FDInit.IsEmpty()) {
-	FD = FDInit.Serve();
-	FD->AssociateRecord();
-    }
+    foreach (vector<CobolFile*>::iterator, ifd, FDInit)
+	(*ifd)->AssociateRecord();
+    FDInit.clear();
 }
 
 void SetFileStatus (void)
 {
 StackEntry * CurEntry;
     if (FileToSelect != NULL) {
-	CurEntry = SemStack.Pop();
+	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetStatusVar (CurEntry->ident);
 	delete CurEntry;
     }
@@ -281,11 +279,10 @@ void SetRelativeKey (void)
 {
 StackEntry * CurEntry;
     if (FileToSelect != NULL) {
-	CurEntry = SemStack.Pop();
+	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetKey (CurEntry->ident);
 	FileToSelect = NULL;
-	SemStack.Push (CurEntry);
-	delete CurEntry;
+	SemStack.push_back (CurEntry);
     }
     else
 	WriteError ("setting relative key for nonexistant file");
@@ -295,7 +292,7 @@ void SetRecordKey (void)
 {
 StackEntry * CurEntry;
     if (FileToSelect != NULL) {
-	CurEntry = SemStack.Pop();
+	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetKey (CurEntry->ident);
 	delete CurEntry;
     }
@@ -306,33 +303,20 @@ StackEntry * CurEntry;
 // Printer spool for example...
 void OpenSpecialFiles (void)
 {
-CobolFile * sf;
-Queue<CobolFile> TempQ;
-
 #ifndef NDEBUG
     cout << "DBG: Opening special files\n";
 #endif
-
-    while (!SFQueue.IsEmpty()) {
-	sf = SFQueue.Serve();
-	sf->GenOpen (codef, OM_Output);
-	TempQ.Append (sf);
-    }
-    while (!TempQ.IsEmpty())
-	SFQueue.Append (TempQ.Serve());	// For closing
+    foreach (vector<CobolFile*>::iterator, sf, SFQueue)
+	(*sf)->GenOpen (codef, OM_Output);
 }
 
 void CloseSpecialFiles (void)
 {
-CobolFile * sf;
-
 #ifndef NDEBUG
     cout << "DBG: Closing special files\n";
 #endif
-
-    while (!SFQueue.IsEmpty()) {
-	sf = SFQueue.Serve();
-	sf->GenClose (codef);
-    }
+    foreach (vector<CobolFile*>::iterator, sf, SFQueue)
+	(*sf)->GenClose (codef);
+    SFQueue.clear();
 }
 

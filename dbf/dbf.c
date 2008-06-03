@@ -1,7 +1,7 @@
-// dbf.c
+// This file is part of cobcy, a COBOL-to-C compiler.
 //
-//	Routines for manipulating dBASE IV files
-//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "dbf.h"
 #include <time.h>

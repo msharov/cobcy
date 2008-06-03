@@ -1,10 +1,10 @@
-/* semfile.h
-**
-**	Defines file semantic actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMFILE_H
-#define __SEMFILE_H
+#ifndef SEMFILE_H_6C1765536B1AFB8760AE803D46A0673F
+#define SEMFILE_H_6C1765536B1AFB8760AE803D46A0673F
 
 #include "semtypes.h"
 

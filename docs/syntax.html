@@ -1,109 +1,109 @@
-<HTML>
-<HEAD>
-<TITLE>Cobcy syntax for users</TITLE>
-</HEAD>
-<BODY>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Cobcy COBOL syntax for users</title>
+    <meta http-equiv="Content-Type" content="text/xhtml+xml; charset=ISO-8859-1" />
+</head>
+<body>
 
-<CENTER>
-<H1>Cobcy syntax</H1>
-</CENTER>
+<h1>Cobcy syntax</h1>
 
-<H2>General parsing properties</H2>
-
+<h2>General parsing properties</h2>
+<p>
 	Cobcy is not case sensitive and will convert everything to lowercase
 in the resulting C code. Cobol variable names are converted to C variable
 names by changing dashes to underscores, since dash is the only thing allowed
 in Cobol names and illegal in C names.
-<p>
+</p><p>
 	There are no positional restrictions, so comments and other statements
 can start anywhere. Of course, if portability to real Cobol compilers is
 desired, begin comments in column 7.
-<p>
+</p><p>
 	Comments allow all characters in them, so feel free to add text in
 any language as long as the characters are mapped within ASCII's 256 set
 (feature added at request of german users). I don't know if lex can read
 non-ASCII characters.
+</p>
+
+<h2>Syntax for users</h2>
 <p>
-
-<H2>Syntax for users</H2>
-
 	This section intends to explain syntax of Cobol as implemented in
 Cobcy. For those interested in hacking the compiler a semantic action
 review is provided later (well, later in time...)
 The notation is as follows: TEXT
-is for reserved Cobol words, <VAR>text</VAR> denotes meta-variables,
+is for reserved Cobol words, <var>text</var> denotes meta-variables,
 [text] is optional, (text1, text2) means selecting one entry from the list, 
 and {text} may be repeated one or more times.
-<p>
+</p><p>
 	Cobcy programs are made up of four major divisions:
 identification division, containing informational statements,
 environment division, defining the devices needed to run the program
 	and stating some properties of the program for maintainers,
 data division, having all the variables,
 and procedure division, where all the executable instructions are.
-<p>
+</p><p>
 	The minimal program for cobcy contains all four divisions and a
 program-id clause in identification division, which is
 required. Example:
-<p>
-<PRE>
+</p>
+<pre>
 IDENTIFICATION DIVISION.
 PROGRAM-ID. EMPTY-PROGRAM.
 ENVIRONMENT DIVISION.
 DATA DIVISION.
 PROCEDURE DIVISION.
-</PRE>
+</pre>
+
+<h3>Identification division</h3>
+
 <p>
-
-<H3>Identification division</H3>
-
 The division begins with:
-<PRE>
+</p><pre>
 IDENTIFICATION DIVISION.
-</PRE>
+</pre><p>
 exactly as written (I will assume you know about case-insensitivity). Only
 one clause is implemented so far in this division - program-id clause.
-<PRE>
-PROGRAM-ID. <VAR>program-name.</VAR> [(COMMON, INITIAL) [PROGRAM]]
-</PRE>
-where <VAR>program-name</VAR> is any legal Cobol identifier denoting the
+</p><pre>
+PROGRAM-ID. <var>program-name.</var> [(COMMON, INITIAL) [PROGRAM]]
+</pre><p>
+where <var>program-name</var> is any legal Cobol identifier denoting the
 name of the program.
 Nothing else, except comments can be present in the identification division.
+</p>
+
+<h3>Environment division</h3>
 <p>
-
-<H3>Environment division</H3>
-
 This division may contain 2 secions: configuration section and input-output
 section. Configuration section may contain one or more of
 the following entries (only one SPECIAL-NAMES clause is allowed though):
-<PRE>
-SOURCE-COMPUTER. <VAR>name</VAR> [[WITH] DEBUGGING].
-OBJECT-COMPUTER. <VAR>name</VAR> [MEMORY [SIZE] <VAR>integer</VAR>
+</p><pre>
+SOURCE-COMPUTER. <var>name</var> [[WITH] DEBUGGING].
+OBJECT-COMPUTER. <var>name</var> [MEMORY [SIZE] <var>integer</var>
 		(WORDS, CHARACTERS, MODULES)].
 SPECIAL-NAMES.
-	<VAR>device</VAR> IS <VAR>device_name</VAR>.
-</PRE>
+	<var>device</var> IS <var>device_name</var>.
+</pre><p>
 The source and object computer specifications have no effect on the program
 and are provided for documentation purposes only. Memory size clause for
 object computer is obsolete and should not be used in new programs.
 Special names section declares aliases for devices. These are not necessary
 for Cobcy programs, but are provided for compatibility.
-<p>
+</p><p>
 Input-output section so far supports only the file-control section.
 One or more SELECT statements must appear if this section is present.
-<PRE>
+</p><pre>
 FILE-CONTROL.
-SELECT [OPTIONAL] <VAR>file_desc</VAR> ASSIGN [TO] <VAR>device</VAR>
-	{([FILE] STATUS [IS] <VAR>status_variable</VAR>,
+SELECT [OPTIONAL] <var>file_desc</var> ASSIGN [TO] <var>device</var>
+	{([FILE] STATUS [IS] <var>status_variable</var>,
 	  ACCESS [MODE] [IS] (SEQUENTIAL, RANDOM, DYNAMIC),
           ORGANIZATION [IS] (SEQUENTIAL, LINE SEQUENTIAL, RELATIVE, INDEXED)
-	  [(RELATIVE [KEY] [IS] <VAR>relative_key_name</VAR>,
-	    RECORD [KEY] [IS] <VAR>record_key_name</VAR>
+	  [(RELATIVE [KEY] [IS] <var>relative_key_name</var>,
+	    RECORD [KEY] [IS] <var>record_key_name</var>
 	   )
 	  ]
 	 )
 	}.
-</PRE>
+</pre><p>
 Sequential access mode forbids seeking, like reading a character device.
 Random and dynamic access modes are for block devices with seeking.
 Although cobcy does implement file pointer positioning on the next record
@@ -116,28 +116,28 @@ except that no separators are present, so that the file is one big line.
 Tell me if this should be the other way around... Relative and indexed
 organizations use dBASE III format to store records. The indexes in the
 indexed files are in dBASE III NDX format.
+</p>
+
+<h3>Data division</h3>
 <p>
-
-<H3>Data division</H3>
-
 Data division contains five sections (in any order or absent): file section,
 working-storage section, linkage section, communication section, and
 report section.
-<PRE>
+</p><pre>
 DATA DIVISION.
 FILE SECTION.
-FD <VAR>file_desc</VAR> 
+FD <var>file_desc</var> 
 	[LABEL RECORD [IS] (STANDARD, OMITTED)]
-	[VALUE [OF FILE-ID] [IS] (<VAR>file_name_var</VAR>,
-				  "<VAR>file name</VAR>")]
+	[VALUE [OF FILE-ID] [IS] (<var>file_name_var</var>,
+				  "<var>file name</var>")]
 	.
-<VAR>level</VAR> <VAR>record_name</VAR>.
-	{<VAR>level</VAR>
-	 <VAR>variable_name</VAR>
-	 PIC[TURE] [IS] <VAR>picture</VAR>
-	 VALUE [IS] <VAR>default_value</VAR>
+<var>level</var> <var>record_name</var>.
+	{<var>level</var>
+	 <var>variable_name</var>
+	 PIC[TURE] [IS] <var>picture</var>
+	 VALUE [IS] <var>default_value</var>
 	 {[(USAGE [IS] (BINARY,COMP[UTATIONAL],DISPLAY,INDEX,PACKED-DECIMAL),
-	    [SIGN] [IS] (LEADING,TRAILING) [SEPARATE] [<VAR>sep_char</VAR>],
+	    [SIGN] [IS] (LEADING,TRAILING) [SEPARATE] [<var>sep_char</var>],
 	    SYNC [(LEFT, RIGHT)],
 	    JUST[IFIED] [RIGHT]
 	   (
@@ -145,42 +145,42 @@ FD <VAR>file_desc</VAR>
 	 }
 	 .
 	}
-</PRE>
+</pre><p>
 Label records clause is again, an obsolete one. It makes no difference in
-the file format. Value clause for the FD is <EM>the</EM> way to specify
+the file format. Value clause for the FD is <em>the</em> way to specify
 the file name on disk. It took me a while to figure out. The associated
-record <EM>must</EM> be a record. I have not implemented yet a file
+record <em>must</em> be a record. I have not implemented yet a file
 with only one variable in it. 
-<p>
+</p><p>
 The record declaration format is the same as in working-storage section.
 Level is any positive integer. Unlike in the cobol standard the numbers
 have no special meaning yet, although I may change that later.
 Variable name is any legal identifier.
 Examples of pictures follow:
-<PRE>
-<B>XXXXXXXXXX</B>			10 character text string
-<B>9999999999</B>			10 digit number
-<B>X(10)</B>				10 character text string
-<B>99/99/99</B>			6 digit number formatted as date on output
-<B>99B9999</B>				6 digit number with a blank 
+</p><pre>
+<b>XXXXXXXXXX</b>			10 character text string
+<b>9999999999</b>			10 digit number
+<b>X(10)</b>				10 character text string
+<b>99/99/99</b>			6 digit number formatted as date on output
+<b>99B9999</b>				6 digit number with a blank 
 				(blanks are not allowed in the picture)
-<B>+9999</B>				Sign is always displayed
-<B>-9999</B>				Sign is drawn only if negative
-</PRE>
+<b>+9999</b>				Sign is always displayed
+<b>-9999</b>				Sign is drawn only if negative
+</pre><p>
 Tell me to add more if you think this is not enough.
-<p>
+</p><p>
 All the options, like SYNC, JUSTIFIED, etc. are not implemented yet,
 they just generate a comment in the output C source.
-<p>
+</p><p>
 Working-storage section contains variable and record blocks in the
 same format as above described.
-<p>
+</p><p>
 Linkage, communication, and report sections are not implemented, generating
 a comment to this matter in the output C code.
+</p>
+
+<h3>Procedure division</h3>
 <p>
-
-<H3>Procedure division</H3>
-
 Procedure division is a sequence of paragraphs and clauses. Sections are
 not implemented and generate a parse error. The parser makes a distinction
 between statements and clauses. Clauses are directives that can be strung
@@ -188,189 +188,171 @@ together with no seperators without creating ambiguity. Statements are
 all the other directives. Note that any clause is a statement if ends in
 a period.
 The following statements are supported:
-<PRE>
-PROCEDURE <VAR>proc_name</VAR>.
-</PRE>
+</p><pre>
+PROCEDURE <var>proc_name</var>.
+</pre><p>
 Starts a new procedure, finishing the last one. This is pretty much
 an equivalent of a paragraph and in the output C code the only
 difference is that a procedure is never executed unless explicitly called.
-
-<PRE>
-INITIALIZE <VAR>id</VAR> {, <VAR>id</VAR>}
+</p><pre>
+INITIALIZE <var>id</var> {, <var>id</var>}
 	{TOK_REPLACING
 	 (ALPHABETIC,ALPHANUMERIC,NUMERIC,ALPHANUMERIC-EDITED,NUMERIC-EDITED)
-	 [DATA] <VAR>value</VAR>
+	 [DATA] <var>value</var>
 	}
 	.
-</PRE>
+</pre><p>
 This is another stub.
-
-<PRE>
+</p><pre>
 REPLACE OFF.
-</PRE>
+</pre><p>
 A stub.
-
-<PRE>
-READ (<VAR>file_desc</VAR>, <VAR>variable</VAR>) [RECORD]
-	AT END <VAR>clause_list</VAR>.
-</PRE>
+</p><pre>
+READ (<var>file_desc</var>, <var>variable</var>) [RECORD]
+	AT END <var>clause_list</var>.
+</pre><p>
 Yes, I do support READ for file descriptors; it is actually much simpler than
 the process for record READ. However, for clarity reasons one should always
 use the bound record as the argument. Clause list must contain only
 clauses, no statements!
-
-<PRE>
-IF <VAR>boolean</VAR> <VAR>clause_list</VAR>
-	{ELSIF <VAR>boolean</VAR> <VAR>clause_list</VAR>}
-	[ELSE <VAR>clause_list</VAR>]
+</p><pre>
+IF <var>boolean</var> <var>clause_list</var>
+	{ELSIF <var>boolean</var> <var>clause_list</var>}
+	[ELSE <var>clause_list</var>]
 .
-</PRE>
+</pre><p>
 Although COBOL has no ELSIF keyword, I have added on for efficiency: I cannot
-translate the ELSE IF construct to a C <CODE>else if</CODE> statement because
+translate the ELSE IF construct to a C <samp>else if</samp> statement because
 without block markers it is just too ambiguous. Your ELSE IFs will translate
 into this kind of a thing:
-<PRE>
-if (a > b)
+</p><pre>
+if (a &gt; b)
     stmts
 else
-    if (b > c)
+    if (b &gt; c)
 	stmts
     else
-	if (c > d)
+	if (c &gt; d)
 	    stmts
 	etc...
-</PRE>
+</pre><p>
 which works just fine, but is much less readable in C code. The readability
 of the compiled output will be greatly enhanced if you take time and
-do a <KEY>%s/ELSE IF/ELSIF/g</KEY> on your COBOL sources (VI rules! :)
-<p>
+do a <tt>%s/ELSE IF/ELSIF/g</tt> on your COBOL sources (VI rules! :)
+</p><p>
 Another thing that deserves explanation is a boolean argument. The conditions
 are the same as in any other language, but you can also use word substitutes.
-For example you can say <CODE>GREATER THAN</CODE> instead of <CODE>></CODE>.
-The tricky part is the <CODE>>=</CODE> type things. Here you should use
-negation on the opposite operator, like <CODE>NOT LESS</CODE> for that one.
+For example you can say <samp>GREATER THAN</samp> instead of <samp>&gt;</samp>.
+The tricky part is the <samp>&gt;=</samp> type things. Here you should use
+negation on the opposite operator, like <samp>NOT LESS</samp> for that one.
 Of course you can still use symbolic notation too.
 Other operators available are
-<CODE>ALPHABETIC</CODE>,
-<CODE>ALPHABETIC-UPPER</CODE>, and
-<CODE>ALPHABETIC-LOWER</CODE>.
+<samp>ALPHABETIC</samp>,
+<samp>ALPHABETIC-UPPER</samp>, and
+<samp>ALPHABETIC-LOWER</samp>.
 Use parentheses where you need them. This will make the code more readable.
 The conditions can be strung together using the usual connectors, like
-<CODE>AND</CODE> and
-<CODE>OR</CODE>.
-
-<p>
+<samp>AND</samp> and
+<samp>OR</samp>.
+</p><p>
 This concludes the statament part. The following are supported clauses.
 Remember, a clause cannot be used by itself. You have to convert it to
 a statement by appending a period. Otherwise you can string them together.
-
-<PRE>
-ACCEPT <VAR>var</VAR> [{, <VAR>var2</VAR>}] 
+</p><pre>
+ACCEPT <var>var</var> [{, <var>var2</var>}] 
 	[FROM (DATE, DAY, DAY-OF-WEEK, TIME, CONSOLE)]
-</PRE>
+</pre><p>
 Reads input from console, which is considered to be a sequentially
-organized file (see above). In id lists the commas <EM>are</EM> optional, 
+organized file (see above). In id lists the commas <em>are</em> optional, 
 but let me stress this: use them! Cobcy may require them later to reduce 
 ambiguity. Only console input has been implemented, the others do generate
 stubs in the C code though.
-
-<PRE>
-DISPLAY <VAR>var</VAR> [{, <VAR>var2</VAR>}] [UPON <VAR>special_name</VAR>]
-</PRE>
+</p><pre>
+DISPLAY <var>var</var> [{, <var>var2</var>}] [UPON <var>special_name</var>]
+</pre><p>
 Displays given variables on the specified device. If device is not specified,
 output goes to stdout.
-
-<PRE>
-MOVE <VAR>expression</VAR> TO <VAR>var</VAR> [{, <VAR>var2</VAR>}] 
-</PRE>
-<VAR>expression</VAR> is any normal arithmetic expression.
-Records <EM>cannot</EM> be moved to or from.
-
-<PRE>
-ADD <VAR>expression</VAR> TOK_TO <VAR>var</VAR> [{, <VAR>var2</VAR>}]
-	[GIVING <VAR>result_var</VAR>]
-SUBTRACT <VAR>expression</VAR> TOK_FROM <VAR>var</VAR> [{, <VAR>var2</VAR>}]
-	[GIVING <VAR>result_var</VAR>]
-MULTIPLY <VAR>var</VAR> [{, <VAR>var2</VAR>}] TOK_BY <VAR>expression</VAR> 
-	[GIVING <VAR>result_var</VAR>]
-</PRE>
+</p><pre>
+MOVE <var>expression</var> TO <var>var</var> [{, <var>var2</var>}] 
+</pre><p>
+<var>expression</var> is any normal arithmetic expression.
+Records <em>cannot</em> be moved to or from.
+</p><pre>
+ADD <var>expression</var> TOK_TO <var>var</var> [{, <var>var2</var>}]
+	[GIVING <var>result_var</var>]
+SUBTRACT <var>expression</var> TOK_FROM <var>var</var> [{, <var>var2</var>}]
+	[GIVING <var>result_var</var>]
+MULTIPLY <var>var</var> [{, <var>var2</var>}] TOK_BY <var>expression</var> 
+	[GIVING <var>result_var</var>]
+</pre><p>
 Pretty obvious.
-
-<PRE>
-DIVIDE <VAR>var</VAR> [{, <VAR>var2</VAR>}] BY <VAR>var</VAR> 
-	[GIVING <VAR>result_var</VAR>]
+</p><pre>
+DIVIDE <var>var</var> [{, <var>var2</var>}] BY <var>var</var> 
+	[GIVING <var>result_var</var>]
 	[ROUNDED]
-	[ON SIZE ERROR <VAR>clause_list</VAR>]
+	[ON SIZE ERROR <var>clause_list</var>]
 	.
-</PRE>
+</pre><p>
 Rounding is turned off by default. Currently rounding is not implemented 
 very well.
-
-<PRE>
-COMPUTE <VAR>result</VAR> [ROUNDED] = <VAR>expression</VAR>
-</PRE>
-<VAR>expression</VAR> can be any arithmetic expression involving any valid
+</p><pre>
+COMPUTE <var>result</var> [ROUNDED] = <var>expression</var>
+</pre><p>
+<var>expression</var> can be any arithmetic expression involving any valid
 variables.
-
-<PRE>
-GO TOK_TO <VAR>label</VAR>
-</PRE>
+</p><pre>
+GO TOK_TO <var>label</var>
+</pre><p>
 Pretty obvious.
-
-<PRE>
-PERFORM <VAR>paragraph_name</VAR> 
-	[<VAR>integer</VAR> TIMES]
-	[VARYING <VAR>variable</VAR> 
-	 (FROM <VAR>start</VAR> TO <VAR>end</VAR> [BY <VAR>increment</VAR>],
-	  FROM <VAR>start</VAR> [BY <VAR>increment</VAR>]
-	  	(UNTIL, WHILE) <VAR>boolean</VAR>,
-	  AFTER <VAR>boolean</VAR>
+</p><pre>
+PERFORM <var>paragraph_name</var> 
+	[<var>integer</var> TIMES]
+	[VARYING <var>variable</var> 
+	 (FROM <var>start</var> TO <var>end</var> [BY <var>increment</var>],
+	  FROM <var>start</var> [BY <var>increment</var>]
+	  	(UNTIL, WHILE) <var>boolean</var>,
+	  AFTER <var>boolean</var>
 	 )
 	]
 	.
-</PRE>
+</pre><p>
 The limits for iteration can be integers or integer variables.
-
-<PRE>
-OPEN {(INPUT, OUTPUT, EXTEND, I-O) <VAR>fd_list</VAR>
+</p><pre>
+OPEN {(INPUT, OUTPUT, EXTEND, I-O) <var>fd_list</var>
       [REVERSED] [WITH NO REWIND]
      }
-</PRE>
+</pre><p>
 The modes are self-explanatory. REVERSED and WITH NO REWIND are not
 implemented.
-
-<PRE>
-CLOSE <VAR>fd_list</VAR>
+</p><pre>
+CLOSE <var>fd_list</var>
 	[(UNIT, REEL) (FOR REMOVAL, WITH NO REWIND)] 
 	[WITH LOCK]
-</PRE>
+</pre><p>
 Closes the file. No options are implemented.
-
-<PRE>
-WRITE <VAR>identifier</VAR> [FROM <VAR>var</VAR>]
-</PRE>
-<VAR>identifier</VAR> can be a variable or a file descriptor. See READ.
+</p><pre>
+WRITE <var>identifier</var> [FROM <var>var</var>]
+</pre><p>
+<var>identifier</var> can be a variable or a file descriptor. See READ.
 The source variable is written directly into the file and if the first
 identifier is a variable, it is not changed.
-
-<PRE>
-CALL <VAR>call_list</VAR>
-	[USING [BY] (CONTENT, REFERENCE) <VAR>id</VAR>
-	 {, <VAR>id_list</VAR>}
+</p><pre>
+CALL <var>call_list</var>
+	[USING [BY] (CONTENT, REFERENCE) <var>id</var>
+	 {, <var>id_list</var>}
 	]
-</PRE>
+</pre><p>
 This function is not yet implemented.
-
-<PRE>
+</p><pre>
 STOP RUN
 EXIT PROGRAM
-</PRE>
-These are equivalent.
-
-<p><hr><p>
+</pre><p>
+These are equivalent.<br />
+</p>
+<hr /><p>
 Well, that's it for now. I hope I'll add stuff to this when I add stuff to
 the compiler :)
+</p>
 
-</BODY>
-</HTML>
-
+</body>
+</html>

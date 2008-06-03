@@ -1,12 +1,7 @@
-/* symfile.cc
-**
-**	Cobol file symbol.
-**	Sequential and line sequential files are handled raw,
-** Relative and indexed files are in dBASE IV format. Note that
-** reading and writing is still done with same routines since DBF
-** files store data in all ascii and just like COBOL wants it. Were
-** they developed for COBOL by any chance?
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "symfile.h"
@@ -110,21 +105,21 @@ void CobolFile :: SetFlushCommand (const char* NewCommand)
     strcpy (FlushCommand, NewCommand);
 }
 
-void CobolFile :: WriteIndexCName (ostream& os)
+void CobolFile :: WriteIndexCName (ostringstream& os)
 {
     // The uppercased 'I' will ensure that no conflict with Cobol code
     //	occurs, since Cobcy translates everything to lowercase.
     os << GetCName() << "_Idx";
 }
 
-void CobolFile :: WriteTextStream (ostream& os)
+void CobolFile :: text_write (ostringstream& os) const
 {
-    CobolSymbol::WriteTextStream (os);
+    CobolSymbol::text_write (os);
     if (IsDBF)
        os << "->DataDesc";
 }
 
-void CobolFile :: WriteOpenMode (ostream& os, OpenModeType mode)
+void CobolFile :: WriteOpenMode (ostringstream& os, OpenModeType mode)
 {
     switch (mode) {
        case OM_Input:		os << "\"rb\"";		break;
@@ -134,7 +129,7 @@ void CobolFile :: WriteOpenMode (ostream& os, OpenModeType mode)
     }
 }
 
-void CobolFile :: GenRecordSignature (ostream& os)
+void CobolFile :: GenRecordSignature (ostringstream& os)
 {
 CobolRecord * rec;
 
@@ -148,7 +143,7 @@ CobolRecord * rec;
        WriteError ("file is not associated with any record");
 }
 
-void CobolFile :: GenKeySignature (ostream& os)
+void CobolFile :: GenKeySignature (ostringstream& os)
 {
 CobolVar * var;
 
@@ -173,7 +168,7 @@ CobolRecord * rec;
        WriteError ("file is not associated with any record");
 }
 
-void CobolFile :: GenDeclare (ostream& os)
+void CobolFile :: GenDeclare (ostringstream& os)
 {
     GenIndent();
     if (IsDBF)
@@ -190,7 +185,7 @@ void CobolFile :: GenDeclare (ostream& os)
     }
 }
 
-void CobolFile :: GenOpen (ostream& os, OpenModeType mode)
+void CobolFile :: GenOpen (ostringstream& os, OpenModeType mode)
 {
     GenIndent();
     if (!Open) {
@@ -234,7 +229,7 @@ void CobolFile :: GenOpen (ostream& os, OpenModeType mode)
     }
 }
 
-void CobolFile :: GenFlush (ostream& os)
+void CobolFile :: GenFlush (ostringstream& os)
 {
     GenIndent();
     if (IsDBF)
@@ -249,7 +244,7 @@ void CobolFile :: GenFlush (ostream& os)
     }
 }
 
-void CobolFile :: GenSeek (ostream& os)
+void CobolFile :: GenSeek (ostringstream& os)
 {
 CobolData * BoundRecord;
 
@@ -275,7 +270,7 @@ CobolData * BoundRecord;
 	}
 
 	// Now look up the bound record to determine block size for the file
-	if ((BoundRecord = (CobolData*) SymTable.Lookup (RecordName)) == NULL){
+	if ((BoundRecord = (CobolData*) SymTable [RecordName]) == NULL){
 	    WriteError ("record bound to file does not exist");
 	    return;
 	}
@@ -291,7 +286,7 @@ CobolData * BoundRecord;
     }
 }
 
-void CobolFile :: GenClose (ostream& os)
+void CobolFile :: GenClose (ostringstream& os)
 {
     if (Open) {
 	if (Changed)
@@ -324,13 +319,13 @@ void CobolFile :: GenClose (ostream& os)
     }
 }
 
-void CobolFile :: GenEOFCheck (ostream& os)
+void CobolFile :: GenEOFCheck (ostringstream& os)
 {
     GenIndent();
     os << "if (feof (" << *this << "))\n";
 }
 
-void CobolFile :: GenWriteData (ostream& os, CobolData * data)
+void CobolFile :: GenWriteData (ostringstream& os, CobolData * data)
 {
 char StreamName[80];
 
@@ -347,7 +342,7 @@ char StreamName[80];
     Changed = true;
 }
 
-void CobolFile :: GenReadData (ostream& os, CobolData * data)
+void CobolFile :: GenReadData (ostringstream& os, CobolData * data)
 {
 char StreamName[80];
 
@@ -363,7 +358,7 @@ char StreamName[80];
     }
 }
 
-void CobolFile :: GenReadEnd (ostream& os)
+void CobolFile :: GenReadEnd (ostringstream& os)
 {
     if (NewlineFlag) {
 	GenIndent();
@@ -375,7 +370,7 @@ void CobolFile :: GenReadEnd (ostream& os)
     }
 }
 
-void CobolFile :: GenWriteEnd (ostream& os)
+void CobolFile :: GenWriteEnd (ostringstream& os)
 {
     if (NewlineFlag) {
 	GenIndent();
@@ -387,7 +382,7 @@ void CobolFile :: GenWriteEnd (ostream& os)
     }
 }
 
-void CobolFile :: GenSetupForAppend (ostream& os)
+void CobolFile :: GenSetupForAppend (ostringstream& os)
 {
     if (IsDBF) {
 	GenIndent();

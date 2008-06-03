@@ -1,12 +1,12 @@
-/* semdecl.h
-**
-**	Prototypes all the semantic actions in semdecl.cc
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMDECL_H
-#define __SEMDECL_H
+#ifndef SEMDECL_H_047C309F443754C00B988A6E6B1E97A6
+#define SEMDECL_H_047C309F443754C00B988A6E6B1E97A6
 
-#include "adtlib/mdefs.h"
+#include "config.h"
 
 #define STACK_IDENT_LENGTH	50
 

@@ -1,7 +1,7 @@
-/* seminit.cc
-**
-**	Implements initialization actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "semcontrol.h"
@@ -13,8 +13,8 @@
 /*--------------------------------------------------*/
   ofstream 			codef;
   ofstream 			declf;
-  Stack<StackEntry> 		SemStack;
-  HashTable<CobolSymbol> 	SymTable;
+  vector<StackEntry*> 		SemStack;
+  symtable_t		 	SymTable;
   int 				NestingLevel = 0;
   bool				CodeBegan = false;
 /*--------------------------------------------------*/
@@ -112,7 +112,7 @@ CobolFile * NewFile;
     codef << "long int _cpi;\n";	
     codef << "\n";
 
-    SymTable.Clear();
+    SymTable.clear();
 
     // Space filler variable
     NewSymbol = new CobolVar;
@@ -121,7 +121,7 @@ CobolFile * NewFile;
 #ifndef NDEBUG
     cout << "DBG: Declaring _space_var\n";
 #endif
-    SymTable.Insert ("_space_var", NewSymbol);
+    SymTable["_space_var"] = NewSymbol;
 
     // Zero filler variable
     NewSymbol = new CobolVar;
@@ -130,7 +130,7 @@ CobolFile * NewFile;
 #ifndef NDEBUG
     cout << "DBG: Declaring _zero_var\n";
 #endif
-    SymTable.Insert ("_zero_var", NewSymbol);
+    SymTable["_zero_var"] = NewSymbol;
 
     // Default output stream
     NewFile = new CobolFile;
@@ -140,12 +140,14 @@ CobolFile * NewFile;
 #ifndef NDEBUG
     cout << "DBG: Declaring stdout\n";
 #endif
-    SymTable.Insert ("stdout", NewFile);
+    SymTable["stdout"] = NewFile;
 }
 
 void EndProgram (void)
 {
+    codef.flush();
     codef.close();
+    declf.flush();
     declf.close();
 }
 

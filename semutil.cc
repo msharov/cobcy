@@ -1,12 +1,13 @@
-/* semutil.cc
-**
-**	Implements semantic utilities for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "symbase.h"
 #include "symconst.h"
 #include "symlabel.h"
+#include <stdio.h>
 
 extern long int ival;
 extern double fval;
@@ -78,20 +79,12 @@ void PrintStackEntry (StackEntry * se)
 
 void PrintStack (void)
 {
-StackEntry * se;
-Stack<StackEntry> TempStack;
-int index = 1;
-
     cerr << "Stack:\n";
-    while (!SemStack.IsEmpty()) {
-       se = SemStack.Pop();
-       cerr << "\t" << index << ") ";
-       PrintStackEntry (se);
-       cerr << "\n";
-       TempStack.Push (se);
+    eachfor (vector<StackEntry*>::reverse_iterator, i, SemStack) {
+	cerr << "\t" << distance(SemStack.rbegin(),i) << ") ";
+	PrintStackEntry (*i);
+	cerr << "\n";
     }
-    while (!TempStack.IsEmpty())
-       SemStack.Push (TempStack.Pop());
 }
 #endif
 
@@ -121,9 +114,9 @@ bool ErrorOccured (void)
     return (ErrorFlag);
 }
 
-void PrintConstant (StackEntry * entry, ostream& os)
+void PrintConstant (StackEntry * entry, ostringstream& os)
 {
-CobolConstant ctp;	// Just to keep all the stuff in one place
+    CobolConstant ctp;	// Just to keep all the stuff in one place
     ctp = entry;
     os << ctp;
 }
@@ -133,7 +126,7 @@ CobolSymbol * LookupIdentifier (const char* id)
 CobolSymbol * sym;
 char ErrorBuffer [80];
 
-    if ((sym = SymTable.Lookup (id)) == NULL) {
+    if ((sym = SymTable[id]) == NULL) {
        sprintf (ErrorBuffer, "identifier '%s' is unknown", id);
        WriteError (ErrorBuffer);
        return (NULL);
@@ -141,7 +134,7 @@ char ErrorBuffer [80];
     return (sym);
 }
 
-void PrintIdentifier (const char* id, ostream& os)
+void PrintIdentifier (const char* id, ostringstream& os)
 {
 CobolSymbol * sym;
 
@@ -151,38 +144,22 @@ CobolSymbol * sym;
 
 uint32_t CountIdentifiers (void)
 {
-Stack<StackEntry> TempStack;
-StackEntry * CurEntry;
-uint32_t count = 0;
-
-    do {
-       CurEntry = SemStack.Pop();
-       TempStack.Push (CurEntry);
-       ++ count;
+    vector<StackEntry*>::iterator i = SemStack.end();
+    while (i > SemStack.begin() && (*--i)->kind != SE_Mark);
+    if (i < SemStack.end()) {
+	if (i < SemStack.end() && (*i)->kind != SE_Mark)
+	    WriteError ("No mark found");
+	else {
+	    delete *i;	// Delete the mark
+	    i = SemStack.erase (i);
+	}
     }
-    while (CurEntry->kind != SE_Mark && !SemStack.IsEmpty());
-
-    if (CurEntry->kind != SE_Mark)
-       WriteError ("No mark found");
-
-    -- count;			// Subtract the mark
-    delete (TempStack.Pop());	// Delete the mark
-
-    while (!TempStack.IsEmpty())
-       SemStack.Push (TempStack.Pop());
-
-    return (count);
+    return (distance (i, SemStack.end()));
 }
 
 void ReverseIdentifiers (uint32_t nIds)
 {
-Queue<StackEntry> TempQueue;
-uint32_t i;
-
-    for (i = 0; i < nIds; ++ i)
-       TempQueue.Append (SemStack.Pop());
-    for (i = 0; i < nIds; ++ i)
-       SemStack.Push (TempQueue.Serve());
+    reverse (SemStack.end() - nIds, SemStack.end());
 }
 
 void GenIndent (void)
@@ -194,9 +171,7 @@ int i;
 
 void Push (StackEntryKind kind)
 {
-StackEntry * NewEntry;
-
-    NewEntry = new StackEntry;
+    StackEntry* NewEntry = new StackEntry;
     NewEntry->kind = kind;
     memset (NewEntry->ident, 0, STACK_IDENT_LENGTH);
     NewEntry->fval = NewEntry->ival = 0;
@@ -222,7 +197,7 @@ StackEntry * NewEntry;
 		break;
     }
 
-    SemStack.Push (NewEntry);
+    SemStack.push_back (NewEntry);
 }
 
 bool IsInSet (char c, const char* set)

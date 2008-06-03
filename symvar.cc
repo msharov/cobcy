@@ -1,7 +1,7 @@
-/* symvar.cc
-**
-**	Variable class
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "symvar.h"
@@ -26,7 +26,7 @@ CobolSymbolType CobolVar :: Kind (void)
     return (CS_Variable);
 }
 
-void CobolVar :: GenDeclare (ostream& os)
+void CobolVar :: GenDeclare (ostringstream& os)
 {
     GenIndent();
     Picture.GenTypePrefix (os);
@@ -35,7 +35,7 @@ void CobolVar :: GenDeclare (ostream& os)
     os << ";\n";
 }
 
-void CobolVar :: GenRead (ostream& os, const char* stream)
+void CobolVar :: GenRead (ostringstream& os, const char* stream)
 {
 #ifndef NDEBUG
     cout << "\t\tReading variable " << *this;
@@ -47,7 +47,7 @@ void CobolVar :: GenRead (ostream& os, const char* stream)
     os << "\"" << Picture << "\");\n";
 }
 
-void CobolVar :: GenWrite (ostream& os, const char* stream)
+void CobolVar :: GenWrite (ostringstream& os, const char* stream)
 {
 #ifndef NDEBUG
     cout << "\t\tWriting variable " << *this;
@@ -60,7 +60,7 @@ void CobolVar :: GenWrite (ostream& os, const char* stream)
 }
 
 // Move for two variables
-void CobolVar :: GenMove (ostream& os, CobolVar * data)
+void CobolVar :: GenMove (ostringstream& os, CobolVar * data)
 {
     // Indent, as usual
     GenIndent();
@@ -86,7 +86,7 @@ void CobolVar :: GenMove (ostream& os, CobolVar * data)
        WriteError ("Incompatible types for assignment");
 }
 
-void CobolVar :: GenMove (ostream& os, CobolConstant& data)
+void CobolVar :: GenMove (ostringstream& os, CobolConstant& data)
 {
     if (Picture.IsNumeric() && !data.IsNumeric()) {
        WriteError ("cannot cast constants (yet)");
@@ -103,8 +103,7 @@ void CobolVar :: GenMove (ostream& os, CobolConstant& data)
 }
 
 // This should get both constants and variables
-void CobolVar :: GenArith (ostream& os, Streamable * op1, 
-			   Streamable * op2, char opc)
+void CobolVar :: GenArith (ostringstream& os, CobolSymbol* op1, CobolSymbol* op2, char opc)
 {
     if (Picture.IsNumeric()) {
        // Generate a division by zero check
@@ -137,13 +136,13 @@ void CobolVar :: GenArith (ostream& os, Streamable * op1,
        WriteError ("arithmetic is for numbers");
 }
 
-void CobolVar :: GenSignature (ostream& os)
+void CobolVar :: GenSignature (ostringstream& os)
 {
     os << " " << GetCName();
     Picture.GenSignature (os);
 }
 
-void CobolVar :: GenCharCast (ostream& os)
+void CobolVar :: GenCharCast (ostringstream& os)
 {
 PictureType CharPic;
 

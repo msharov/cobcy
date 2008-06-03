@@ -1,14 +1,14 @@
-/* seminfo.cc
-**
-**	Implements informational semantic actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 
 void SetProgramName (void)
 {
-StackEntry * entry;
-    if ((entry = SemStack.Pop()) != NULL) {
+    StackEntry* entry = SemStack.back(); SemStack.pop_back();
+    if (entry) {
        if (entry->kind == SE_Identifier) {
           codef << "/* This program is called ";
 	  codef << entry->ident << " */\n";
@@ -23,8 +23,8 @@ StackEntry * entry;
 
 void SetSourceComputer (void)
 {
-StackEntry * entry;
-    if ((entry = SemStack.Pop()) != NULL) {
+    StackEntry* entry = SemStack.back(); SemStack.pop_back();
+    if (entry) {
        if (entry->kind == SE_Identifier)
           codef << "/* Written on " << entry->ident << " */\n";
        else
@@ -37,17 +37,18 @@ StackEntry * entry;
 
 void SetObjectComputer (void)
 {
-StackEntry * entry;
-    if ((entry = SemStack.Pop()) != NULL) {
-       if (entry->kind == SE_Integer)
-          entry = SemStack.Pop();
-       if (entry->kind == SE_Identifier)
-          codef << "/* Written for " << entry->ident << " */\n\n";
-       else
-	  WriteError ("Object computer name must be one word");
-       delete (entry);
+    StackEntry* entry = SemStack.back(); SemStack.pop_back();
+    if (entry) {
+	if (entry->kind == SE_Integer) {
+	    entry = SemStack.back(); SemStack.pop_back();
+	}
+	if (entry->kind == SE_Identifier)
+	    codef << "/* Written for " << entry->ident << " */\n\n";
+	else
+	    WriteError ("Object computer name must be one word");
+	delete (entry);
     }
     else
-       WriteError ("Object computer name expected");
+	WriteError ("Object computer name expected");
 }
 

@@ -1,7 +1,7 @@
-/* semconio.h
-**
-**	Console IO for the COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "semconio.h"
@@ -28,7 +28,7 @@ int i, nIds;
     nIds = CountIdentifiers();
 
     for (i = 0; i < nIds; ++ i) {
-       entry = SemStack.Pop();
+       entry = SemStack.back(); SemStack.pop_back();
        if (entry->kind == SE_Identifier) {
 	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
 	     return;
@@ -40,13 +40,13 @@ int i, nIds;
 		break;
 	     case AS_Date:
 	        GenIndent();
-	        attr->WriteTextStream (codef);
+	        attr->text_write (codef);
 		codef << " = ";
 		codef << "_GetDate();\n";
 		break;
 	     case AS_Day:
 	        GenIndent();
-	        attr->WriteTextStream (codef);
+	        attr->text_write (codef);
 		codef << " = ";
 		codef << "_GetDay();\n";
 		break;
@@ -55,7 +55,7 @@ int i, nIds;
 	     	break;
 	     case AS_Time:
 	        GenIndent();
-	        attr->WriteTextStream (codef);
+	        attr->text_write (codef);
 		codef << " = ";
 		codef << "_GetTime();\n";
 		break;
@@ -89,17 +89,16 @@ int i, nIds;
 #endif
 
     for (i = 0; i < nIds; ++ i) {
-       entry = SemStack.Pop();
+	entry = SemStack.back(); SemStack.pop_back();
 
-       if (entry->kind == SE_Identifier) {
-	  if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
-	     return;
-          attr->GenWrite (codef, DisplayOutput);   
-       }
-       else {
-	  cattr = entry;
-	  cattr.GenWrite (codef, DisplayOutput);
-       }
+	if (entry->kind == SE_Identifier) {
+	    if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
+		return;
+	    attr->GenWrite (codef, DisplayOutput);
+	} else {
+	    cattr = entry;
+	    cattr.GenWrite (codef, DisplayOutput);
+	}
     }
 
     GenIndent();
@@ -108,11 +107,8 @@ int i, nIds;
 
 void SetDisplayOutput (void)
 {
-StackEntry * OutputStream;
-CobolFile * OutStrSym;
-    
-    OutputStream = SemStack.Pop();
-    OutStrSym = (CobolFile*) LookupIdentifier (OutputStream->ident);
+    StackEntry* OutputStream = SemStack.back(); SemStack.pop_back();
+    CobolFile* OutStrSym = (CobolFile*) LookupIdentifier (OutputStream->ident);
     if (OutStrSym != NULL)
        strcpy (DisplayOutput, OutStrSym->GetFullCName());
 

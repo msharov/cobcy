@@ -24,7 +24,8 @@
 #define PACKAGE_BUGREPORT	"Mike Sharov <msharov@users.sourceforge.net>"
 
 static cpchar_t g_Files [] = {
-    "Config.mk"
+    "Config.mk",
+    "config.h"
 };
 
 /* Values substitute @VARNAME@ */
@@ -77,6 +78,9 @@ static SComponentInfo g_ComponentInfos [VectorSize(g_Components) / 3] = {
 static cpchar_t g_CustomVars [] = {
     "PACKAGE_NAME",		PACKAGE_NAME,
     "PACKAGE_VERSION",		PACKAGE_VERSION,
+    "PACKAGE_MAJOR",		PACKAGE_MAJOR,
+    "PACKAGE_MINOR",		PACKAGE_MINOR,
+    "PACKAGE_BUILD",		PACKAGE_BUILD,
     "PACKAGE_TARNAME",		PACKAGE_TARNAME,
     "PACKAGE_STRING",		PACKAGE_STRING,
     "PACKAGE_BUGREPORT",	PACKAGE_BUGREPORT,

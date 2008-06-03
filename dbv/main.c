@@ -1,20 +1,17 @@
-/* main.c
-**
-**	Test program for dbf library
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "display.h"
 
-int main (int argc, char ** argv)
+int main (int argc, const char* const* argv)
 {
-DBF_FILE * df;
-
     if (argc != 2) {
-       printf ("Usage: %s <file.dbf>\n", argv[0]);
-       return (0);
+	printf ("Usage: %s <file.dbf>\n", argv[0]);
+	return (0);
     }
-
-    df = DBF_Open (argv[1], "rb");
+    DBF_FILE* df = DBF_Open (argv[1], "rb");
     DisplayOpen();
     ViewDBF (df);
     DisplayClose();

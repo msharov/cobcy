@@ -1,4 +1,5 @@
 Config.mk
+config.h
 .depend
 *.[oa]
 cobcy

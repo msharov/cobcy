@@ -1,7 +1,7 @@
-/* symdata.cc
-**
-**	Defines an abstract data thing.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "symdata.h"
 #include "symfile.h"
@@ -23,12 +23,12 @@ void CobolData :: AssociateWithStream (CobolFile * NewStream)
     AssociatedStream = NewStream;
 }
 
-void CobolData :: GenRead (ostream& os)
+void CobolData :: GenRead (ostringstream& os)
 {
     GenRead (os, AssociatedStream->GetFullCName());
 }
 
-void CobolData :: GenWrite (ostream& os)
+void CobolData :: GenWrite (ostringstream& os)
 {
     GenWrite (os, AssociatedStream->GetFullCName());
 }

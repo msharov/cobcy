@@ -1,6 +1,9 @@
-// ndx.c
+// This file is part of cobcy, a COBOL-to-C compiler.
 //
-//	Implementation of the dBASE III .NDX file format
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
+//
+// Implementation of the dBASE III .NDX file format
 // The unusual thing is doing it without buffered streams (fopen)
 // the reason is that index files need read/write access and
 // buffered streams cannot provide that (no, "w+b" does NOT work!)

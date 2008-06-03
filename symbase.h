@@ -1,14 +1,12 @@
-/* symbase.h
-**
-**	Defines an abstract symbol table entry.
-** This is an abstract virtual class, so don't try to make any.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SYMBASE_H
-#define __SYMBASE_H
+#ifndef SYMBASE_H_64F2F952279411DC249C520D6596F0D6
+#define SYMBASE_H_64F2F952279411DC249C520D6596F0D6
 
-#include "adtlib/mdefs.h"
-#include "adtlib/streamab.h"
+#include "config.h"
 
 #define MAX_SYMBOL_LENGTH	50
 #define MAX_PREFIX_LENGTH	80
@@ -20,10 +18,13 @@ typedef enum {
     CS_Variable,
     CS_Procedure,
     CS_FileDesc,
-    CS_Label
+    CS_Label,
+    CS_Constant,
+    CS_Picture
 } CobolSymbolType;
 
-class CobolSymbol : public Streamable {
+/// Defines an abstract symbol table entry.
+class CobolSymbol {
 private:
     char		ParentCobolName [MAX_SYMBOL_LENGTH];
     char		Prefix [MAX_PREFIX_LENGTH];
@@ -42,8 +43,7 @@ public:
     inline const char*		GetFullCName (void);
     void			SetParent (const char* NewParent);
     virtual CobolSymbolType	Kind (void) = 0;
-    virtual void		WriteBinaryStream (ostream& os);
-    virtual void		WriteTextStream (ostream& os);
+    virtual void		text_write (ostringstream& os) const;
     virtual		       ~CobolSymbol (void);
 };
 

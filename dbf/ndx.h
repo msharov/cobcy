@@ -1,7 +1,11 @@
-// ndx.h
+// This file is part of cobcy, a COBOL-to-C compiler.
 //
-//	This is an implementation of an index file for Cobcy.
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 //
+/// \file ndx.h
+/// \brief This is an implementation of an index file for Cobcy.
+///
 
 #ifndef NDX_H_090C07BB6A4BA18A2304CEC370541651
 #define NDX_H_090C07BB6A4BA18A2304CEC370541651

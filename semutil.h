@@ -1,10 +1,10 @@
-/* semutil.h
-**
-**	Prototypes semantic utilities for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMUTIL_H
-#define __SEMUTIL_H
+#ifndef SEMUTIL_H_6A73F48510972692670B68D112C25CA4
+#define SEMUTIL_H_6A73F48510972692670B68D112C25CA4
 
 #include "semtypes.h"
 #include "symbase.h"
@@ -15,9 +15,9 @@
   void	NIY (const char* str);
   void  GenComment (const char* str);
   bool	ErrorOccured (void);
-  void 	PrintConstant (StackEntry * entry, ostream& os);
+  void 	PrintConstant (StackEntry * entry, ostringstream& os);
   CobolSymbol *	LookupIdentifier (const char* id);
-  void	PrintIdentifier (const char* id, ostream& os);
+  void	PrintIdentifier (const char* id, ostringstream& os);
   void 	GenIndent (void);
   uint32_t 	CountIdentifiers (void);
   void 	ReverseIdentifiers (uint32_t nIds);

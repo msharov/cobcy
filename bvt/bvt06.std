@@ -58,7 +58,7 @@ void _SetVarValues (void)
     _AssignVarString (various_numbers.filler001, _space_var, 1, 200);
     various_numbers.entry_three = 12345;
     _AssignVarString (various_numbers.filler002, _space_var, 1, 200);
-    various_numbers.entry_four = 12.3;
+    various_numbers.entry_four = 12.30;
     _AssignVarString (various_numbers.filler003, _space_var, 1, 200);
     various_numbers.entry_five = 239847;
     other_numbers.other_one = 12345;
@@ -67,7 +67,7 @@ void _SetVarValues (void)
     _AssignVarString (other_numbers.filler005, _space_var, 1, 200);
     other_numbers.other_three = 12345;
     _AssignVarString (other_numbers.filler006, _space_var, 1, 200);
-    other_numbers.other_four = 12.3;
+    other_numbers.other_four = 12.30;
     _AssignVarString (other_numbers.filler007, _space_var, 1, 200);
     other_numbers.other_five = 239847;
 }

@@ -1,7 +1,11 @@
-// dbf.h
+// This file is part of cobcy, a COBOL-to-C compiler.
 //
-//	Defines ANSI C structures to deal with dBASE IV files.
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 //
+/// \file dbf.h
+/// \brief Defines ANSI C structures to deal with dBASE IV files.
+///
 
 #ifndef DBF_H_3DA1E0F75FD740083F92610B470AE378
 #define DBF_H_3DA1E0F75FD740083F92610B470AE378

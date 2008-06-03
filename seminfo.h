@@ -1,10 +1,10 @@
-/* seminfo.cc
-**
-**	Defines informational semantic actions for COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMINFO_H
-#define __SEMINFO_H
+#ifndef SEMINFO_H_4B0787F5567FAB92437F6E37518ABFBB
+#define SEMINFO_H_4B0787F5567FAB92437F6E37518ABFBB
 
 /*----------------------------------------*/
   void 	SetProgramName (void);

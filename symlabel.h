@@ -1,13 +1,14 @@
-/* symlabel.h
-**
-**	Defines a label symbol
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SYMLABEL_H
-#define __SYMLABEL_H
+#ifndef SYMLABEL_H_65C3ED8A24D067CC5020766B36AE2E2B
+#define SYMLABEL_H_65C3ED8A24D067CC5020766B36AE2E2B
 
 #include "symbase.h"
 
+/// Defines a label symbol
 class CobolLabel : public CobolSymbol {
 public:
     bool		Undeclared;	// For forward references
@@ -15,8 +16,8 @@ public:
 public:
 			CobolLabel (void);
     inline CobolSymbolType	Kind (void);
-    void		GenDeclare (ostream& os);
-    void		GenJump (ostream& os, CobolLabel * dest);
+    void		GenDeclare (ostringstream& os);
+    void		GenJump (ostringstream& os, CobolLabel * dest);
 		       ~CobolLabel (void);
 };
 

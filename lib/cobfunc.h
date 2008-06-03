@@ -1,7 +1,9 @@
-// cobfunc.h
+// This file is part of cobcy, a COBOL-to-C compiler.
 //
-//	Defines cobol function library.
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 //
+// Cobol function library.
 
 #ifndef COBFUNC_H_5F505570391DF1261B8F7F0537665407
 #define COBFUNC_H_5F505570391DF1261B8F7F0537665407

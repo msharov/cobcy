@@ -1,12 +1,11 @@
-/* main.cc
-**
-**       Defines the main module of the COBOL compiler.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#include "adtlib/mdefs.h"
-#include <unistd.h>
-#include "lyextern.h"
 #include "semextern.h"
+#include <unistd.h>
+#include <stdio.h>
 
 //----------------------------------------------------------------------
 

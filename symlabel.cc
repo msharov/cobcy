@@ -1,7 +1,7 @@
-/* symlabel.cc
-**
-**	Defines a label symbol
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "symlabel.h"
 #include "semutil.h"
@@ -12,14 +12,14 @@ CobolLabel :: CobolLabel (void)
     Undeclared = true;
 }
 
-void CobolLabel :: GenDeclare (ostream& os)
+void CobolLabel :: GenDeclare (ostringstream& os)
 {
     os << "int " << *this << " (void)\n";
     BeginCompound();
     os << *this << ":\n";
 }
 
-void CobolLabel :: GenJump (ostream& os, CobolLabel * dest)
+void CobolLabel :: GenJump (ostringstream& os, CobolLabel * dest)
 {
     GenIndent();
     // If in jumping to the top of the current paragraph, use goto.

@@ -5,21 +5,16 @@ OBJS	= $(SRCS:.cc=.o)
 
 CLIB	= lib/libcobol.a
 DBFOBJS	= dbf/dbf.o dbf/ndx.o
-ADTLIB	= adtlib/libadt.a
 
 #############################################
 
 all:	${EXE} ${CLIB}
 
-${ADTLIB}:
-	@echo "Building base classes ..."
-	@+make -C adtlib
-
 ${CLIB}:
 	@echo "Building cobcy runtime library ..."
 	@+make -C lib
 
-${EXE}:	${OBJS} ${ADTLIB}
+${EXE}:	${OBJS}
 	@echo "Linking $@ ..."
 	@${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
@@ -58,11 +53,9 @@ check:	${EXE} ${CLIB}
 depend:
 	@echo Generating dependencies ...
 	@${CXX} ${CXXFLAGS} -MM ${SRCS} > .depend
-	@+make -C adtlib depend
 	@+make -C dbf depend
 
 clean:
-	@+make -C adtlib clean
 	@+make -C dbf clean
 	@+make -C lib clean
 	@+make -C bvt clean
@@ -71,6 +64,5 @@ clean:
 
 realclean: clean
 	@rm -f $(EXE) $(CLIB)
-	@rm -f $(ADTLIB)
 
 -include .depend

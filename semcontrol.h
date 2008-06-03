@@ -1,10 +1,10 @@
-/* semcontrol.h
-**
-**	Control statement semantics.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMCONTROL_H
-#define __SEMCONTROL_H
+#ifndef SEMCONTROL_H_53E3AA77780572B600D9D421352480CC
+#define SEMCONTROL_H_53E3AA77780572B600D9D421352480CC
 
 /*-----------------------------------------------------------------*/
   void 	GenParagraph (void);

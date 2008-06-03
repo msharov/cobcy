@@ -1,9 +1,10 @@
-/* semconio.h
-**
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMCONIO_H
-#define __SEMCONIO_H
+#ifndef SEMCONIO_H_228FBB8660C958CE6D1598CD5EC95B49
+#define SEMCONIO_H_228FBB8660C958CE6D1598CD5EC95B49
 
 /*----------------------------------------------------*/
   void 	GenAccept (void);

@@ -1,15 +1,22 @@
-/* symfile.h
-**
-**	Defines a file descriptor symbol
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SYMFILE_H
-#define __SYMFILE_H
+#ifndef SYMFILE_H_21AF9B80775D0334054DEA8C2F74C4B1
+#define SYMFILE_H_21AF9B80775D0334054DEA8C2F74C4B1
 
 #include "symbase.h"
 #include "symdata.h"
 #include "semtypes.h"
 
+/// Defines a file descriptor symbol
+///
+/// Sequential and line sequential files are handled raw,
+/// Relative and indexed files are in dBASE IV format. Note that
+/// reading and writing is still done with same routines since DBF
+/// files store data in all ascii and just like COBOL wants it. Were
+/// they developed for COBOL by any chance?
 class CobolFile : public CobolSymbol {
 private:
     char			DataFileName [PATH_MAX];
@@ -32,10 +39,10 @@ private:
     bool			IsFormatted;
 
 private:
-    void			GenRecordSignature (ostream& os);
-    void			GenKeySignature (ostream& os);
-    void			WriteIndexCName (ostream& os);
-    void			WriteOpenMode (ostream& os, OpenModeType mode);
+    void			GenRecordSignature (ostringstream& os);
+    void			GenKeySignature (ostringstream& os);
+    void			WriteIndexCName (ostringstream& os);
+    void			WriteOpenMode (ostringstream& os, OpenModeType mode);
 
 public:
 				CobolFile (void);
@@ -50,21 +57,19 @@ public:
     void			SetNewlineFlag (bool NewFlag);
     void			SetUnlinkOnClose (bool NewFlag);
     void			AssociateRecord (void);
-    virtual void		WriteTextStream (ostream& os);
+    virtual void		text_write (ostringstream& os) const;
 
-    void			GenDeclare (ostream& os);
-    void			GenOpen (ostream& os, OpenModeType mode);
-    void			GenFlush (ostream& os);
-    void			GenSeek (ostream& os);
-    void			GenClose (ostream& os);
-    void			GenEOFCheck (ostream& os);
-    void			GenWriteData (ostream& os, 
-    					      CobolData * data = NULL);
-    void			GenReadData (ostream& os, 
-    					     CobolData * data = NULL);
-    void			GenWriteEnd (ostream& os);
-    void			GenReadEnd (ostream& os);
-    void			GenSetupForAppend (ostream& os);
+    void			GenDeclare (ostringstream& os);
+    void			GenOpen (ostringstream& os, OpenModeType mode);
+    void			GenFlush (ostringstream& os);
+    void			GenSeek (ostringstream& os);
+    void			GenClose (ostringstream& os);
+    void			GenEOFCheck (ostringstream& os);
+    void			GenWriteData (ostringstream& os, CobolData* data = NULL);
+    void			GenReadData (ostringstream& os, CobolData* data = NULL);
+    void			GenWriteEnd (ostringstream& os);
+    void			GenReadEnd (ostringstream& os);
+    void			GenSetupForAppend (ostringstream& os);
 
     			       ~CobolFile (void);
 };

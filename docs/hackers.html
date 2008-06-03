@@ -1,161 +1,115 @@
-<HTML>
-<HEAD>
-<TITLE>Cobcy hacker's guide</TITLE>
-</HEAD>
-<BODY>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Cobcy hacker's guide</title>
+    <meta http-equiv="Content-Type" content="text/xhtml+xml; charset=ISO-8859-1" />
+</head>
+<body>
 
-<CENTER>
-<HR WIDTH=70%>
-<H1>Cobcy for Hackers</H1>
-<HR WIDTH=60%>
-</CENTER>
+<hr />
+<h1>Cobcy for hackers</h1>
+<hr />
 
-<P>
-<H2>Introduction</H2>
-
+<h2>Introduction</h2>
+<p>
 The purpose of this document is to explain the internal design of Cobcy to
 start you up as a Cobcy hacker. Here I will in brief try to explain some of
 the functions in source code (since this is a pretty big task, chances
 are you are still reading an incomplete document)
-<P>
-Some global portability conventions: I use
-<PRE>
-#ifndef __MSDOS__
-...
-#endif
-</PRE>
-directive to help those who want to compile under DOS. I have not heard
-any success stories yet, so these are mostly just a guess.
-Another macro I use is <CODE>CAN_HAVE_STDIO</CODE>, an unfortunate name
-perhaps, inserted because some compilers, like some of the older versions
-of gcc don't like to mix iostreams and stdio. Current gcc does not have
-this problem. I also use the NDEBUG macro to isolate debug messages.
-I chose that because it is compatible with <CODE>assert</CODE>. An example
-would be:
-<PRE>
-#ifndef NDEBUG
-    cout << "\tIn GenMove\n";
-#endif
-</PRE>
-<P>
-All code should be written using <CODE>codef</CODE> and <CODE>declf</CODE>
+</p><p>
+All code should be written using <tt>codef</tt> and <tt>declf</tt>
 streams, with the former being the output .c file and the latter the .h file.
-These streams are opened and closed in <A HREF="#seminit">seminit.cc</A>
+These streams are opened and closed in <a href="#seminit">seminit.cc</a>
+</p>
+<h2>Modules</h2>
 
-<P>
-<H2>Modules</H2>
+<p></p>
 
-<P>
-<H3>Contents</H3>
+<h3>Contents</h3>
 
-<P>
-<UL>
-<LI><A HREF="#semconio">semconio.cc</A>
-<LI><A HREF="#semcontrol">semcontrol.cc</A>
-<LI><A HREF="#semdecl">semdecl.cc</A>
-<LI><A HREF="#semfile">semfile.cc</A>
-<LI><A HREF="#seminfo">seminfo.cc</A>
-<LI><A HREF="#seminit">seminit.cc</A>
-<LI><A HREF="#semutil">semutil.cc</A>
-</UL>
-</P>
-
+<ul>
+    <li><a href="#semconio">semconio.cc</a></li>
+    <li><a href="#semcontrol">semcontrol.cc</a></li>
+    <li><a href="#semdecl">semdecl.cc</a></li>
+    <li><a href="#semfile">semfile.cc</a></li>
+    <li><a href="#seminfo">seminfo.cc</a></li>
+    <li><a href="#seminit">seminit.cc</a></li>
+    <li><a href="#semutil">semutil.cc</a></li>
+</ul>
+<p>
 Cobcy code is divided into three roughly divided parts - semantic actions,
 code generating classes, and glue. Semantic actions are stored in files
-starting with <TT>sem</TT>, code generating classes are in files starting
-with <TT>sym</TT>, and everything else is glue routines. This is of course
+starting with <tt>sem</tt>, code generating classes are in files starting
+with <tt>sym</tt>, and everything else is glue routines. This is of course
 with the exception of .l and .y files, which constitute the parser.
 Semantic action deal with the stack and all parser-related stuff. Code
 generating classes do just that - generate most of the actual code.
-
-<P>
-<H3>main.cc</H3>
-
+</p>
+<h3>main.cc</h3>
+<p>
 This file contains routines to process command line-arguments, set
 compiler configuration, and anything else that does not have anything
-to do with code generation. <CODE>CobcyConfig</CODE>, the global
+to do with code generation. <tt>CobcyConfig</tt>, the global
 configuration structure, is defined and set up here. main also
 opens the source file and starts the parser. When the parser is
 finished, main checks for errors and removes output files if found.
-
-<P>
-<H3>semarith.cc</H3>
-
+</p>
+<h3>semarith.cc</h3>
+<p>
 This defines arithmetic-related and movement semantic actions.
 Since many functions require rounding, a global variable 
-<CODE>RoundResult</CODE> is defined here with type <CODE>BOOL</CODE>.
+<tt>RoundResult</tt> is defined here with type <tt>bool</tt>.
 Most of these simply involve plenty of tedious setup with not much
 interesting stuff going on. Basically all of these generate some
 sort of an assignment statement or a string assignment function with
 possible conversion (all from cobfunc.c)
 Present functions:
-
-<DL>
-<DT>void GenMove (void)</DT>
-<DD>Record moves are not implemented.
-</DD>
-
-<DT>void GenAdd (void)</DT>
-<DT>void GenSubtract (void)</DT>
-<DT>void GenMultiply (void)</DT>
-<DT>void GenDivide (void)</DT>
-<DD>Divide does generate zero checking as an <CODE>if</CODE> statement, 
+</p>
+<dl>
+<dt>void GenMove (void)</dt>
+<dd>Record moves are not implemented.</dd>
+<dt>void GenAdd (void)</dt>
+<dt>void GenSubtract (void)</dt>
+<dt>void GenMultiply (void)</dt>
+<dt>void GenDivide (void)</dt>
+<dd>Divide does generate zero checking as an <tt>if</tt> statement, 
 	but it is just that unless ON SIZE ERROR appends an 
-	<CODE>else</CODE> clause to handle the error.
-</DD>
+	<tt>else</tt> clause to handle the error.</dd>
+<dt>void GenCompute (void)</dt>
+<dd>Same thing as all the others.</dd>
+<dt>void SetResultRounding (void)</dt>
+<dd>Sets <var>ResultRounding</var> variable to true. All of the above
+	functions will reset it to false.</dd>
+</dl>
 
-<DT>void GenCompute (void)</DT>
-<DD>Same thing as all the others.
-</DD>
-
-<DT>void SetResultRounding (void)</DT>
-<DD>Sets <VAR>ResultRounding</VAR> variable to TRUE. All of the above
-	functions will reset it to FALSE.
-</DD>
-</DL>
-
-<P>
-<A NAME=semconio>
-<H3>semconio.cc</H3>
-</A>
-
+<h3><a name="semconio">semconio.cc</a></h3>
+<p>
 This file contains user interaction routines, which at present include
 only displaying and accepting text.
 Functions:
-
-<DL>
-<DT>void GenAccept (void)</DT>
-<DD>Processes ACCEPT clause. Expects a marked list of identifiers on
+</p>
+<dl>
+<dt>void GenAccept (void)</dt>
+<dd>Processes ACCEPT clause. Expects a marked list of identifiers on
 	the stack, processing them one at a time, generating code to
 	assign appropriate value to it. ACCEPT sources other than
 	console generate unimplemented function stubs, so the error
-	will be only reported by gcc.
-</DD>
-
-<DT>void GenDisplay (void)</DT>
-<DD> Expects a marked list of identifiers on
+	will be only reported by gcc.</dd>
+<dt>void GenDisplay (void)</dt>
+<dd> Expects a marked list of identifiers on
 	the stack, processing them one at a time, generating code to
 	print each one using a separate fprintf statement. At the end
-	an fprintf printing a newline is generated.
-</DD>
-
-<DT>void SetDisplayOutput (void)</DT>
-<DD>Expects an identifier on the stack.
+	an fprintf printing a newline is generated.</dd>
+<dt>void SetDisplayOutput (void)</dt>
+<dd>Expects an identifier on the stack.
 	Sets the file stream to DISPLAY to. All Cobcy files are of type FILE,
-	so GenDisplay can just pass the needed one to fprintf.
-</DD>
-
-<DT>void SetAcceptSource (AcceptSourceType NewSrc)</DT>
-<DD>This one is a little more tricky, with source as an enum. GenAccept
-	will parse it to determine where the data should come from.
-</DD>
-</DL>
-
-<P>
-<A NAME=semcontrol>
-<H3>semcontrol.cc</H3>
-</A>
-
+	so GenDisplay can just pass the needed one to fprintf.</dd>
+<dt>void SetAcceptSource (AcceptSourceType NewSrc)</dt>
+<dd>This one is a little more tricky, with source as an enum. GenAccept
+	will parse it to determine where the data should come from.</dd>
+</dl>
+<h3><a name="semcontrol">semcontrol.cc</a></h3>
+<p>
 This file contains code generation of control structures. Paragraphs are
 implemented as separate functions with a same-name label in the beginning.
 The label is there to allow faster loops. See GenGoto for more details.
@@ -164,143 +118,101 @@ to work. The limit is set to 32000 at present, which is a lot of paragraphs.
 The compiler will not give you any bad message about it, but if you have
 50000 paragraphs and STOP RUN in paragraph 3, you'll go to paragraph 32000.
 I'll fix that if anyone needs that many.
-Global variables are <CODE>ParagraphList</CODE>, which is a queue of all
+Global variables are <tt>ParagraphList</tt>, which is a queue of all
 paragraphs for generation of the main control switch in generated C main().
-See <A HREF="#seminit">seminit.cc</A> for more detail. <CODE>CurPar</CODE>
-points to the current paragraph object. <CODE>CurLoopVar</CODE> is the
+See <a href="#seminit">seminit.cc</a> for more detail. <tt>CurPar</tt>
+points to the current paragraph object. <tt>CurLoopVar</tt> is the
 name of the last declared loop variable, needed because there are several
 loop generation routines which need to use this. And the last one is
-<CODE>LoopNesting</CODE>, an integer denoting current nesting level, used
+<tt>LoopNesting</tt>, an integer denoting current nesting level, used
 mostly for indentation.
-
-<DL>
-<DT>void GenParagraph (void)</DT>
-<DD>Expects an identifier on the stack. 
+</p>
+<dl>
+<dt>void GenParagraph (void)</dt>
+<dd>Expects an identifier on the stack. 
 	Closes the current paragraph, a C function, and starts a new one.
-	Calls GenEndProc to close the current paragraph.
-</DD>
-
-<DT>void GenGoto (void)</DT>
-<DD>Expects an identifier on the stack. If the destination is the current
+	Calls GenEndProc to close the current paragraph.</dd>
+<dt>void GenGoto (void)</dt>
+<dd>Expects an identifier on the stack. If the destination is the current
 	paragraph, use a C goto statement. This comes in handy with loops,
-	because it thus avoids recursion. Otherwise a <CODE>return</CODE>
+	because it thus avoids recursion. Otherwise a <tt>return</tt>
 	statement is generated to give the switch in main the location
-	of the paragraph to go to. This mechanism works with bad code :)
-</DD>
-
-<DT>void GenPerform (void)</DT>
-<DD>This just generates a function call.
+	of the paragraph to go to. This mechanism works with bad code.</dd>
+<dt>void GenPerform (void)</dt>
+<dd>This just generates a function call.
 	Expects an integer on top, number of times to perform the function, and
-	an identifier right under it. Will build a <CODE>for</CODE> loop
-	around the call to perform many times.
-</DD>
-
-<DT>void GenEndProc (void)</DT>
-<DD>Generates function closing, i.e. a return statement and a closing brace.
-</DD>
-
-<DT>void BeginCompound (void)</DT>
-<DD>Inserts a brace and increments indent level.
-</DD>
-
-<DT>void EndCompound (void)</DT>
-<DD>Inserts a brace and decrements indent level.
-</DD>
-
-<DT>void GenStartProc (void)</DT>
-<DD>Calls GenParagraph.
-</DD>
-
-<DT>void GenStartIf (void)</DT>
-<DD>Prints "if ("
-</DD>
-
-<DT>void GenStartElsif (void)</DT>
-<DD>Prints "else if ("
-</DD>
-
-<DT>void GenEndIf (void)</DT>
-<DD>Prints ")\n"
-</DD>
-
-<DT>void GenElse (void)</DT>
-<DD>Prints "else ("
-</DD>
-
-<DT>void GenBool (void)</DT>
-<DD>Expects two identifiers if first is a unary, like "ALPHABETIC",
-	expects three otherwise. Generates a C conditional in parentheses.
-</DD>
-
-<DT>void GenConnect (void)</DT>
-<DD>Expects a connector on the stack and prints it directly. 
-	(connector == &&, ||)
-</DD>
-
-<DT>void GenStopRun (void)</DT>
-<DD>Generates an <CODE>exit</CODE> statement.
-</DD>
-
-<DT>void GenParagraphCalls (void)</DT>
-<DD>Writes paragraph sequence constants to the header stream and generates
-	the big switch statement in main, with <CODE>_cpi</CODE> being the
+	an identifier right under it. Will build a <tt>for</tt> loop
+	around the call to perform many times.</dd>
+<dt>void GenEndProc (void)</dt>
+<dd>Generates function closing, i.e. a return statement and a closing brace.</dd>
+<dt>void BeginCompound (void)</dt>
+<dd>Inserts a brace and increments indent level.</dd>
+<dt>void EndCompound (void)</dt>
+<dd>Inserts a brace and decrements indent level.</dd>
+<dt>void GenStartProc (void)</dt>
+<dd>Calls GenParagraph.</dd>
+<dt>void GenStartIf (void)</dt>
+<dd>Prints "if ("</dd>
+<dt>void GenStartElsif (void)</dt>
+<dd>Prints "else if ("</dd>
+<dt>void GenEndIf (void)</dt>
+<dd>Prints ")\n"</dd>
+<dt>void GenElse (void)</dt>
+<dd>Prints "else ("</dd>
+<dt>void GenBool (void)</dt>
+<dd>Expects two identifiers if first is a unary, like "ALPHABETIC",
+	expects three otherwise. Generates a C conditional in parentheses.</dd>
+<dt>void GenConnect (void)</dt>
+<dd>Expects a connector on the stack and prints it directly. 
+	(connector == &amp;&amp;, ||)</dd>
+<dt>void GenStopRun (void)</dt>
+<dd>Generates an <tt>exit</tt> statement.</dd>
+<dt>void GenParagraphCalls (void)</dt>
+<dd>Writes paragraph sequence constants to the header stream and generates
+	the big switch statement in main, with <tt>_cpi</tt> being the
 	track variable, set to the sequence constant of the paragraph to
-	call. The switch is basically a mapping of the former to the latter.
-</DD>
-
-<DT>void GenStartLoop (void)</DT>
-<DD>Prints "for (" and increments indentation and loop nesting.
-</DD>
-
-<DT>void GenLoopInit (void)</DT>
-<DD>Generates the statement inside the <CODE>for</CODE> 
+	call. The switch is basically a mapping of the former to the latter.</dd>
+<dt>void GenStartLoop (void)</dt>
+<dd>Prints "for (" and increments indentation and loop nesting.</dd>
+<dt>void GenLoopInit (void)</dt>
+<dd>Generates the statement inside the <tt>for</tt> 
 	to init the loop variable. Expects the value to be on top of the
 	stack and the variable identifier under it.
-	Sets <CODE>CurLoopVar</CODE>.
-</DD>
+	Sets <tt>CurLoopVar</tt>.</dd>
+<dt>void GenLoopCondition (void)</dt>
+<dd>Generates the loop condition. This is not a boolean, it is just
+	" &lt;= " always because of the way COBOL works. Expects the end
+	value identifier or a constant on the stack.</dd>
+<dt>void GenLoopIncrement (void)</dt>
+<dd>Expects the increment value on the stack. If not specified by the
+	source, the parser sets it to 1.</dd>
+<dt>void GenEmptyClause (void)</dt>
+<dd>Generates a ";", C empty statement.</dd>
+</dl>
 
-<DT>void GenLoopCondition (void)</DT>
-<DD>Generates the loop condition. This is not a boolean, it is just
-	" <= " always because of the way COBOL works. Expects the end
-	value identifier or a constant on the stack.
-</DD>
-
-<DT>void GenLoopIncrement (void)</DT>
-<DD>Expects the increment value on the stack. If not specified by the
-	source, the parser sets it to 1.
-</DD>
-
-<DT>void GenEmptyClause (void)</DT>
-<DD>Generates a ";", C empty statement.
-</DD>
-</DL>
-
-<P>
-<A NAME=semdecl>
-<H3>semdecl.cc</H3>
-</A>
-
+<h3><a name="semdecl">semdecl.cc</a></h3>
+<p>
 This file contains functions related to declarations in the data division.
 Since parsing is sequential and a record is declared before its entries,
 several global variables are used to keep track of parenting properties.
-<CODE>NestedRecordList</CODE> is a stack of <CODE>CobolRecord</CODE>s, the
+<tt>NestedRecordList</tt> is a stack of <tt>CobolRecord</tt>s, the
 top of which denotes the record that is the parent of the current
-ParentRecord. I have no idea why I didn't just use <CODE>Top</CODE> for
+ParentRecord. I have no idea why I didn't just use <tt>Top</tt> for
 this, but I am afraid to change it. After all, it works :)
 A record is pushed onto this stack when it is declared and popped when a
 record with a smaller or equal level number is declared. Yes, level numbers
 are what determines nesting. The numbers do not mean a thing currently
 unlike in real COBOL.
-<CODE>ParentRecord</CODE> denotes the parent of the current scope.
-<CODE>SFQueue</CODE> is borrowed externally from 
-<A HREF="#semfile">semfile.cc</A> to declare special names, which are treated
+<tt>ParentRecord</tt> denotes the parent of the current scope.
+<tt>SFQueue</tt> is borrowed externally from 
+<a href="#semfile">semfile.cc</a> to declare special names, which are treated
 essentially as any other file.
-<CODE>VarInit</CODE> is a queue holding the variable objects that need
+<tt>VarInit</tt> is a queue holding the variable objects that need
 to be initialized.
-
-<DL>
-<DT>void DeclareRecordLevel (void)</DT>
-<DD>Declares one variable/record declaration. In COBOL these are usually
+</p>
+<dl>
+<dt>void DeclareRecordLevel (void)</dt>
+<dd>Declares one variable/record declaration. In COBOL these are usually
 	on separate lines, so that's consistent with 'level'.
 	Expects a 4-entry list of stuff on the stack, a detail taken care of by
 	the parser. The difference between a record and a variable is
@@ -309,333 +221,271 @@ to be initialized.
 	who its parent is to set itself up. But if the child is a record,
 	it is not finished setting up until it is closed, so the parent is
 	not told to adopt until that moment. Variables can be adopted
-	immediately upon declaration.
-</DD>
+	immediately upon declaration.</dd>
 
-<DT>void CloseScopeLevels (WORD LastLevel)</DT>
-<DD>This is the function that takes care of closing records. It checks whether
-	<CODE>LastLevel</CODE> will close any records, does that if so, and
-	adopts the closed record to its parent.
-</DD>
+<dt>void CloseScopeLevels (uint32_t LastLevel)</dt>
+<dd>This is the function that takes care of closing records. It checks whether
+	<tt>LastLevel</tt> will close any records, does that if so, and
+	adopts the closed record to its parent.</dd>
 
-<DT>void InitializeVariables (void)</DT>
-<DD>Creates initialization code for variables in <CODE>VarInit</CODE>.
-</DD>
+<dt>void InitializeVariables (void)</dt>
+<dd>Creates initialization code for variables in <tt>VarInit</tt>.</dd>
 
-<DT>void DeclareSpecialName (void)</DT>
-<DD>Declares a special name. See above general notes for this file for 
-	discussion.
-</DD>
-</DL>
+<dt>void DeclareSpecialName (void)</dt>
+<dd>Declares a special name. See above general notes for this file for 
+	discussion.</dd>
+</dl>
 
-<P>
-<A NAME=semfile>
-<H3>semfile.cc</H3>
-</A>
-
+<h3><a name="semfile">semfile.cc</a></h3>
+<p>
 This file contains file-related actions. Since COBOL has extensive file
 handling capabilities, this is a pretty big module. This also includes
 record association functions. Any particular implementation details are
-in <CODE>CobolFile</CODE> class, to which most of the functions will
+in <tt>CobolFile</tt> class, to which most of the functions will
 delegate. The record declaration is reused from 
-<A HREF="#semdecl">semdecl.cc</A>, since they are pretty much identical.
+<a href="#semdecl">semdecl.cc</a>, since they are pretty much identical.
 The function that binds the record to the file descriptor is called by
 the parser after the first record level is declared.
-
-<DL>
-<DT>void BeginFileDecl (void)</DT>
-<DD>	This function is for the SELECT statement.
+</p>
+<dl>
+<dt>void BeginFileDecl (void)</dt>
+<dd>	This function is for the SELECT statement.
 	Expects an identifier on top of the stack designating the COBOL name
 	to call the file. If the name is a reserved identifier 
-	<VAR>printer</VAR>, this file is declared to output to a temporary
+	<var>printer</var>, this file is declared to output to a temporary
 	file, a print spool, which is flushed and printed on file's closing.
 	(The exact sequence is flush, close, and print)
-	<VAR>FileToSelect</VAR> variable is set here for later association
+	<var>FileToSelect</var> variable is set here for later association
 	with its other properties. This is the function that enters the
 	file descriptor into the symbol table, so every fd must be SELECTed
-	before anything else.
-</DD>
+	before anything else.</dd>
 
-<DT>void EndFileDecl (void)</DT>
-<DD>	This function is for the SELECT statement.
-	<VAR>FileToSelect</VAR> is set to NULL. Perhaps error checking could
-	be added here for missing properties?
-</DD>
+<dt>void EndFileDecl (void)</dt>
+<dd>	This function is for the SELECT statement.
+	<var>FileToSelect</var> is set to NulL. Perhaps error checking could
+	be added here for missing properties?</dd>
 
-<DT>void GenFileDesc (void)</DT>
-<DD>	This is a semantic action for FD statement in the file section of
+<dt>void GenFileDesc (void)</dt>
+<dd>	This is a semantic action for FD statement in the file section of
 	the data division.
 	Expects a file name on top and a file and under it an identifier,
 	describing a previously SELECTed file.
-	Appends the file record to <CODE>FDInit</CODE> queue for being
+	Appends the file record to <tt>FDInit</tt> queue for being
 	associated with its parent record. This is done because although
 	the record can be told what the parent fd is (it isn't), the fd cannot
 	associate with the record at that point (after the first statement
 	of record declaration), so this queue is created to associate all
-	fds with their actual records, not just names of the records.
-</DD>
+	fds with their actual records, not just names of the records.</dd>
 
-<DT>void AssociateFileRecord (void)</DT>
-<DD>This copies the name of the associated record to the file record.
-	See GenFileDesc for explanation.
-</DD>
+<dt>void AssociateFileRecord (void)</dt>
+<dd>This copies the name of the associated record to the file record.
+	See GenFileDesc for explanation.</dd>
 
-<DT>void GenOpen (OpenModeType mode)</DT>
-<DD>Generates a statement to open the file. Expects a list of fds on the stack.
-	The mode is the same for all.
-</DD>
+<dt>void GenOpen (OpenModeType mode)</dt>
+<dd>Generates a statement to open the file. Expects a list of fds on the stack.
+	The mode is the same for all.</dd>
 
-<DT>void GenClose (void)</DT>
-<DD>Generates a statement to close the file. Expects a list of fds on the stack.
-</DD>
+<dt>void GenClose (void)</dt>
+<dd>Generates a statement to close the file. Expects a list of fds on the stack.</dd>
 
-<DT>void GenRead (void)</DT>
-<DD>Expects a record or a fd identifier on the stack, seeks, calls
-	GenReadData, GenReadEnd, and GenEOFCheck in <CODE>CobolFile</CODE>.
-</DD>
+<dt>void GenRead (void)</dt>
+<dd>Expects a record or a fd identifier on the stack, seeks, calls
+	GenReadData, GenReadEnd, and GenEOFCheck in <tt>CobolFile</tt>.</dd>
 
-<DT>void GenWrite (void)</DT>
-<DD>Expects a source record, and a record or a fd identifier on the stack, 
+<dt>void GenWrite (void)</dt>
+<dd>Expects a source record, and a record or a fd identifier on the stack, 
 	sets up for appending, calls
-	GenWriteData and GenWriteEnd in <CODE>CobolFile</CODE>.
-</DD>
+	GenWriteData and GenWriteEnd in <tt>CobolFile</tt>.</dd>
 
-<DT>void GenRewrite (void)</DT>
-<DD>The only difference between this and GenWrite is seeking instead of
-	setting up for append.
-</DD>
+<dt>void GenRewrite (void)</dt>
+<dd>The only difference between this and GenWrite is seeking instead of
+	setting up for append.</dd>
 
-<DT>void AssociateRecordsWithFD (void)</DT>
-<DD>This loops through <VAR>FDInit</VAR> queue, calling the function to
-	bond records and file descriptors.
-</DD>
+<dt>void AssociateRecordsWithFD (void)</dt>
+<dd>This loops through <var>FDInit</var> queue, calling the function to
+	bond records and file descriptors.</dd>
 
-<DT>void SetFileStatus (void)</DT>
-<DD>Expects the status on stack and passes it to CobolFile.
-</DD>
+<dt>void SetFileStatus (void)</dt>
+<dd>Expects the status on stack and passes it to CobolFile.</dd>
 
-<DT>void SetAccessMode (AccessModeType mode)</DT>
-<DT>void SetOrganization (OrganizationType org)</DT>
-<DD>These just delegate.
-</DD>
+<dt>void SetAccessMode (AccessModeType mode)</dt>
+<dt>void SetOrganization (OrganizationType org)</dt>
+<dd>These just delegate.</dd>
 
-<DT>void SetRelativeKey (void)</DT>
-<DT>void SetRecordKey (void)</DT>
-<DD>Expects identifier on stack and delegates. There is no distinction
+<dt>void SetRelativeKey (void)</dt>
+<dt>void SetRecordKey (void)</dt>
+<dd>Expects identifier on stack and delegates. There is no distinction
 	between record and relative keys since each file can only have
-	one at a time.
-</DD>
+	one at a time.</dd>
 
-<DT>void OpenSpecialFiles (void)</DT>
-<DT>void CloseSpecialFiles (void)</DT>
-<DD>These look through <VAR>SFQueue</VAR> for files that are opened at
-	startup and closed at shutdown. A printer is such a file for instance.
-</DD>
-</DL>
+<dt>void OpenSpecialFiles (void)</dt>
+<dt>void CloseSpecialFiles (void)</dt>
+<dd>These look through <var>SFQueue</var> for files that are opened at
+	startup and closed at shutdown. A printer is such a file for instance.</dd>
+</dl>
 
-
-<P>
-<A NAME=seminfo>
-<H3>seminfo.cc</H3>
-</A>
-
+<h3><a name="seminfo">seminfo.cc</a></h3>
+<p>
 This file contains informational functions, which just generate comments,
 taken from identification division. Available functions:
+</p>
+<dl>
+<dt>void SetProgramName (void)</dt>
+<dt>void SetSourceComputer (void)</dt>
+<dt>void SetObjectComputer (void)</dt>
+</dl>
 
-<DL>
-<DT>void SetProgramName (void)</DT>
-<DT>void SetSourceComputer (void)</DT>
-<DT>void SetObjectComputer (void)</DT>
-</DL>
-
-
-<P>
-<A NAME=seminit>
-<H3>seminit.cc</H3>
-</A>
-
+<h3><a name="seminit">seminit.cc</a></h3>
+<p>
 This file contains
-
-<DT>void InitializeVariables (void)</DT>
-<DD>Creates a sepearate function to assign all initial values specified
+</p>
+<dl>
+<dt>void InitializeVariables (void)</dt>
+<dd>Creates a sepearate function to assign all initial values specified
 	upon declaration. This is a little more convenient for initializing
-	long variables then an inline initialization.
-</DD>
+	long variables then an inline initialization.</dd>
 
-<DT>void FinishDecl (void)</DT>
-<DD>Closes all scopes and associates file descriptors.
-</DD>
+<dt>void FinishDecl (void)</dt>
+<dd>Closes all scopes and associates file descriptors.</dd>
 
-<DT>void StartCode (void)</DT>
-<DD>Generates the header for the first paragraph.
-</DD>
+<dt>void StartCode (void)</dt>
+<dd>Generates the header for the first paragraph.</dd>
 
-<DT>void EndCode (void)</DT>
-<DD>This generates main() and all related things in it.
-</DD>
+<dt>void EndCode (void)</dt>
+<dd>This generates main() and all related things in it.</dd>
 
-<DT>void StartProgram (void)</DT>
-<DD>Opens output files and writes initial headers there, like the include files,
-	standard variables, etc.
-</DD>
+<dt>void StartProgram (void)</dt>
+<dd>Opens output files and writes initial headers there, like the include files,
+	standard variables, etc.</dd>
 
-<DT>void EndProgram (void)</DT>
-<DD>Closes output files.
-</DD>
-</DL>
+<dt>void EndProgram (void)</dt>
+<dd>Closes output files.</dd>
+</dl>
 
-
-<P>
-<A NAME=semutil>
-<H3>semutil.cc</H3>
-</A>
-
+<h3><a name="semutil">semutil.cc</a></h3>
+<p>
 This file contains accessory routines to make coding a bit easier and
 perhaps a bit more portable.
-
-<DL>
-<DT>void WriteError (char * str)</DT>
-<DD>Writes a compiler error message. Sets the error flag, so that
+</p>
+<dl>
+<dt>void WriteError (char * str)</dt>
+<dd>Writes a compiler error message. Sets the error flag, so that
 	the glue routines could delete the output files as not to confuse
-	the user to whether compilation was successful or not.
-</DD>
+	the user to whether compilation was successful or not.</dd>
 
-<DT>void WriteWarning (char * str)</DT>
-<DD>Writes a compiler warning message.
-</DD>
+<dt>void WriteWarning (char * str)</dt>
+<dd>Writes a compiler warning message.</dd>
 
-<DT>void NIY (char * str)</DT>
-<DD>Call this function from every stub you make. It just generates a
-	comment in the output code and prints a compiler warning.
-</DD>
+<dt>void NIY (char * str)</dt>
+<dd>Call this function from every stub you make. It just generates a
+	comment in the output code and prints a compiler warning.</dd>
 
-<DT>void  GenComment (char * str);
-<DD>Generates a comment in the output code.
-</DD>
+<dt>void  GenComment (char * str);</dt>
+<dd>Generates a comment in the output code.</dd>
 
-<DT>BOOL ErrorOccured (void)</DT>
-<DD>This function returns TRUE if WriteError was ever called.
-</DD>
+<dt>bool ErrorOccured (void)</dt>
+<dd>This function returns true if WriteError was ever called.</dd>
 
-<DT>void PrintConstant (StackEntry * entry, ostream& os)</DT>
-<DD>Prints constant from the given stack entry on os.
-</DD>
+<dt>void PrintConstant (StackEntry * entry, ostream&amp; os)</dt>
+<dd>Prints constant from the given stack entry on os.</dd>
 
-<DT>CobolSymbol * LookupIdentifier (char * id)</DT>
-<DD>Returns the <CODE>CobolSymbol</CODE> associated with the given
-	identifier, generating a compiler error if not found.
-</DD>
+<dt>CobolSymbol * LookupIdentifier (char * id)</dt>
+<dd>Returns the <tt>CobolSymbol</tt> associated with the given
+	identifier, generating a compiler error if not found.</dd>
 
-<DT>void PrintIdentifier (char * id, ostream& os)</DT>
-<DD>A shortcut to print the C name of id on os.
-</DD>
+<dt>void PrintIdentifier (char * id, ostream&amp; os)</dt>
+<dd>A shortcut to print the C name of id on os.</dd>
 
-<DT>void GenIndent (void)</DT>
-<DD>Indents to the current indentation level.
-</DD>
+<dt>void GenIndent (void)</dt>
+<dd>Indents to the current indentation level.</dd>
 
-<DT>WORD CountIdentifiers (void)</DT>
-<DD>Counts identifiers on the stack in a marked list. Removes the mark.
-</DD>
+<dt>uint32_t CountIdentifiers (void)</dt>
+<dd>Counts identifiers on the stack in a marked list. Removes the mark.</dd>
 
-<DT>void ReverseIdentifiers (WORD nIds)</DT>
-<DD>Reverses the order of <VAR>nIds</VAR> identifiers on the stack.
-</DD>
+<dt>void ReverseIdentifiers (uint32_t nIds)</dt>
+<dd>Reverses the order of <var>nIds</var> identifiers on the stack.</dd>
 
-<DT>void Push (StackEntryKind kind)</DT>
-<DD>Called by the parser, pushes the given kind of a thing on the stack using
-	parser's global variables.
-</DD>
+<dt>void Push (StackEntryKind kind)</dt>
+<dd>Called by the parser, pushes the given kind of a thing on the stack using
+	parser's global variables.</dd>
 
-<DT>BOOL IsInSet (char c, char * set)</DT>
-<DD>This is the same as <CODE>member</CODE> template in adtlib; I wrote
-	this before I wrote that. Use either one.
-</DD>
+<dt>bool IsInSet (char c, char * set)</dt>
+<dd>This is the same as <tt>member</tt> template in adtlib; I wrote
+	this before I wrote that. Use either one.</dd>
 
-<DT>void PrintStackEntry (StackEntry * se)</DT>
-<DD>A debug function, enabled only if NDEBUG is undefined.
-	Prints the given stack entry to stderr.
-</DD>
+<dt>void PrintStackEntry (StackEntry * se)</dt>
+<dd>A debug function, enabled only if NDEBUG is undefined.
+	Prints the given stack entry to stderr.</dd>
 
-<DT>void PrintStack (void)</DT>
-<DD>A debug function, enabled only if NDEBUG is undefined.
-	Prints the whole stack to stderr.
-</DD>
-</DL>
+<dt>void PrintStack (void)</dt>
+<dd>A debug function, enabled only if NDEBUG is undefined.
+	Prints the whole stack to stderr.</dd>
+</dl>
 
-<P>
-<H2>Codegen classes</H2>
-
+<h2>Codegen classes</h2>
+<p>
 This part is still under construction, so you may be better off just reading
 the header files for now.
+</p>
+<h3>Contents</h3>
+<ul>
+    <li><a href="#TagCobolSymbol">CobolSymbol</a></li>
+    <li><a href="#TagCobolData">CobolData</a></li>
+    <li><a href="#TagCobolRecord">CobolRecord</a></li>
+    <li><a href="#TagCobolVar">CobolVar</a></li>
+    <li><a href="#TagCobolFile">CobolFile</a></li>
+    <li><a href="#TagCobolLabel">CobolLabel</a></li>
+    <li><a href="#TagCobolConstant">CobolConstant</a></li>
+    <li><a href="#TagPictureType">PictureType</a></li>
+</ul>
 
-<P>
-<H3>Contents</H3>
-<UL>
-<LI><A HREF="#TagCobolSymbol">CobolSymbol</A>
-<LI><A HREF="#TagCobolData">CobolData</A>
-<LI><A HREF="#TagCobolRecord">CobolRecord</A>
-<LI><A HREF="#TagCobolVar">CobolVar</A>
-<LI><A HREF="#TagCobolFile">CobolFile</A>
-<LI><A HREF="#TagCobolLabel">CobolLabel</A>
-<LI><A HREF="#TagCobolConstant">CobolConstant</A>
-<LI><A HREF="#TagPictureType">PictureType</A>
-</UL>
+<h3>Hierarchy</h3>
 
-<P>
-<H3>Hierarchy</H3>
+<pre>
+<a href="#TagCobolSymbol">CobolSymbol</a>
+|
++--- <a href="#TagCobolData">CobolData</a>
+|     |
+|     +--- <a href="#TagCobolRecord">CobolRecord</a>
+|     |
+|     +--- <a href="#TagCobolVar">CobolVar</a>
+|
++--- <a href="#TagCobolFile">CobolFile</a>
+|
++--- <a href="#TagCobolLabel">CobolLabel</a>
+|
++--- <a href="#TagCobolConstant">CobolConstant</a>
+|
++--- <a href="#TagPictureType">PictureType</a>
+</pre>
 
-<PRE>
-<A HREF="adtlib.html#TagStreamable">Streamable</A>
- |
- +--- <A HREF="#TagCobolSymbol">CobolSymbol</A>
- |     |
- |     +--- <A HREF="#TagCobolData">CobolData</A>
- |     |     |
- |     |     +--- <A HREF="#TagCobolRecord">CobolRecord</A>
- |     |     |
- |     |     +--- <A HREF="#TagCobolVar">CobolVar</A>
- |     |
- |     +--- <A HREF="#TagCobolFile">CobolFile</A>
- |     |
- |     +--- <A HREF="#TagCobolLabel">CobolLabel</A>
- |
- +--- <A HREF="#TagCobolConstant">CobolConstant</A>
- |
- +--- <A HREF="#TagPictureType">PictureType</A>
-
-</PRE>
-
-<P>
-<H3>Class descriptions</H3>
-
+<h3>Class descriptions</h3>
+<p>
 	Defined in symbase.h and symbase.cc. Defines an abstract symbol 
 table entry. This is an abstract virtual class, so don't try to make any.
 Restricts the symbol name to 50 characters (MAX_SYMBOL_LENGTH) and the
-prefix name to 80 characters (MAX_PREFIX_LENGTH).
+prefix name to 80 characters (MAX_preFIX_LENGTH).
 Defines the following member variables:
+</p>
 
-<DL>
-<DT>ParentCobolName [MAX_SYMBOL_LENGTH]</DT>
-<DD>COBOL name of the parent, if any.
-</DD>
+<dl>
+<dt>ParentCobolName [MAX_SYMBOL_LENGTH]</dt>
+<dd>COBOL name of the parent, if any.</dd>
 
-<DT>Prefix [MAX_PREFIX_LENGTH]</DT>
-<DD>The list of all the parents in a C structure format to prepend
+<dt>Prefix [MAX_preFIX_LENGTH]</dt>
+<dd>The list of all the parents in a C structure format to prepend
 	the variable name to make it legal. This does not contain
-	the prefix at all time. This is just a buffer variable.
-</DD>
+	the prefix at all time. This is just a buffer variable.</dd>
 
-<DT>CName [MAX_SYMBOL_LENGTH]</DT>
-<DD>C variable name.
-</DD>
+<dt>CName [MAX_SYMBOL_LENGTH]</dt>
+<dd>C variable name.</dd>
 
-<DT>FullCName [MAX_FULLNAME_LENGTH]</DT>
-<DD>Cached Prefix + CName.
-</DD>
+<dt>FullCName [MAX_FulLNAME_LENGTH]</dt>
+<dd>Cached Prefix + CName.</dd>
 
-<DT>CobolName [MAX_SYMBOL_LENGTH]</DT>
-<DD>COBOL name of the variable or whatever.
-</DD>
-</DL>
+<dt>CobolName [MAX_SYMBOL_LENGTH]</dt>
+<dd>COBOL name of the variable or whatever.</dd>
+</dl>
 
+</body>
+</html>

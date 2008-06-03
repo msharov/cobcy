@@ -1,10 +1,10 @@
-/* semtypes.h
-**
-**	Various types used by semantic routines.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SEMTYPES_H
-#define __SEMTYPES_H
+#ifndef SEMTYPES_H_593765E061DA031311A565E326CBF80D
+#define SEMTYPES_H_593765E061DA031311A565E326CBF80D
 
 #define STACK_IDENT_LENGTH	50
 

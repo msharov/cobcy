@@ -1,10 +1,11 @@
-/* symbase.cc
-**
-**	Functions for CobolSymbol
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
 #include "symbase.h"
+#include <stdio.h>
 
 CobolSymbol :: CobolSymbol (void)
 {
@@ -42,7 +43,7 @@ char ErrorBuffer [80];
        strcpy (FullCName, CName);
     }
     else {
-       if ((pattr = SymTable.Lookup (NewParent)) == NULL) {
+       if ((pattr = SymTable [NewParent]) == NULL) {
 	  sprintf (ErrorBuffer, 
 	  	   "cannot find parent %s; wanted for child support; reward", 
 		   NewParent);
@@ -59,12 +60,7 @@ char ErrorBuffer [80];
     }
 }
 
-void CobolSymbol :: WriteBinaryStream (ostream& os)
-{
-    os << FullCName;
-}
-
-void CobolSymbol :: WriteTextStream (ostream& os)
+void CobolSymbol :: text_write (ostringstream& os) const
 {
     os << FullCName;
 }

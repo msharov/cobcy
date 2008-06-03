@@ -1,15 +1,15 @@
-/* sympic.h
-**
-**	Defines a picture data type. Here are all the data-type dependent
-** functions.
-*/
+// This file is part of cobcy, a COBOL-to-C compiler.
+//
+// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// This file is free software, distributed under the MIT License.
 
-#ifndef __SYMPIC_H
-#define __SYMPIC_H
+#ifndef SYMPIC_H_277BE237541B90400D097078098FBA47
+#define SYMPIC_H_277BE237541B90400D097078098FBA47
 
-#include "adtlib/streamab.h"
+#include "symbase.h"
 
-class PictureType : public Streamable {
+/// Defines a picture data type. Here are all the data-type dependent functions.
+class PictureType : public CobolSymbol {
 protected:
     uint32_t		Size;
     uint32_t		CSize;
@@ -18,7 +18,7 @@ protected:
        Integer, 
        Float,
        String 
-    } 			Kind;
+    } 			m_Kind;
     enum {
        NoSign = false,
        TrailingSign = true,
@@ -36,14 +36,15 @@ protected:
 public:
 			PictureType (void);
     uint32_t		Set (const char* NewPicture);
-    void		GenTypePrefix (ostream& os);
-    void		GenTypeSuffix (ostream& os);
-    void		GenReadFunction (ostream& os);
-    void		GenWriteFunction (ostream& os);
-    void		GenSignature (ostream& os);
-    bool		GenCastFrom (ostream& os, PictureType& pic);
-    bool		GenCastTo (ostream& os, PictureType& pic);
-    virtual void	WriteTextStream (ostream& os);
+    void		GenTypePrefix (ostringstream& os);
+    void		GenTypeSuffix (ostringstream& os);
+    void		GenReadFunction (ostringstream& os);
+    void		GenWriteFunction (ostringstream& os);
+    void		GenSignature (ostringstream& os);
+    bool		GenCastFrom (ostringstream& os, PictureType& pic);
+    bool		GenCastTo (ostringstream& os, PictureType& pic);
+    virtual void	text_write (ostringstream& os) const;
+    virtual CobolSymbolType	Kind (void) { return (CS_Picture); }
     inline bool		IsNumeric (void);
     inline uint32_t	GetSize (void);
     virtual	       ~PictureType (void);
@@ -53,7 +54,7 @@ public:
 
 inline bool PictureType :: IsNumeric (void)
 {
-    return (Kind == Integer || Kind == Float);
+    return (m_Kind == Integer || m_Kind == Float);
 }
 
 inline uint32_t PictureType :: GetSize (void)
