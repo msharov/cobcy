@@ -59,10 +59,9 @@ clean:
 	@+make -C dbf clean
 	@+make -C lib clean
 	@+make -C bvt clean
-	@rm -f $(OBJS) *.bak *~ y.tab.h cobol_lex.cc cobol_yacc.cc
-	@rm -f $(COBJS)
+	@rm -f ${EXE} ${OBJS} y.tab.h cobol_lex.cc cobol_yacc.cc
 
 realclean: clean
-	@rm -f $(EXE) $(CLIB)
+	@rm -f Config.mk config.h
 
 -include .depend

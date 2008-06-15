@@ -9,13 +9,13 @@
 #define CONFIG_H_4CC6EDA968BCAAFA13FF025B4C8537D7
 
 // Define to the one symbol short name of this package.
-#define COBCY_NAME		"@PACKAGE_NAME@"
+#define COBCY_NAME		"@PKG_NAME@"
 // Define to the version of this package.
-#define COBCY_VERSION		0x@PACKAGE_MAJOR@@PACKAGE_MINOR@@PACKAGE_BUILD@
+#define COBCY_VERSION		@PKG_VERSION@
 // Define to the version string of this package.
-#define COBCY_VERSTRING		"@PACKAGE_VERSION@"
+#define COBCY_VERSTRING		"@PKG_VERSTR@"
 // Define to the address where bug reports for this package should be sent.
-#define COBCY_BUGREPORT		"@PACKAGE_BUGREPORT@"
+#define COBCY_BUGREPORT		"@PKG_BUGREPORT@"
 
 // Define to 1 if you have the ustl.h header file.
 #undef HAVE_USTL_H
@@ -24,11 +24,11 @@
 #if HAVE_USTL_H
     #include <ustl.h>
     #if USTL_VERSION < 0x110
-	#error "@PACKAGE_NAME@ requires uSTL 1.1.0+. http://ustl.sourceforge.net"
+	#error "@PKG_NAME@ requires uSTL 1.1.0+. http://ustl.sourceforge.net"
     #endif
     using namespace ustl;
 #else
-    #error "uSTL library is required to compile @PACKAGE_NAME@. http://ustl.sourceforge.net"
+    #error "uSTL library is required to compile @PKG_NAME@. http://ustl.sourceforge.net"
 #endif
 
 #endif	// CONFIG_H

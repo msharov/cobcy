@@ -1,6 +1,6 @@
 ################ Program version #####################################
 
-EXE		= @PACKAGE_NAME@
+EXE		= @PKG_NAME@
 #DEBUG		= 1
 
 ################ Progams #############################################
@@ -11,7 +11,7 @@ LD		= @CC@
 AR		= @AR@
 RANLIB		= @RANLIB@
 LEX		= @LEX@
-YACC		= @YACC@
+YACC		= @YACC@ -y
 INSTALL		= @INSTALL@
 
 INSTALLDIR	= ${INSTALL} -d
@@ -28,12 +28,11 @@ CWARNS		= -Wall -W -Wno-cast-align -Wredundant-decls -Wcast-qual \
 		  -Wpointer-arith -Wshadow -Wwrite-strings @SYSWARNS@
 CXXWARNS	= ${CWARNS} -Woverloaded-virtual -Wsign-promo -Wsynth -Wconversion 
 TGT_OPTS	=@PROCESSOR_OPTS@ \
-		@INLINE_OPTS@ \
-		@GCC4_SIZEOPTS@
+		@INLINE_OPTS@
 
 CFLAGS		= -std=c99 ${CWARNS}
-CXXFLAGS	=@CUSTOMINCDIR@ ${TGT_OPTS} ${CXXWARNS}
-LDFLAGS		=@CUSTOMLIBDIR@
+CXXFLAGS	= @CUSTOMINCDIR@ ${TGT_OPTS} ${CXXWARNS}
+LDFLAGS		= @CUSTOMLIBDIR@
 ifdef DEBUG
     CXXFLAGS	+= -O0 -g
 else
