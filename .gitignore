@@ -9,3 +9,5 @@ scanner.cc
 parser.cc
 bvt/output-file
 bvt/relative.dbf
+hexv/hexv
+dbv/dbv

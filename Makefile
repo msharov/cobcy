@@ -100,5 +100,6 @@ Config.mk config.h:	configure
 
 include coblib/Module.mk
 include bvt/Module.mk
+include hexv/Module.mk
 
 -include ${OBJS:.o=.d}
