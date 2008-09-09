@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "semactions.h"
+#include "../semactions.h"
 
 extern int CurrentLine;
 extern long int ival;

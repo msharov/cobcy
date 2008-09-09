@@ -3,8 +3,8 @@
 ################ Source files ##########################################
 
 EXE	:= ${NAME}
-SRCS	:= $(sort $(wildcard *.cc) scanner.cc parser.cc)
-OBJS	:= $(addprefix $O,$(SRCS:.cc=.o))
+SRCS	:= $(sort $(wildcard *.cc) $Oscanner.cc $Oparser.cc)
+OBJS	:= $(addprefix $O,$(notdir $(SRCS:.cc=.o)))
 
 ################ Compilation ###########################################
 
@@ -21,6 +21,10 @@ $O%.o:	%.cc
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	@${CXX} ${CXXFLAGS} -MMD -MT "$(<:.cc=.s) $@" -o $@ -c $<
 
+$Oscanner.o $Oparser.o:	%.o: %.cc
+	@echo "    Compiling $< ..."
+	@${CXX} ${CXXFLAGS} -MMD -MT "$(<:.cc=.s) $@" -o $@ -c $<
+
 $O%.o:	%.c
 	@echo "    Compiling $< ..."
 	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
@@ -34,13 +38,20 @@ $O%.o:	%.c
 	@echo "    Compiling $< to assembly ..."
 	@${CC} ${CFLAGS} -S -o $@ -c $<
 
-scanner.cc:	scanner.l parser.cc
+$Oscanner.cc:	scanner.l $Oparser.cc
 	@echo "    Generating $@ ..."
 	@${FLEX} -o $@ $<
 
-parser.cc:	parser.y
+$Oparser.cc:	parser.y
 	@echo "    Generating $@ ..."
-	@${BISON} -d -o parser.cc parser.y
+	@${BISON} -d -o $@ $<
+
+################ Modules ###############################################
+
+include coblib/Module.mk
+include bvt/Module.mk
+include hexv/Module.mk
+include dbv/Module.mk
 
 ################ Installation ##########################################
 
@@ -62,7 +73,7 @@ endif
 ################ Maintenance ###########################################
 
 clean:
-	@rm -f ${EXE} ${OBJS} $(OBJS:.o=.d) scanner.cc parser.cc parser.hh
+	@rm -f ${EXE} ${OBJS} $(OBJS:.o=.d) $Oscanner.cc $Oparser.cc $Oparser.hh
 	@rmdir $O &> /dev/null || true
 
 ifdef MAJOR
@@ -95,11 +106,5 @@ config.h:		config.h.in
 Config.mk config.h:	configure
 	@if [ -x config.status ]; then echo "Reconfiguring ..."; ./config.status; \
 	else echo "Running configure ..."; ./configure; fi
-
-################ Modules ###############################################
-
-include coblib/Module.mk
-include bvt/Module.mk
-include hexv/Module.mk
 
 -include ${OBJS:.o=.d}

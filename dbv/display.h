@@ -6,8 +6,7 @@
 #ifndef DISPLAY_H_49D1162E7437501B457F396B695060D0
 #define DISPLAY_H_49D1162E7437501B457F396B695060D0
 
-#include "../config.h"
-#include "../dbf/dbf.h"
+#include "coblib/dbf.h"
 #include <ncurses.h>
 
 //----------------------------------------------------------------------
@@ -15,12 +14,6 @@
 void ViewDBF (DBF_FILE* df);
 void DisplayOpen (void);
 void DisplayClose (void);
-void SetAttrNormal (WINDOW* win);
-void SetAttrHighlight (WINDOW* win);
-void SetAttrHeader (WINDOW* win);
-void ClearCursesWindow (WINDOW* win);
-void DisplayDBFHeader (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE* df);
-void DisplayDBFRecord (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE* df, uint32_t record);
 
 //----------------------------------------------------------------------
 

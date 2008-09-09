@@ -43,8 +43,10 @@ CXXFLAGS	:= ${WARNOPTS} ${TGTOPTS} @CUSTOMINCDIR@
 LDFLAGS		:= ${CUSTOMLIBDIR} @CUSTOMLIBDIR@
 LIBS		:= @libustl@ @libfl@
 ifdef DEBUG
+    CFLAGS	+= -O0 -g
     CXXFLAGS	+= -O0 -g
 else
+    CFLAGS	+= -Os -g0 -DNDEBUG=1 -fomit-frame-pointer -ffunction-sections -fdata-sections
     CXXFLAGS	+= -Os -g0 -DNDEBUG=1 -fomit-frame-pointer
     LDFLAGS	+= -Wl,-gc-sections
 endif

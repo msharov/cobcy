@@ -52,7 +52,7 @@ endif
 clean:		coblib/clean
 coblib/clean:
 	@rm -f ${coblib/OBJS} $(coblib/OBJS:.o=.d) ${COBLIB}
-	@rmdir $Olib &> /dev/null || true
+	@rmdir $Ocoblib &> /dev/null || true
 
 ${coblib/OBJS}:	Makefile Config.mk coblib/Module.mk
 -include ${coblib/OBJS:.o=.d}

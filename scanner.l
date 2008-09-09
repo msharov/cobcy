@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "parser.hh"
-#include "semutil.h"
+#include "../semutil.h"
 
 #define STRINGBUFSIZE	200
 

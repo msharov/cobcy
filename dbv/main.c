@@ -18,4 +18,3 @@ int main (int argc, const char* const* argv)
     DBF_Close (df);
     return (0);
 }
-

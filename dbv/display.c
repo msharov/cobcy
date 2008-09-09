@@ -1,17 +1,36 @@
-// This file is part of cobcy, a COBOL-to-C compiler.
-//
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include <string.h>
+#include <stdlib.h>
 #include "display.h"
+
+//----------------------------------------------------------------------
+
+#ifndef min
+#define min(a,b)	((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b)	((a) < (b) ? (b) : (a))
+#endif
+
+//----------------------------------------------------------------------
+
+static void SetAttrNormal (WINDOW* win);
+static void SetAttrHighlight (WINDOW* win);
+static void SetAttrHeader (WINDOW* win);
+static void DisplayDBFHeader (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE* df);
+static void DisplayDBFRecord (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE* df, uint32_t record);
+
+//----------------------------------------------------------------------
 
 void ViewDBF (DBF_FILE * df)
 {
-uint32_t Field = 0, Row = 0, TopRow = 0;
-uint32_t maxx, maxy, MaxVisRecords;
-uint32_t key = 0, i;
-const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
+    uint32_t Row = 0, TopRow = 0;
+    int32_t Field = 0;
+    uint32_t maxx, maxy, MaxVisRecords;
+    uint32_t key = 0, i;
+    static const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
 
     getmaxyx (stdscr, maxy, maxx);
     SetAttrNormal (stdscr);
@@ -117,7 +136,7 @@ void DisplayClose (void)
     endwin();
 }
 
-void SetAttrNormal (WINDOW * win)
+static void SetAttrNormal (WINDOW * win)
 {
     if (has_colors())
        wattrset (win, A_NORMAL | COLOR_PAIR(1));
@@ -125,7 +144,7 @@ void SetAttrNormal (WINDOW * win)
        wattrset (win, A_NORMAL);
 }
 
-void SetAttrHighlight (WINDOW * win)
+static void SetAttrHighlight (WINDOW * win)
 {
     if (has_colors())
        wattrset (win, A_BOLD | COLOR_PAIR(2));
@@ -133,7 +152,7 @@ void SetAttrHighlight (WINDOW * win)
        wattrset (win, A_BOLD);
 }
 
-void SetAttrHeader (WINDOW * win)
+static void SetAttrHeader (WINDOW * win)
 {
     if (has_colors())
        wattrset (win, COLOR_PAIR(3));
@@ -141,53 +160,41 @@ void SetAttrHeader (WINDOW * win)
        wattrset (win, A_BOLD);
 }
 
-void ClearCursesWindow (WINDOW * win)
+static void DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df)
 {
-int maxx, maxy;
-int x, y;
-
-    getmaxyx (win, maxy, maxx);
-    for (y = 0; y < maxy; ++ y)
-       for (x = 0; x < maxx; ++ x)
-          mvwaddch (win, y, x, ' ');
-}
-
-void DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df)
-{
-int i, j, x = 0, maxy, maxx;
-char OutputBuffer[128], dummy[5];
-int NameLength, FieldLength;
+    uint32_t x = 0, maxy, maxx;
+    char OutputBuffer[128], dummy[5];
 
     getmaxyx (win, maxy, maxx);
     memset (OutputBuffer, 0, 128);
 
-    for (i = field; i < df->nFields && x < maxx; ++ i) {
-       NameLength = min (maxx - x, strlen (df->Fields[i].Name));
-       FieldLength = min (maxx - x, df->Fields[i].FieldLength);
+    for (int i = field; i < df->nFields && x < maxx; ++ i) {
+	int NameLength = min (maxx - x, strlen (df->Fields[i].Name));
+	int FieldLength = min (maxx - x, df->Fields[i].FieldLength);
 
-       strcat (OutputBuffer, " ");
-       strncat (OutputBuffer, df->Fields[i].Name, NameLength);
-       for (j = 0; j < FieldLength - NameLength; ++ j)
-	  strcat (OutputBuffer, " ");
-       strcat (OutputBuffer, " ");
-       dummy[0] = '|';
-       strncat (OutputBuffer, dummy, 1);
+	strcat (OutputBuffer, " ");
+	strncat (OutputBuffer, df->Fields[i].Name, NameLength);
+	for (int j = 0; j < FieldLength - NameLength; ++ j)
+	    strcat (OutputBuffer, " ");
+	strcat (OutputBuffer, " ");
+	dummy[0] = '|';
+	strncat (OutputBuffer, dummy, 1);
 
-       x += 3 + max (FieldLength, NameLength);
+	x += 3 + max (FieldLength, NameLength);
     }
     if (x >= maxx)
-       memset (&OutputBuffer[maxx], 0, 128 - maxx);
+	memset (&OutputBuffer[maxx], 0, 128 - maxx);
 
     mvwaddstr (win, row, 0, OutputBuffer);
 }
 
-void DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df, uint32_t record)
+static void DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df, uint32_t record)
 {
-int i, j, ri, x = 0;
-char OutputBuffer[128], dummy[5];
-int NameLength, FieldLength, DataLength;
-int maxx, maxy;
-char * RecordBuffer;
+    int ri;
+    char OutputBuffer[128], dummy[5];
+    uint32_t NameLength, FieldLength, DataLength;
+    uint32_t x = 0, maxx, maxy;
+    char* RecordBuffer;
 
     getmaxyx (win, maxy, maxx);
     memset (OutputBuffer, 0, 128);
@@ -197,32 +204,31 @@ char * RecordBuffer;
     DBF_ReadRecord (df, RecordBuffer);
 
     ri = 0;
-    for (i = 0; i < field; ++ i)
-       ri += df->Fields[i].FieldLength;
-    for (i = field; i < df->nFields && x < maxx; ++ i) {
-       NameLength = min (maxx - x, strlen (df->Fields[i].Name));
-       FieldLength = min (maxx - x, df->Fields[i].FieldLength);
-       DataLength = min (strlen (&RecordBuffer[ri]), FieldLength);
-       DataLength = min (maxx - x, DataLength);
+    for (uint32_t i = 0; i < field; ++i)
+	ri += df->Fields[i].FieldLength;
+    for (int i = field; i < df->nFields && x < maxx; ++ i) {
+	NameLength = min (maxx - x, strlen (df->Fields[i].Name));
+	FieldLength = min (maxx - x, df->Fields[i].FieldLength);
+	DataLength = min (strlen (&RecordBuffer[ri]), FieldLength);
+	DataLength = min (maxx - x, DataLength);
 
-       strcat (OutputBuffer, " ");
-       strncat (OutputBuffer, &RecordBuffer[ri], DataLength);
-       for (j = 0; j < FieldLength - DataLength; ++ j)
-	  strncat (OutputBuffer, " ", 1);
-       for (j = 0; j < NameLength - FieldLength; ++ j)
-	  strncat (OutputBuffer, " ", 1);
-       strncat (OutputBuffer, " ", 1);
-       dummy[0] = '|';
-       strncat (OutputBuffer, dummy, 1);
+	strcat (OutputBuffer, " ");
+	strncat (OutputBuffer, &RecordBuffer[ri], DataLength);
+	for (int j = 0; j < (int)(FieldLength - DataLength); ++j)
+	    strncat (OutputBuffer, " ", 1);
+	for (int j = 0; j < (int)(NameLength - FieldLength); ++j)
+	    strncat (OutputBuffer, " ", 1);
+	strncat (OutputBuffer, " ", 1);
+	dummy[0] = '|';
+	strncat (OutputBuffer, dummy, 1);
 
-       x += 3 + max (FieldLength, NameLength);
-       ri += FieldLength;
+	x += 3 + max (FieldLength, NameLength);
+	ri += FieldLength;
     }
     if (x >= maxx)
-       memset (&OutputBuffer[maxx], 0, 128 - maxx);
+	memset (&OutputBuffer[maxx], 0, 128 - maxx);
 
     mvwaddstr (win, row, 0, OutputBuffer);
 
     free (RecordBuffer);
 }
-

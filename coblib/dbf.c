@@ -108,7 +108,7 @@ static int DBF_ReadHeader (DBF_FILE* dfd)
     fseek (dfd->DataDesc, 0, SEEK_SET);
     // First, the static data.
     fread (&dfd->Header, 1, 12, dfd->DataDesc);
-    if (dfd->Header.Version != 0x03)
+    if (dfd->Header.Version != 0x03 && dfd->Header.Version != 0x83)
 	return (1);	// Incompatible version error
     fseek (dfd->DataDesc, 20, SEEK_CUR); // Reserved 20 bytes are all zero
 

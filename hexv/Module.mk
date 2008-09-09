@@ -35,6 +35,7 @@ endif
 clean:		hexv/clean
 hexv/clean:
 	@rm -f ${hexv/EXE} ${hexv/OBJS} $(hexv/OBJS:.o=.d)
+	@rmdir $Ohexv &> /dev/null || true
 
 ${hexv/OBJS}:	Makefile Config.mk hexv/Module.mk
 -include ${hexv/OBJS:.o=.d}

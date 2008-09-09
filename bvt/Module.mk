@@ -3,7 +3,7 @@
 bvt/COBS:= $(wildcard bvt/bvt*.cob)
 bvt/SRCS:= $(bvt/COBS:.cob=.c)
 bvt/INCS:= $(bvt/COBS:.cob=.h)
-bvt/OBJS:= $(bvt/SRCS:.c=.o)
+bvt/OBJS:= $(addprefix $O,$(bvt/SRCS:.c=.o))
 bvt/BVTS:= $(bvt/COBS:.cob=)
 bvt/LIBS:= ${COBLIB}
 CFLAGS	+= -I.
@@ -37,7 +37,6 @@ ${bvt/BVTS}:	bvt/bvt%:	$Obvt/bvt%.o ${COBLIB}
 
 clean:	bvt/clean
 bvt/clean:
-	@echo "Removing generated files ..."
 	@rm -f ${bvt/BVTS} ${bvt/OBJS} $(bvt/OBJS:.o=.d) ${bvt/SRCS} ${bvt/INCS}
 	@rmdir $Obvt &> /dev/null || true
 	@rm -f bvt/output-file bvt/*.dbf bvt/*.ndx
