@@ -153,7 +153,6 @@ void GenRead (void)
 {
 StackEntry * entry;
 CobolSymbol * ToRead;
-CobolFile * DestStream;
 
     entry = SemStack.back(); SemStack.pop_back();
 
@@ -163,12 +162,15 @@ CobolFile * DestStream;
     }
     delete entry;
 
+    CobolFile* DestStream;
     if (ToRead->Kind() == CS_Record || ToRead->Kind() == CS_Variable)
 	DestStream = ((CobolData*) ToRead)->GetStream();
     else if (ToRead->Kind() == CS_FileDesc)
 	DestStream = (CobolFile*) ToRead;
-    else
+    else {
 	WriteError ("cannot read into that");
+	return;
+    }
 
     DestStream->GenSeek (codef);
     DestStream->GenReadData (codef);

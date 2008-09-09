@@ -7,11 +7,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
-#ifdef __MSDOS__
-#include "cob_yacc.h"
-#else
-#include "y.tab.h"
-#endif
+#include "parser.hh"
 #include "semutil.h"
 
 #define STRINGBUFSIZE	200

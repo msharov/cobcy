@@ -186,7 +186,7 @@ void GenElse (void)
 void GenBool (void)
 {
 StackEntry *entry[3];
-CobolVar *attrs[2];
+CobolVar *attrs[2] = { NULL, NULL };
 int i;
 
     for (i = 0; i < 2; ++ i) {
@@ -281,9 +281,7 @@ void GenParagraphCalls (void)
     GenIndent();
     codef << "_cpi = _pi__FirstParagraph;\n";
     GenIndent();
-    codef << "while (_cpi <= " << nPars << ")\n";
-    GenIndent();
-    codef << "{\n";
+    codef << "while (_cpi <= " << nPars << ") {\n";
     ++ NestingLevel;
 
     // Debugging information is generated with -g switch
@@ -295,9 +293,7 @@ void GenParagraphCalls (void)
 
     // This is the switch statement
     GenIndent();
-    codef << "switch (_cpi)\n";
-    GenIndent();
-    codef << "{\n";
+    codef << "switch (_cpi) {\n";
     ++ NestingLevel;
 
     // Each paragraph call will return the displacement from current

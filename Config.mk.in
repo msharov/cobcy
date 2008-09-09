@@ -1,42 +1,51 @@
-################ Program version #####################################
+################ Build options #######################################
 
-EXE		= @PKG_NAME@
-#DEBUG		= 1
+NAME		:= @PKG_NAME@
+MAJOR		:= @PKG_MAJOR@
+MINOR		:= @PKG_MINOR@
 
-################ Progams #############################################
+#DEBUG		:= 1
 
-CC		= @CC@
-CXX		= @CXX@
-LD		= @CC@
-AR		= @AR@
-RANLIB		= @RANLIB@
-LEX		= @LEX@
-YACC		= @YACC@ -y
-INSTALL		= @INSTALL@
+################ Programs ############################################
 
-INSTALLDIR	= ${INSTALL} -d
-INSTALLEXE	= ${INSTALL} -p -m 755
-INSTALLDATA	= ${INSTALL} -p -m 644
+CXX		:= @CXX@
+LD		:= @CC@
+AR		:= @AR@
+RANLIB		:= @RANLIB@
+FLEX		:= @FLEX@
+BISON		:= @BISON@
+INSTALL		:= @INSTALL@
 
-BINDIR		= @bindir@
-LIBDIR		= @libdir@
-INCDIR		= @includedir@
+INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
+INSTALLDATA	:= ${INSTALL} -D -p -m 644
+INSTALLLIB	:= ${INSTALLDATA}
+
+################ Destination #########################################
+
+prefix		:= @prefix@
+exec_prefix	:= @exec_prefix@
+BINDIR		:= @bindir@
+INCDIR		:= @includedir@
+LIBDIR		:= @libdir@
 
 ################ Compiler options ####################################
 
-CWARNS		= -Wall -W -Wno-cast-align -Wredundant-decls -Wcast-qual \
-		  -Wpointer-arith -Wshadow -Wwrite-strings @SYSWARNS@
-CXXWARNS	= ${CWARNS} -Woverloaded-virtual -Wsign-promo -Wsynth -Wconversion 
-TGT_OPTS	=@PROCESSOR_OPTS@ \
-		@INLINE_OPTS@
+CWARNOPTS	:= -Wall -W -Wno-cast-align -Wredundant-decls -Wcast-qual \
+		-Wpointer-arith -Wshadow -Wwrite-strings @SYSWARNS@
+WARNOPTS	:= -Wall -Wextra -Wpointer-arith -Wshadow -Wcast-qual \
+		-Wsynth -Wwrite-strings -Wno-overflow -Wno-cast-align \
+		-Wsign-promo -Wredundant-decls -Woverloaded-virtual @SYSWARNS@
+PROCOPTS	:= @PROCESSOR_OPTS@
+TGTOPTS		:= ${PROCOPTS} @INLINE_OPTS@
 
-CFLAGS		= -std=c99 ${CWARNS}
-CXXFLAGS	= @CUSTOMINCDIR@ ${TGT_OPTS} ${CXXWARNS}
-LDFLAGS		= @CUSTOMLIBDIR@
+CFLAGS		:= ${CWARNOPTS} ${PROCOPTS} -std=c99 @CUSTOMINCDIR@
+CXXFLAGS	:= ${WARNOPTS} ${TGTOPTS} @CUSTOMINCDIR@
+LDFLAGS		:= ${CUSTOMLIBDIR} @CUSTOMLIBDIR@
+LIBS		:= @libustl@ @libfl@
 ifdef DEBUG
     CXXFLAGS	+= -O0 -g
 else
-    CXXFLAGS	+= -Os -DNDEBUG=1
-    LDFLAGS	+= -s
+    CXXFLAGS	+= -Os -g0 -DNDEBUG=1 -fomit-frame-pointer
+    LDFLAGS	+= -Wl,-gc-sections
 endif
-LIBS		= @libustl@ @libfl@
+O		:= .o/

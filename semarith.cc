@@ -124,7 +124,7 @@ bool ConstantSource = false;
     }
 
     // First get the value (or identifier) of source
-    CobolSymbol *src1, *src2;
+    CobolSymbol *src1 = NULL, *src2 = NULL;
     switch (SrcEntry->kind) {
        case SE_Identifier:
        		src1 = (CobolVar*) LookupIdentifier (SrcEntry->ident);

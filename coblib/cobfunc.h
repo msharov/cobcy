@@ -8,8 +8,9 @@
 #ifndef COBFUNC_H_5F505570391DF1261B8F7F0537665407
 #define COBFUNC_H_5F505570391DF1261B8F7F0537665407
 
-#include "../dbf/dbf.h"
-#include "../dbf/ndx.h"
+#include "dbf.h"
+#include "ndx.h"
+#include <string.h>
 
 //----------------------------------------------------------------------
 

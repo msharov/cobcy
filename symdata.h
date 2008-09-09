@@ -22,12 +22,12 @@ public:
     inline virtual uint32_t	GetDeclLevel (void);
     void		AssociateWithStream (CobolFile * NewStream);
     CobolFile *		GetStream (void);
-    virtual void	GenRead (ostringstream& os, const char* stream) = 0;
-    virtual void	GenWrite (ostringstream& os, const char* stream) = 0;
-    virtual void	GenSignature (ostringstream& os) = 0;
+    virtual void	GenRead (ostringstream&, const char*)	{ assert (!"This data type is not readable"); };
+    virtual void	GenWrite (ostringstream&, const char*)	{ assert (!"This data type is not writable"); };
+    virtual void	GenSignature (ostringstream&)		{ assert (!"This data type has no signature"); };
     void		GenRead (ostringstream& os);
     void		GenWrite (ostringstream& os);
-    inline uint32_t		GetSize (void);
+    inline uint32_t	GetSize (void);
 		       ~CobolData (void);
 };
 

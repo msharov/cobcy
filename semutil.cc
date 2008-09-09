@@ -145,7 +145,7 @@ CobolSymbol * sym;
 uint32_t CountIdentifiers (void)
 {
     vector<StackEntry*>::iterator i = SemStack.end();
-    while (i > SemStack.begin() && (*--i)->kind != SE_Mark);
+    while (i > SemStack.begin() && (*--i)->kind != SE_Mark) ;
     if (i < SemStack.end()) {
 	if (i < SemStack.end() && (*i)->kind != SE_Mark)
 	    WriteError ("No mark found");

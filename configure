@@ -1,37 +1,23 @@
 #! /bin/sh
 #
-# Copyright (C) 2008 by Mike Sharov <msharov@users.sourceforge.net>
 # This file is free software, distributed under the MIT License.
-#
-# This file is a replacement for autoconf configure, written due to the
-# enormous size of the latter and its slow performance. Autoconf runs a
-# whole suite of tests to determine each an every available feature. In
-# this script, the approach is to assume that Linux is the sane system,
-# and treat all others as braindead exceptions. Also, this configure is
-# assuming a more or less recent POSIX environment, eliminating many of
-# the legacy tests. For the point of view of the user, however, all the
-# functionality is identical to autoconf. For the developer, the change
-# is only in the way dependencies and substitutions are specified here.
-# The top sections are configuration, and are inteded to be seen as the
-# example of how to write them for your own project.
-#
 ######################################################################
 #### Project Configuration ###########################################
 ######################################################################
 
 PKG_NAME="cobcy"
-PKG_MAJOR="0"
-PKG_MINOR="5"
-
-FILES="Config.mk config.h"
+PKG_VERSTR="v0.5"
 
 PKG_BUGREPORT="Mike Sharov <msharov@users.sourceforge.net>"
+
+# Files that get created by this script
+FILES="Config.mk config.h"
 
 # Package options
 COMPONENTS="
 {
 name=[with-debug]
-desc=[	Compiles the library with debugging information]
+desc=[	Compiles $PKG_NAME with debugging information]
 seds=[s/#DEBUG\t\t= 1/DEBUG\t\t= 1/]
 }";
 
@@ -42,20 +28,21 @@ HEADERS="ustl.h"
 LIBS="ustl fl"
 
 # First pair is used if nothing matches
-PROGS="CC=gcc CC=cc CXX=g++ CXX=c++ DOXYGEN=doxygen
-LD=ld AR=ar RANLIB=ranlib RANLIB=touch INSTALL=install
-LEX=flex LEX=lex YACC=bison YACC=yacc"
+PROGS="CC=gcc CXX=g++ LD=ld AR=ar RANLIB=ranlib RANLIB=touch INSTALL=install FLEX=flex BISON=bison"
 
 # Automatic vars
-PKG_VERSTR="$PKG_MAJOR.$PKG_MINOR"
+[ -d .git ] && PKG_VERSTR=`git describe`
+PKG_MAJOR=`expr "$PKG_VERSTR" : 'v\([0-9]*\)\.[0-9]*'`
+PKG_MINOR=`expr "$PKG_VERSTR" : 'v[0-9]*\.\([0-9]*\)'`
 PKG_STRING="$PKG_NAME $PKG_VERSTR"
 
 # Miscellaneous substitutions
 CUSTSUBS="s/@PKG_NAME@/$PKG_NAME/g
 s/@PKG_VERSION@/"0x$PKG_MAJOR${PKG_MINOR}0"/g
+s/@PKG_VERSTR@/$PKG_VERSTR/g
 s/@PKG_TARNAME@/$PKG_NAME/g
 s/@PKG_STRING@/$PKG_STRING/g
-s/@PKG_VERSTR@/$PKG_VERSTR/g
+s/@PKG_UNAME@/`echo $PKG_NAME | tr [a-z] [A-Z]`/g
 s/@PKG_BUGREPORT@/$PKG_BUGREPORT/g
 s/@PKG_MAJOR@/$PKG_MAJOR/g
 s/@PKG_MINOR@/$PKG_MINOR/g"
@@ -64,7 +51,7 @@ s/@PKG_MINOR@/$PKG_MINOR/g"
 #### The rest of the file is configuration code. Leave it alone. #####
 ######################################################################
 
-die() { rm -f config.sed config.cpu config.cpu.c; }
+die() { rm -f config.sed config.cpu config.cpu.c; exit; }
 
 #### Compile the configurator and generate initial config.sed ########
 
@@ -122,28 +109,28 @@ int main (void)
 {
     typedef struct {
 	char	m_Bit;
-	char	m_Sub [55];
+	char	m_Sub [11];
     } SCpuCaps;
     static const short int boCheck = 0x0001;
     static const char boNames[2][16] = { "BIG", "LITTLE" };
     static const SCpuCaps s_CpuCaps [] = {
-	{  0, "#undef CPU_HAS_FPU/#define CPU_HAS_FPU 1"		},
-	{  2, "#undef CPU_HAS_EXT_DEBUG/#define CPU_HAS_EXT_DEBUG 1"	},
-	{  4, "#undef CPU_HAS_TIMESTAMPC/#define CPU_HAS_TIMESTAMPC 1"	},
-	{  5, "#undef CPU_HAS_MSR/#define CPU_HAS_MSR 1"		},
-	{  8, "#undef CPU_HAS_CMPXCHG8/#define CPU_HAS_CMPXCHG8 1"	},
-	{  9, "#undef CPU_HAS_APIC/#define CPU_HAS_APIC 1"		},
-	{ 11, "#undef CPU_HAS_SYSCALL/#define CPU_HAS_SYSCALL 1"	},
-	{ 12, "#undef CPU_HAS_MTRR/#define CPU_HAS_MTRR 1"		},
-	{ 15, "#undef CPU_HAS_CMOV/#define CPU_HAS_CMOV 1"		},
-	{ 16, "#undef CPU_HAS_FCMOV/#define CPU_HAS_FCMOV 1"		},
-	{ 22, "#undef CPU_HAS_SSE /#define CPU_HAS_SSE 1"		},
-	{ 23, "#undef CPU_HAS_MMX/#define CPU_HAS_MMX 1"		},
-	{ 24, "#undef CPU_HAS_FXSAVE/#define CPU_HAS_FXSAVE 1"		},
-	{ 25, "#undef CPU_HAS_SSE /#define CPU_HAS_SSE 1"		},
-	{ 26, "#undef CPU_HAS_SSE2/#define CPU_HAS_SSE2 1"		},
-	{ 30, "#undef CPU_HAS_EXT_3DNOW/#define CPU_HAS_EXT_3DNOW 1"	},
-	{ 31, "#undef CPU_HAS_3DNOW/#define CPU_HAS_3DNOW 1"		}
+	{  0, "FPU"		},
+	{  2, "EXT_DEBUG"	},
+	{  4, "TIMESTAMPC"	},
+	{  5, "MSR"		},
+	{  8, "CMPXCHG8"	},
+	{  9, "APIC"		},
+	{ 11, "SYSCALL"		},
+	{ 12, "MTRR"		},
+	{ 15, "CMOV"		},
+	{ 16, "FCMOV"		},
+	{ 22, "SSE "		},
+	{ 23, "MMX"		},
+	{ 24, "FXSAVE"		},
+	{ 25, "SSE "		},
+	{ 26, "SSE2"		},
+	{ 30, "EXT_3DNOW"	},
+	{ 31, "3DNOW"		}
     };
     uint i, caps;
 
@@ -209,7 +196,7 @@ int main (void)
     caps = cpuid();
     for (i = 0; i < sizeof(s_CpuCaps)/sizeof(SCpuCaps); ++i)
 	if (caps & (1 << s_CpuCaps[i].m_Bit))
-	    printf ("s/%s/g\n", s_CpuCaps[i].m_Sub);
+	    printf ("s/#undef CPU_HAS_%s/#define CPU_HAS_%s 1/g\n", s_CpuCaps[i].m_Sub, s_CpuCaps[i].m_Sub);
 #if __GNUC__ >= 3
     printf ("s/ \\?@PROCESSOR_OPTS@/");
     if (caps & (1 << 23))
@@ -257,7 +244,7 @@ if [ "$SYSNAME" = "bsd" ]; then
 	s/#define HAVE_VA_COPY 1/#undef HAVE_VA_COPY/g" >>config.sed
 fi
 if [ "$SYSNAME" = "linux" -o "$SYSNAME" = "bsd" ]; then
-    echo "s/@SHBLDFL@/-shared -Wl,-soname=\$\{LIBSOLNK\}/g" >>config.sed
+    echo "s/@SHBLDFL@/-shared -Wl,-soname=\$1/g" >>config.sed
 elif [ "$SYSNAME" = "alpha" ]; then
     echo "s/BUILD_SHARED\\t= 1 /#BUILD_SHARED\\t= 1/g
 	s/#BUILD_STATIC\\t= 1/BUILD_STATIC\\t= 1 /g" >>config.sed
@@ -265,11 +252,11 @@ fi
 if [ "$SYSNAME" = "mac" ]; then
     echo "s/ \\?@libgcc_eh@//g
 	s/@SYSWARNS@/-Wno-long-double/g
-	s/lib\$\{LIBNAME\}.so/lib\$\{LIBNAME\}.dylib/g
-	s/\$\{LIBSO\}.\$\{MAJOR\}.\$\{MINOR\}.\$\{BUILD\}/lib\$\{LIBNAME\}.\$\{MAJOR\}.\$\{MINOR\}.\$\{BUILD\}.dylib/g
-	s/\$\{LIBSO\}.\$\{MAJOR\}.\$\{MINOR\}/lib\$\{LIBNAME\}.\$\{MAJOR\}.\$\{MINOR\}.dylib/g
-	s/\$\{LIBSO\}.\$\{MAJOR\}/lib\$\{LIBNAME\}.\$\{MAJOR\}.dylib/g
-	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name \$\{LIBSOLNK\} -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.4/g" >>config.sed
+	s/lib\$1.so/lib\$1.dylib/g
+	s/lib\$1.so.\$\{MAJOR\}.\$\{MINOR\}.\$\{BUILD\}/lib\$1.\$\{MAJOR\}.\$\{MINOR\}.\$\{BUILD\}.dylib/g
+	s/lib\$1.so.\$\{MAJOR\}.\$\{MINOR\}/lib\$1.\$\{MAJOR\}.\$\{MINOR\}.dylib/g
+	s/lib\$1.so.\$\{MAJOR\}/lib\$1.\$\{MAJOR\}.dylib/g
+	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name \$1 -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.4/g" >>config.sed
 else
     echo "s/ \\?@SYSWARNS@//g" >>config.sed
 fi
@@ -336,11 +323,7 @@ System types:
 }
 
 PrintVersion() {
-    echo "$PKG_NAME configure $PKG_VERSTR
-
-Copyright (c) 2003-2008, Mike Sharov <msharov@users.sourceforge.net>
-This configure script is free software under the MIT license.
-Unlimited permission to copy, distribute, and modify is granted."
+    echo "$PKG_NAME configure $PKG_VERSTR"
 }
 
 SubVar() {
@@ -451,8 +434,8 @@ for i in $PROGS; do
 done
 # And, finally, the environment variables
 for i in $ENVIRONS; do
-    local esci="`echo $i | sed 's/\//\\\&/g'`"
-    local esciv=`eval echo '"'\$\{$esci\}'"'`
+    local esciv=`eval echo '"'\$\{$i\}'"'`
+    esciv="`echo $esciv | sed 's/\//\\\&/g'`"
     [ ! -z "$esciv" ] && esciv=" $esciv"
     echo "s/ \?@$i@/$esciv/g" >>config.sed
 done
@@ -465,4 +448,13 @@ SubHeadLibsProgs
 for i in $FILES; do
     sed -f config.sed $i.in > $i
 done
+
+touch config.status
+cp config.status config.status.old
+echo "#! /bin/sh
+$0 $*
+`tail -n+3 config.status.old`" > config.status
+chmod u+x config.status
+rm -f config.status.old
+
 die

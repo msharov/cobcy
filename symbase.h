@@ -42,7 +42,7 @@ public:
     inline const char*		GetCName (void);
     inline const char*		GetFullCName (void);
     void			SetParent (const char* NewParent);
-    virtual CobolSymbolType	Kind (void) = 0;
+    virtual CobolSymbolType	Kind (void) { return (CS_Undefined); }
     virtual void		text_write (ostringstream& os) const;
     virtual		       ~CobolSymbol (void);
 };
