@@ -73,8 +73,7 @@ endif
 ################ Maintenance ###########################################
 
 clean:
-	@rm -f ${EXE} ${OBJS} $(OBJS:.o=.d) $Oscanner.cc $Oparser.cc $Oparser.hh
-	@rmdir $O &> /dev/null || true
+	@[ ! -d ./$O ] || rm -rf ./$O
 
 ifdef MAJOR
 DISTVER	:= ${MAJOR}.${MINOR}
