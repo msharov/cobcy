@@ -10,12 +10,9 @@
 
 #define STACK_IDENT_LENGTH	50
 
-/*------------------------------------------------*/
-  void 	DeclareRecordLevel (void);
-  void 	CloseScopeLevels (uint32_t LastLevel);
-  void 	InitializeVariables (void);
-  void	DeclareSpecialName (void);
-/*------------------------------------------------*/
+void DeclareRecordLevel (void);
+void CloseScopeLevels (uint32_t LastLevel);
+void InitializeVariables (void);
+void DeclareSpecialName (void);
 
 #endif
-

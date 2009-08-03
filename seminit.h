@@ -6,13 +6,10 @@
 #ifndef SEMINIT_H_5CED86AB5687C52E1D2232D3514B9583
 #define SEMINIT_H_5CED86AB5687C52E1D2232D3514B9583
 
-/*-------------------------------------------------*/
-  void 	FinishDecl (void);
-  void 	StartCode (void);
-  void 	EndCode (void);
-  void 	StartProgram (void);
-  void 	EndProgram (void);
-/*-------------------------------------------------*/
+void FinishDecl (void);
+void StartCode (void);
+void EndCode (void);
+void StartProgram (void);
+void EndProgram (void);
 
 #endif
-

@@ -11,24 +11,12 @@
 
 /// Defines a constant data type. This never enters the symbol table.
 class CobolConstant : public CobolSymbol {
-protected:
-    union {
-        char *		cval;
-	long int	ival;
-	double		fval;
-    }				data;
-    enum {
-        CC_Undefined,
-        CC_String,
-	CC_Integer,
-	CC_Float
-    }				CurKind;
-
 public:
 				CobolConstant (void);
 				CobolConstant (const char* cval);
 				CobolConstant (long int ival);
 				CobolConstant (double fval);
+    virtual			~CobolConstant (void);
     CobolConstant&		operator= (const char* cval);
     CobolConstant&		operator= (long int ival);
     CobolConstant&		operator= (double fval);
@@ -36,16 +24,22 @@ public:
     virtual CobolSymbolType	Kind (void) { return (CS_Constant); }
     virtual void		text_write (ostringstream& os) const;
     void			GenWrite (ostringstream& os, const char* stream);
-    inline bool			IsNumeric (void);
-    virtual		       ~CobolConstant (void);
+    inline bool			IsNumeric (void)	{ return (CurKind == CC_Integer || CurKind == CC_Float); }
+protected:
+    union UData {
+        char*		cval;
+	long int	ival;
+	double		fval;
+    };
+    enum EKind {
+        CC_Undefined,
+        CC_String,
+	CC_Integer,
+	CC_Float
+    };
+protected:
+    UData			data;
+    EKind			CurKind;
 };
 
-/*---------------------------------------------------------------------------*/
-
-inline bool CobolConstant :: IsNumeric (void)
-{
-    return (CurKind == CC_Integer || CurKind == CC_Float);
-}
-
 #endif
-

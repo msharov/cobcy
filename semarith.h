@@ -6,15 +6,12 @@
 #ifndef SEMARITH_H_503A913B4ADC70F064EDF1806F474404
 #define SEMARITH_H_503A913B4ADC70F064EDF1806F474404
 
-/*-------------------------------------------*/
-  void 	GenMove (void);
-  void 	GenAdd (void);
-  void 	GenSubtract (void);
-  void 	GenMultiply (void);
-  void 	GenDivide (void);
-  void	GenCompute (void);
-  void	SetResultRounding (void);
-/*-------------------------------------------*/
+void GenMove (void);
+void GenAdd (void);
+void GenSubtract (void);
+void GenMultiply (void);
+void GenDivide (void);
+void GenCompute (void);
+void SetResultRounding (void);
 
 #endif
-

@@ -12,15 +12,12 @@
 
 #define MAX_FILENAME	30
 
-/***--| Cobcy global configuration options |--***/
+/// Cobcy global configuration options
 typedef struct {
-    /* Filename locations */
-    char 	SourceFile [MAX_FILENAME];	/* Input COBOL file */
-    char 	CodeFile [MAX_FILENAME];	/* Output .c file */
-    char 	DeclFile [MAX_FILENAME];	/* Output .h file */
-
-    /* Build options */
-    bool	GenDebug;	/* Generate debugging code? */
+    char 	SourceFile [MAX_FILENAME];	// Input COBOL file
+    char 	CodeFile [MAX_FILENAME];	// Output .c file
+    char 	DeclFile [MAX_FILENAME];	// Output .h file
+    bool	GenDebug;			// Generate debugging code?
 } CobcyConfigType;
 
 // All of these are defined in seminit.cc
@@ -32,4 +29,3 @@ extern ofstream codef, declf;
 extern CobcyConfigType CobcyConfig;
 
 #endif
-

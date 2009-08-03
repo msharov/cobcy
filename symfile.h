@@ -19,26 +19,6 @@
 /// they developed for COBOL by any chance?
 class CobolFile : public CobolSymbol {
 private:
-    char			DataFileName [PATH_MAX];
-    char			IndexFileName [PATH_MAX];
-    char			RecordName [MAX_SYMBOL_LENGTH];
-    char			StatusVar [MAX_SYMBOL_LENGTH];
-    char			RecordKey [MAX_SYMBOL_LENGTH];
-
-    char			FlushCommand [PATH_MAX];
-    bool			NewlineFlag;
-    AccessModeType		AccessMode;
-    OrganizationType		Organization;
-
-    bool			Changed;
-    bool			Open;
-    OpenModeType		OpenMode;
-    bool			UnlinkOnClose;
-
-    bool			IsDBF;		// To avoid 'if Organization ==
-    bool			IsFormatted;
-
-private:
     void			GenRecordSignature (ostringstream& os);
     void			GenKeySignature (ostringstream& os);
     void			WriteIndexCName (ostringstream& os);
@@ -46,6 +26,7 @@ private:
 
 public:
 				CobolFile (void);
+				~CobolFile (void);
     CobolSymbolType		Kind (void);
     void			SetFilename (const char* filename);
     void			SetAccessMode (AccessModeType mode);
@@ -70,9 +51,25 @@ public:
     void			GenWriteEnd (ostringstream& os);
     void			GenReadEnd (ostringstream& os);
     void			GenSetupForAppend (ostringstream& os);
+private:
+    char			DataFileName [PATH_MAX];
+    char			IndexFileName [PATH_MAX];
+    char			RecordName [MAX_SYMBOL_LENGTH];
+    char			StatusVar [MAX_SYMBOL_LENGTH];
+    char			RecordKey [MAX_SYMBOL_LENGTH];
 
-    			       ~CobolFile (void);
+    char			FlushCommand [PATH_MAX];
+    bool			NewlineFlag;
+    AccessModeType		AccessMode;
+    OrganizationType		Organization;
+
+    bool			Changed;
+    bool			Open;
+    OpenModeType		OpenMode;
+    bool			UnlinkOnClose;
+
+    bool			IsDBF;		// To avoid 'if Organization ==
+    bool			IsFormatted;
 };
 
 #endif
-

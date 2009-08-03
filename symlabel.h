@@ -11,22 +11,13 @@
 /// Defines a label symbol
 class CobolLabel : public CobolSymbol {
 public:
-    bool		Undeclared;	// For forward references
-
-public:
 			CobolLabel (void);
-    inline CobolSymbolType	Kind (void);
+    inline CobolSymbolType	Kind (void)	{ return (CS_Label); }
     void		GenDeclare (ostringstream& os);
     void		GenJump (ostringstream& os, CobolLabel * dest);
 		       ~CobolLabel (void);
+public:
+    bool		Undeclared;	// For forward references
 };
 
-/*---------------------------------------------------------------*/
-
-inline CobolSymbolType CobolLabel :: Kind (void)
-{
-    return (CS_Label);
-}
-
 #endif
-

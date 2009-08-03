@@ -6,11 +6,9 @@
 #ifndef SEMINFO_H_4B0787F5567FAB92437F6E37518ABFBB
 #define SEMINFO_H_4B0787F5567FAB92437F6E37518ABFBB
 
-/*----------------------------------------*/
-  void 	SetProgramName (void);
-  void 	SetSourceComputer (void);
-  void 	SetObjectComputer (void);
-/*----------------------------------------*/
+void SetProgramName (void);
+void SetSourceComputer (void);
+void SetObjectComputer (void);
 
 #endif
 

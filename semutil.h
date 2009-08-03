@@ -9,7 +9,7 @@
 #include "semtypes.h"
 #include "symbase.h"
 
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
   void 	WriteError (const char* str);
   void 	WriteWarning (const char* str);
   void	NIY (const char* str);
@@ -27,7 +27,6 @@
   void	PrintStackEntry (StackEntry * se);
   void	PrintStack (void);
 #endif
-/*-----------------------------------------------------------------------*/
+//-----------------------------------------------------------------------
 
 #endif
-

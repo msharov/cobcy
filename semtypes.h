@@ -8,8 +8,7 @@
 
 #define STACK_IDENT_LENGTH	50
 
-
-/*----------------------| StackEntry stuff |----------------------------*/
+//----------------------| StackEntry stuff |----------------------------
 
 typedef enum {
     SE_Error,
@@ -45,7 +44,7 @@ typedef struct {
 } StackEntry;
 
 
-/*--------------------------| File declaration enums |--------------------*/
+//--------------------------| File declaration enums |--------------------
 
 typedef enum {
     AM_Sequential,
@@ -68,7 +67,7 @@ typedef enum {
 } OpenModeType;
 
 
-/*---------------------| Display and accept enums |----------------------*/
+//---------------------| Display and accept enums |----------------------
 
 typedef enum {
     AS_Date,
@@ -79,5 +78,3 @@ typedef enum {
 } AcceptSourceType;
 
 #endif
-
-

@@ -22,8 +22,8 @@ bool ErrorFlag = false;
 void WriteError (const char* str)
 {
     if (CodeBegan && CurPar != NULL) {
-       cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
-       cerr << "in paragraph " << *CurPar << ":\n";
+	cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+	cerr << "in paragraph " << *CurPar << ":\n";
     }
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "error: ";
@@ -37,8 +37,8 @@ void WriteError (const char* str)
 void WriteWarning (const char* str)
 {
     if (CodeBegan && CurPar != NULL) {
-       cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
-       cerr << "in paragraph " << *CurPar << ":\n";
+	cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
+	cerr << "in paragraph " << *CurPar << ":\n";
     }
     cerr << CobcyConfig.SourceFile << ":" << CurrentLine << ": ";
     cerr << "warning: ";
@@ -61,14 +61,14 @@ void PrintStackEntry (StackEntry * se)
 	case SE_Float:
 			cerr << "float " << se->fval;
 			break;
-	case SE_String: 
+	case SE_String:
 			cerr << "string " << se->ident;
 			break;
 	case SE_Identifier:
 			cerr << "identifier " << se->ident;
 			break;
 	case SE_Picture:
-			cerr << "picture [" << se->ident << "]";	
+			cerr << "picture [" << se->ident << "]";
 			break;
 	case SE_Bool:		cerr << "boolean";	break;
 	case SE_Connector:	cerr << "connector";	break;
@@ -90,7 +90,7 @@ void PrintStack (void)
 
 void NIY (const char* str)
 {
-char MessageBuf [80];
+    char MessageBuf [80];
 
     GenIndent();
     sprintf (MessageBuf, "%s is unimplemented", str);
@@ -123,20 +123,20 @@ void PrintConstant (StackEntry * entry, ostringstream& os)
 
 CobolSymbol * LookupIdentifier (const char* id)
 {
-CobolSymbol * sym;
-char ErrorBuffer [80];
+    CobolSymbol * sym;
+    char ErrorBuffer [80];
 
     if ((sym = SymTable[id]) == NULL) {
-       sprintf (ErrorBuffer, "identifier '%s' is unknown", id);
-       WriteError (ErrorBuffer);
-       return (NULL);
+	sprintf (ErrorBuffer, "identifier '%s' is unknown", id);
+	WriteError (ErrorBuffer);
+	return (NULL);
     }
     return (sym);
 }
 
 void PrintIdentifier (const char* id, ostringstream& os)
 {
-CobolSymbol * sym;
+    CobolSymbol * sym;
 
     sym = LookupIdentifier (id);
     os << *sym;
@@ -164,9 +164,9 @@ void ReverseIdentifiers (uint32_t nIds)
 
 void GenIndent (void)
 {
-int i;
+    int i;
     for (i = 0; i < NestingLevel; ++ i)
-       codef << "    ";
+	codef << "    ";
 }
 
 void Push (StackEntryKind kind)
@@ -178,23 +178,23 @@ void Push (StackEntryKind kind)
 
     switch (kind) {
 	case SE_Integer:
-		NewEntry->ival = ival;
-		break;
+	    NewEntry->ival = ival;
+	    break;
 	case SE_Float:
-		NewEntry->fval = fval;
-		break;
+	    NewEntry->fval = fval;
+	    break;
 	case SE_String:
 	case SE_Identifier:
 	case SE_Picture:
 	case SE_Bool:
 	case SE_Connector:
-		strcpy (NewEntry->ident, StringBuffer);
-		break;
+	    strcpy (NewEntry->ident, StringBuffer);
+	    break;
 	case SE_Operator:
-		NewEntry->opkind = opkind;
-		break;
+	    NewEntry->opkind = opkind;
+	    break;
 	default:		// For others, simply set the type
-		break;
+	    break;
     }
 
     SemStack.push_back (NewEntry);
@@ -202,13 +202,12 @@ void Push (StackEntryKind kind)
 
 bool IsInSet (char c, const char* set)
 {
-register int i, sl;
+    register int i, sl;
 
     sl = strlen (set);
     for (i = 0; i < sl; ++ i) {
-       if (c == set[i])
-	  return (true);
+	if (c == set[i])
+	    return (true);
     }
     return (false);
 }
-

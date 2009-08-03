@@ -6,12 +6,9 @@
 #ifndef SEMCONIO_H_228FBB8660C958CE6D1598CD5EC95B49
 #define SEMCONIO_H_228FBB8660C958CE6D1598CD5EC95B49
 
-/*----------------------------------------------------*/
-  void 	GenAccept (void);
-  void 	GenDisplay (void);
-  void 	SetDisplayOutput (void);
-  void	SetAcceptSource (AcceptSourceType NewSrc);
-/*----------------------------------------------------*/
+void GenAccept (void);
+void GenDisplay (void);
+void SetDisplayOutput (void);
+void SetAcceptSource (AcceptSourceType NewSrc);
 
 #endif
-

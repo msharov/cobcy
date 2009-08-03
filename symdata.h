@@ -11,42 +11,23 @@
 class CobolFile;	// They are cross-linked
 /// Defines an abstract data thing.
 class CobolData : public CobolSymbol {
-protected:
-    uint32_t		CSize;
-    uint32_t		DeclLevel;			// >01< ID IS RECORD
-    CobolFile *		AssociatedStream;
-
 public:
 			CobolData (void);
-    inline virtual void	SetDeclLevel (uint32_t NewLevel);
-    inline virtual uint32_t	GetDeclLevel (void);
+			~CobolData (void);
+    inline virtual void	SetDeclLevel (uint32_t NewLevel)	{ DeclLevel = NewLevel; }
+    inline virtual uint32_t	GetDeclLevel (void)		{ return (DeclLevel); }
     void		AssociateWithStream (CobolFile * NewStream);
-    CobolFile *		GetStream (void);
+    CobolFile*		GetStream (void);
     virtual void	GenRead (ostringstream&, const char*)	{ assert (!"This data type is not readable"); };
     virtual void	GenWrite (ostringstream&, const char*)	{ assert (!"This data type is not writable"); };
     virtual void	GenSignature (ostringstream&)		{ assert (!"This data type has no signature"); };
     void		GenRead (ostringstream& os);
     void		GenWrite (ostringstream& os);
-    inline uint32_t	GetSize (void);
-		       ~CobolData (void);
+    inline uint32_t	GetSize (void)				{ return (CSize); }
+protected:
+    uint32_t		CSize;
+    uint32_t		DeclLevel;			// >01< ID IS RECORD
+    CobolFile*		AssociatedStream;
 };
 
-/*---------------------------------------------------------------------------*/
-
-inline void CobolData :: SetDeclLevel (uint32_t NewLevel)
-{
-    DeclLevel = NewLevel;
-}
-
-inline uint32_t CobolData :: GetDeclLevel (void)
-{
-    return (DeclLevel);
-}
-
-inline uint32_t CobolData :: GetSize (void)
-{
-    return (CSize);
-}
-
 #endif
-

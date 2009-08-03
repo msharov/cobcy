@@ -28,16 +28,15 @@ int main (int argc, const char* const* argv)
 	Usage (argv[0]);
 	return (2);
     }
-    
+
     if ((yyin = fopen (CobcyConfig.SourceFile, "r")) == NULL) {
 	cerr << "FATAL: Could not open '" << CobcyConfig.SourceFile << "'!\n";
 	return (1);
     }
 #ifndef NDEBUG
-    else
-	cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
+    else cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
 #endif
-    
+
     yyparse();
     fclose (yyin);
 
@@ -69,7 +68,7 @@ static int ProcessFlags (int argc, const char* const* argv)
     int NameLength;
     enum {
 	FlagMode,
-	SourceFileMode,	/* This will be the default */
+	SourceFileMode,	// This will be the default
 	OutputFileMode
     } mode = FlagMode;
     bool SourceSet = false, OutputSet = false;
@@ -106,8 +105,8 @@ static int ProcessFlags (int argc, const char* const* argv)
 		if (!OutputSet) {
 		    strcpy (CobcyConfig.CodeFile, argv[i]);
 		    strcpy (CobcyConfig.DeclFile, argv[i]);
-		    /* If possible, remove the ending .c extension 	*/
-		    /* Do this by replacing the dot with EOS 		*/
+		    // If possible, remove the ending .c extension
+		    // Do this by replacing the dot with EOS
 		    NameLength = strlen (CobcyConfig.DeclFile);
 		    if (CobcyConfig.DeclFile [NameLength - 1] == 'c' &&
 		        CobcyConfig.DeclFile [NameLength - 2] == '.')
@@ -141,4 +140,3 @@ static void SetInitialConfiguration (void)
     memset (CobcyConfig.DeclFile, 0, MAX_FILENAME);
     CobcyConfig.GenDebug = false;
 }
-

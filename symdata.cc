@@ -6,34 +6,33 @@
 #include "symdata.h"
 #include "symfile.h"
 
-CobolData :: CobolData (void)
+CobolData::CobolData (void)
 {
     CSize = 0;
     DeclLevel = 0;
     AssociatedStream = NULL;
 }
 
-CobolFile * CobolData :: GetStream (void)
+CobolFile * CobolData::GetStream (void)
 {
     return (AssociatedStream);
 }
 
-void CobolData :: AssociateWithStream (CobolFile * NewStream)
+void CobolData::AssociateWithStream (CobolFile * NewStream)
 {
     AssociatedStream = NewStream;
 }
 
-void CobolData :: GenRead (ostringstream& os)
+void CobolData::GenRead (ostringstream& os)
 {
     GenRead (os, AssociatedStream->GetFullCName());
 }
 
-void CobolData :: GenWrite (ostringstream& os)
+void CobolData::GenWrite (ostringstream& os)
 {
     GenWrite (os, AssociatedStream->GetFullCName());
 }
 
-CobolData :: ~CobolData (void)
+CobolData::~CobolData (void)
 {
 }
-

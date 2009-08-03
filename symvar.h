@@ -12,15 +12,12 @@
 
 /// Defines a variable symbol
 class CobolVar : public CobolData {
-protected:
-    PictureType		Picture;
-
 public:
 			CobolVar (void);
+    virtual		~CobolVar (void);
     void		SetPicture (const char* NewPic);
     virtual CobolSymbolType	Kind (void);
-    inline bool		IsNumeric (void);
-
+    inline bool		IsNumeric (void) const	{ return (Picture.IsNumeric()); }
     void		GenDeclare (ostringstream& os);
     void		GenRead (ostringstream& os, const char* stream);
     void		GenWrite (ostringstream& os, const char* stream);
@@ -29,22 +26,9 @@ public:
     void		GenArith (ostringstream& os, CobolSymbol* op1, CobolSymbol* op2, char op);
     void		GenSignature (ostringstream& os);
     void		GenCharCast (ostringstream& os);
-    inline void		WritePicture (ostringstream& os);
-
-    virtual	       ~CobolVar (void);
+    inline void		WritePicture (ostringstream& os)	{ os << Picture; } 
+protected:
+    PictureType		Picture;
 };
 
-/*-----------------------------------------------------------------------*/
-
-inline bool CobolVar :: IsNumeric (void)
-{
-    return (Picture.IsNumeric());
-}
-
-inline void CobolVar :: WritePicture (ostringstream& os)
-{
-    os << Picture;
-}
-
 #endif
-

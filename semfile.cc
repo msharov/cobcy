@@ -11,17 +11,17 @@
 #include "semdecl.h"	// for CloseScopeLevels
 #include "symdata.h"
 
-/*---------------------| Globals |------------------------------*/
-  CobolFile * 			FileToAssociate = NULL;
-  CobolFile * 			FileToSelect = NULL;
-  vector<CobolFile*>		FDInit;
-  vector<CobolFile*>		SFQueue;
-/*--------------------------------------------------------------*/
+//---------------------| Globals |------------------------------
+CobolFile * 			FileToAssociate = NULL;
+CobolFile * 			FileToSelect = NULL;
+vector<CobolFile*>		FDInit;
+vector<CobolFile*>		SFQueue;
+//--------------------------------------------------------------
 
 void BeginFileDecl (void)
 {
-StackEntry * CurEntry;
-CobolFile * NewFD;
+    StackEntry * CurEntry;
+    CobolFile * NewFD;
 
     CurEntry = SemStack.back(); SemStack.pop_back();	// Pop file name
     NewFD = new CobolFile;
@@ -57,8 +57,8 @@ void EndFileDecl (void)
 
 void GenFileDesc (void)
 {
-StackEntry * CurEntry, * FileNameEntry;
-CobolFile * NewFD;
+    StackEntry * CurEntry, * FileNameEntry;
+    CobolFile * NewFD;
 
     FileNameEntry = SemStack.back(); SemStack.pop_back();
     CurEntry = SemStack.back(); SemStack.pop_back();
@@ -89,7 +89,7 @@ CobolFile * NewFD;
 
 void AssociateFileRecord (void)
 {
-StackEntry * CurEntry;
+    StackEntry * CurEntry;
 
     if (FileToAssociate != NULL) {
 	CurEntry = SemStack.back(); SemStack.pop_back();
@@ -108,9 +108,9 @@ StackEntry * CurEntry;
 
 void GenOpen (OpenModeType mode)
 {
-StackEntry *entry;
-CobolFile *fattr;
-int nIds, i;
+    StackEntry *entry;
+    CobolFile *fattr;
+    int nIds, i;
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
@@ -127,9 +127,9 @@ int nIds, i;
 
 void GenClose (void)
 {
-StackEntry *entry;
-CobolFile *fattr;
-int nIds, i;
+    StackEntry *entry;
+    CobolFile *fattr;
+    int nIds, i;
 
     nIds = CountIdentifiers();
     for (i = 0; i < nIds; ++ i) {
@@ -151,8 +151,8 @@ void GenSeek (CobolFile * RecFile)
 
 void GenRead (void)
 {
-StackEntry * entry;
-CobolSymbol * ToRead;
+    StackEntry * entry;
+    CobolSymbol * ToRead;
 
     entry = SemStack.back(); SemStack.pop_back();
 
@@ -184,8 +184,8 @@ CobolSymbol * ToRead;
 //
 static void FileWriteSetup (CobolFile ** DestStream, CobolData ** ToWriteFrom)
 {
-StackEntry * FileEntry, * SrcEntry;
-CobolSymbol * ToWrite;
+    StackEntry * FileEntry, * SrcEntry;
+    CobolSymbol * ToWrite;
 
     SrcEntry = SemStack.back(); SemStack.pop_back();
     FileEntry = SemStack.back(); SemStack.pop_back();
@@ -222,9 +222,9 @@ CobolSymbol * ToWrite;
 
 void GenWrite (void)
 {
-CobolData * ToWriteFrom;
-CobolFile * DestStream;
-    
+    CobolData * ToWriteFrom;
+    CobolFile * DestStream;
+
     FileWriteSetup (&DestStream, &ToWriteFrom);
     DestStream->GenSetupForAppend (codef);
     DestStream->GenWriteData (codef, (CobolData*) ToWriteFrom);
@@ -233,9 +233,9 @@ CobolFile * DestStream;
 
 void GenRewrite (void)
 {
-CobolData * ToWriteFrom;
-CobolFile * DestStream;
-    
+    CobolData * ToWriteFrom;
+    CobolFile * DestStream;
+
     FileWriteSetup (&DestStream, &ToWriteFrom);
     DestStream->GenSeek (codef);
     DestStream->GenWriteData (codef, (CobolData*) ToWriteFrom);
@@ -251,7 +251,7 @@ void AssociateRecordsWithFD (void)
 
 void SetFileStatus (void)
 {
-StackEntry * CurEntry;
+    StackEntry * CurEntry;
     if (FileToSelect != NULL) {
 	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetStatusVar (CurEntry->ident);
@@ -279,7 +279,7 @@ void SetOrganization (OrganizationType org)
 
 void SetRelativeKey (void)
 {
-StackEntry * CurEntry;
+    StackEntry * CurEntry;
     if (FileToSelect != NULL) {
 	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetKey (CurEntry->ident);
@@ -292,7 +292,7 @@ StackEntry * CurEntry;
 
 void SetRecordKey (void)
 {
-StackEntry * CurEntry;
+    StackEntry * CurEntry;
     if (FileToSelect != NULL) {
 	CurEntry = SemStack.back(); SemStack.pop_back();
 	FileToSelect->SetKey (CurEntry->ident);
@@ -321,4 +321,3 @@ void CloseSpecialFiles (void)
 	(*sf)->GenClose (codef);
     SFQueue.clear();
 }
-

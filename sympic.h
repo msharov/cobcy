@@ -10,31 +10,9 @@
 
 /// Defines a picture data type. Here are all the data-type dependent functions.
 class PictureType : public CobolSymbol {
-protected:
-    uint32_t		Size;
-    uint32_t		CSize;
-    enum { 
-       Undefined,
-       Integer, 
-       Float,
-       String 
-    } 			m_Kind;
-    enum {
-       NoSign = false,
-       TrailingSign = true,
-       LeadingSign
-    }			Sign;
-    bool		SignSeparate;
-    uint32_t		nDigitsBDP;	// Before Decimal Point
-    uint32_t		nDigitsADP;	// After Decimal Point
-    uint32_t		nFillerZeroes;	// Zeroes after DP
-    char *		Text;
-
-protected:
-    void		Expand (const char* pic, char* expanded);
-
 public:
 			PictureType (void);
+    virtual		~PictureType (void);
     uint32_t		Set (const char* NewPicture);
     void		GenTypePrefix (ostringstream& os);
     void		GenTypeSuffix (ostringstream& os);
@@ -45,22 +23,32 @@ public:
     bool		GenCastTo (ostringstream& os, PictureType& pic);
     virtual void	text_write (ostringstream& os) const;
     virtual CobolSymbolType	Kind (void) { return (CS_Picture); }
-    inline bool		IsNumeric (void);
-    inline uint32_t	GetSize (void);
-    virtual	       ~PictureType (void);
+    inline bool		IsNumeric (void) const	{ return (m_Kind == Integer || m_Kind == Float); }
+    inline uint32_t	GetSize (void) const	{ return (Size); }
+protected:
+    void		Expand (const char* pic, char* expanded);
+protected:
+    enum EKind { 
+       Undefined,
+       Integer, 
+       Float,
+       String 
+    };
+    enum ESignPos {
+       NoSign = false,
+       TrailingSign = true,
+       LeadingSign
+    };
+protected:
+    uint32_t		Size;
+    uint32_t		CSize;
+    EKind		m_Kind;
+    ESignPos		Sign;
+    bool		SignSeparate;
+    uint32_t		nDigitsBDP;	// Before Decimal Point
+    uint32_t		nDigitsADP;	// After Decimal Point
+    uint32_t		nFillerZeroes;	// Zeroes after DP
+    char*		Text;
 };
 
-/*------------------------------------------------------------------------*/
-
-inline bool PictureType :: IsNumeric (void)
-{
-    return (m_Kind == Integer || m_Kind == Float);
-}
-
-inline uint32_t PictureType :: GetSize (void)
-{
-    return (Size);
-}
-
 #endif
-

@@ -10,14 +10,14 @@
 #include "symfile.h"
 #include "symvar.h"
 
-/*--------------------------------------------------*/
-  ofstream 			codef;
-  ofstream 			declf;
-  vector<StackEntry*> 		SemStack;
-  symtable_t		 	SymTable;
-  int 				NestingLevel = 0;
-  bool				CodeBegan = false;
-/*--------------------------------------------------*/
+//--------------------------------------------------
+ofstream 			codef;
+ofstream 			declf;
+vector<StackEntry*> 		SemStack;
+symtable_t		 	SymTable;
+int 				NestingLevel = 0;
+bool				CodeBegan = false;
+//--------------------------------------------------
 
 void FinishDecl (void)
 {
@@ -75,11 +75,11 @@ void EndCode (void)
 
 void StartProgram (void)
 {
-CobolVar * NewSymbol;
-CobolFile * NewFile;
-char sourceName [PATH_MAX];
-char headerName [PATH_MAX];
-char cobolName [PATH_MAX];
+    CobolVar * NewSymbol;
+    CobolFile * NewFile;
+    char sourceName [PATH_MAX];
+    char headerName [PATH_MAX];
+    char cobolName [PATH_MAX];
 
     codef.open (CobcyConfig.CodeFile, ios::out | ios::trunc);
     declf.open (CobcyConfig.DeclFile, ios::out | ios::trunc);
@@ -165,4 +165,3 @@ void EndProgram (void)
     declf.flush();
     declf.close();
 }
-

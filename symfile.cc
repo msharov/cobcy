@@ -8,7 +8,7 @@
 #include "symrec.h"
 #include "symvar.h"
 
-CobolFile :: CobolFile (void)
+CobolFile::CobolFile (void)
 {
     memset (DataFileName, 0, PATH_MAX);
     memset (IndexFileName, 0, PATH_MAX);
@@ -23,213 +23,213 @@ CobolFile :: CobolFile (void)
     IsDBF = false;
 }
 
-CobolSymbolType CobolFile :: Kind (void)
+CobolSymbolType CobolFile::Kind (void)
 {
     return (CS_FileDesc);
 }
 
-void CobolFile :: SetFilename (const char* filename)
+void CobolFile::SetFilename (const char* filename)
 {
     strcpy (DataFileName, filename);
 }
 
-void CobolFile :: SetAccessMode (AccessModeType mode)
+void CobolFile::SetAccessMode (AccessModeType mode)
 {
     // Only sequential access files have newline breaks
     NewlineFlag = false;
 
     // This is not yet complete, since I am not sure what AM_Dynamic should be
     switch (Organization) {
-        case ORG_Sequential:
-		NewlineFlag = true;
+	case ORG_Sequential:
+	    NewlineFlag = true;
 	case ORG_Line_sequential:
-       		if (mode != AM_Sequential)
-	  	   WriteWarning ("access mode reset to sequential");
-		AccessMode = AM_Sequential;
-		break;
+	    if (mode != AM_Sequential)
+		WriteWarning ("access mode reset to sequential");
+	    AccessMode = AM_Sequential;
+	    break;
 	case ORG_Relative:
-		AccessMode = mode;	// Can be all three
-		break;
+	    AccessMode = mode;	// Can be all three
+	    break;
 	case ORG_Indexed:
-		if (mode == AM_Sequential)
-		   WriteWarning ("access mode reset to random");
-		AccessMode = AM_Random;	
-		break;
+	    if (mode == AM_Sequential)
+		WriteWarning ("access mode reset to random");
+	    AccessMode = AM_Random;
+	    break;
     }
 }
 
-void CobolFile :: SetOrganization (OrganizationType org)
+void CobolFile::SetOrganization (OrganizationType org)
 {
     Organization = org;
     // No warning needed because organization should always be set
     //	before access mode. This is just to be sure it has reasonable values.
     if (Organization == ORG_Sequential)
-       AccessMode = AM_Sequential;
+	AccessMode = AM_Sequential;
     else
-       AccessMode = AM_Random;
+	AccessMode = AM_Random;
 
     // Set the DBF flag
     if (Organization == ORG_Relative || Organization == ORG_Indexed)
-       IsDBF = true;
+	IsDBF = true;
 }
 
-void CobolFile :: SetKey (const char* keyname)
+void CobolFile::SetKey (const char* keyname)
 {
     strcpy (RecordKey, keyname);
     strcpy (IndexFileName, RecordKey);
     strcat (IndexFileName, ".ndx");
 }
 
-void CobolFile :: SetStatusVar (const char* varname)
+void CobolFile::SetStatusVar (const char* varname)
 {
     strcpy (StatusVar, varname);
 }
 
-void CobolFile :: SetRecord (const char* recname)
+void CobolFile::SetRecord (const char* recname)
 {
     strcpy (RecordName, recname);
 }
 
-void CobolFile :: SetNewlineFlag (bool NewFlag)
+void CobolFile::SetNewlineFlag (bool NewFlag)
 {
     NewlineFlag = NewFlag;
 }
 
-void CobolFile :: SetUnlinkOnClose (bool NewFlag)
+void CobolFile::SetUnlinkOnClose (bool NewFlag)
 {
     UnlinkOnClose = NewFlag;
 }
 
-void CobolFile :: SetFlushCommand (const char* NewCommand)
+void CobolFile::SetFlushCommand (const char* NewCommand)
 {
     strcpy (FlushCommand, NewCommand);
 }
 
-void CobolFile :: WriteIndexCName (ostringstream& os)
+void CobolFile::WriteIndexCName (ostringstream& os)
 {
     // The uppercased 'I' will ensure that no conflict with Cobol code
     //	occurs, since Cobcy translates everything to lowercase.
     os << GetCName() << "_Idx";
 }
 
-void CobolFile :: text_write (ostringstream& os) const
+void CobolFile::text_write (ostringstream& os) const
 {
     CobolSymbol::text_write (os);
     if (IsDBF)
-       os << "->DataDesc";
+	os << "->DataDesc";
 }
 
-void CobolFile :: WriteOpenMode (ostringstream& os, OpenModeType mode)
+void CobolFile::WriteOpenMode (ostringstream& os, OpenModeType mode)
 {
     switch (mode) {
-       case OM_Input:		os << "\"rb\"";		break;
-       case OM_Output:		os << "\"wb\"";		break;
-       case OM_Extend:		os << "\"ab\"";		break;
-       case OM_InputOutput:	os << "\"w+b\"";	break;
+	case OM_Input:		os << "\"rb\"";		break;
+	case OM_Output:		os << "\"wb\"";		break;
+	case OM_Extend:		os << "\"ab\"";		break;
+	case OM_InputOutput:	os << "\"w+b\"";	break;
     }
 }
 
-void CobolFile :: GenRecordSignature (ostringstream& os)
+void CobolFile::GenRecordSignature (ostringstream& os)
 {
-CobolRecord * rec;
+    CobolRecord * rec;
 
-    if (strlen (RecordName) && (rec = (CobolRecord*) 
-     				LookupIdentifier (RecordName)) != NULL) {
-       os << "\"";
-       rec->GenSignature (os);
-       os << "\"";
+    if (strlen (RecordName) && (rec = (CobolRecord*)
+		LookupIdentifier (RecordName)) != NULL) {
+	os << "\"";
+	rec->GenSignature (os);
+	os << "\"";
     }
     else
-       WriteError ("file is not associated with any record");
+	WriteError ("file is not associated with any record");
 }
 
-void CobolFile :: GenKeySignature (ostringstream& os)
+void CobolFile::GenKeySignature (ostringstream& os)
 {
-CobolVar * var;
+    CobolVar * var;
 
-    if (strlen (RecordKey) && (var = (CobolVar*) 
-     				LookupIdentifier (RecordKey)) != NULL) {
-       os << "\"";
-       var->GenSignature (os);
-       os << "\"";
+    if (strlen (RecordKey) && (var = (CobolVar*)
+		LookupIdentifier (RecordKey)) != NULL) {
+	os << "\"";
+	var->GenSignature (os);
+	os << "\"";
     }
     else
-       WriteError ("file is not associated with any record");
+	WriteError ("file is not associated with any record");
 }
 
-void CobolFile :: AssociateRecord (void)
+void CobolFile::AssociateRecord (void)
 {
-CobolRecord * rec;
+    CobolRecord * rec;
 
-    if (strlen (RecordName) && (rec = (CobolRecord*) 
-     				LookupIdentifier (RecordName)) != NULL)
-       rec->AssociateWithStream (this);
+    if (strlen (RecordName) && (rec = (CobolRecord*)
+		LookupIdentifier (RecordName)) != NULL)
+	rec->AssociateWithStream (this);
     else
-       WriteError ("file is not associated with any record");
+	WriteError ("file is not associated with any record");
 }
 
-void CobolFile :: GenDeclare (ostringstream& os)
+void CobolFile::GenDeclare (ostringstream& os)
 {
     GenIndent();
     if (IsDBF)
-       os << "DBF_FILE * ";
+	os << "DBF_FILE * ";
     else
-       os << "FILE * ";
+	os << "FILE * ";
     os << GetCName() << ";\n";
 
     if (Organization == ORG_Indexed) {
-       GenIndent();
-       os << "NDX_FILE * ";
-       WriteIndexCName (os);
-       os << ";\n";
+	GenIndent();
+	os << "NDX_FILE * ";
+	WriteIndexCName (os);
+	os << ";\n";
     }
 }
 
-void CobolFile :: GenOpen (ostringstream& os, OpenModeType mode)
+void CobolFile::GenOpen (ostringstream& os, OpenModeType mode)
 {
     GenIndent();
     if (!Open) {
-       switch (Organization) {
-	  case ORG_Line_sequential:
-	  case ORG_Sequential:	os << "_OpenSequentialFile";	break;
-	  case ORG_Relative:	os << "_OpenRelativeFile";	break;
-	  case ORG_Indexed:	os << "_OpenIndexedFile";	break;
-       }
-       OpenMode = mode;
-       os << " (&" << GetFullCName() << ", ";
-       os << "\"" << DataFileName << "\"";
+	switch (Organization) {
+	    case ORG_Line_sequential:
+	    case ORG_Sequential:	os << "_OpenSequentialFile";	break;
+	    case ORG_Relative:	os << "_OpenRelativeFile";	break;
+	    case ORG_Indexed:	os << "_OpenIndexedFile";	break;
+	}
+	OpenMode = mode;
+	os << " (&" << GetFullCName() << ", ";
+	os << "\"" << DataFileName << "\"";
 
-       // For DBF files add the index file descriptor and a
-       //	record signature for creation of new files and
-       //	validation of the old ones.
-       if (IsDBF) {
-	  os << ", ";
-	  GenRecordSignature (os);
-       }
+	// For DBF files add the index file descriptor and a
+	//	record signature for creation of new files and
+	//	validation of the old ones.
+	if (IsDBF) {
+	    os << ", ";
+	    GenRecordSignature (os);
+	}
 
-       os << ", ";
-       WriteOpenMode (os, mode);
-       os << ");\n";
+	os << ", ";
+	WriteOpenMode (os, mode);
+	os << ");\n";
 
-       // Index file is separate in dBASE
-       if (Organization == ORG_Indexed) {
-	  GenIndent();
-	  os << "_OpenIndexFile (&";
-	  WriteIndexCName (os);
-	  os << ", \"" << IndexFileName << "\", ";
-	  GenKeySignature (os);
-	  os << ", ";
-	  WriteOpenMode (os, mode);
-	  os << ");\n";
-       }
+	// Index file is separate in dBASE
+	if (Organization == ORG_Indexed) {
+	    GenIndent();
+	    os << "_OpenIndexFile (&";
+	    WriteIndexCName (os);
+	    os << ", \"" << IndexFileName << "\", ";
+	    GenKeySignature (os);
+	    os << ", ";
+	    WriteOpenMode (os, mode);
+	    os << ");\n";
+	}
 
-       Open = true;
-       if (mode != OM_Input)
-	  Changed = true;
+	Open = true;
+	if (mode != OM_Input)
+	    Changed = true;
     }
 }
 
-void CobolFile :: GenFlush (ostringstream& os)
+void CobolFile::GenFlush (ostringstream& os)
 {
     GenIndent();
     if (IsDBF)
@@ -244,9 +244,9 @@ void CobolFile :: GenFlush (ostringstream& os)
     }
 }
 
-void CobolFile :: GenSeek (ostringstream& os)
+void CobolFile::GenSeek (ostringstream& os)
 {
-CobolData * BoundRecord;
+    CobolData * BoundRecord;
 
     // Outright stop any attempt to seek in sequential mode
     if (AccessMode == AM_Sequential)
@@ -257,13 +257,13 @@ CobolData * BoundRecord;
 
 	if (IsDBF) {
 	    switch (Organization) {
-		case ORG_Relative:	
-		    os << "_SeekRelativeFile";	
+		case ORG_Relative:
+		    os << "_SeekRelativeFile";
 		    break;
-		case ORG_Indexed:	
-		    os << "_SeekIndexedFile";	
+		case ORG_Indexed:
+		    os << "_SeekIndexedFile";
 		    break;
-		default:	
+		default:
 		    WriteError ("cannot seek in sequential files");
 		    break;
 	    }
@@ -286,7 +286,7 @@ CobolData * BoundRecord;
     }
 }
 
-void CobolFile :: GenClose (ostringstream& os)
+void CobolFile::GenClose (ostringstream& os)
 {
     if (Open) {
 	if (Changed)
@@ -303,7 +303,7 @@ void CobolFile :: GenClose (ostringstream& os)
 	    os << "&";
 	os << GetFullCName();
 	os << ");\n";
-	
+
 	// Index file is separate in dBASE
 	if (Organization == ORG_Indexed) {
 	    GenIndent();
@@ -319,32 +319,32 @@ void CobolFile :: GenClose (ostringstream& os)
     }
 }
 
-void CobolFile :: GenEOFCheck (ostringstream& os)
+void CobolFile::GenEOFCheck (ostringstream& os)
 {
     GenIndent();
     os << "if (feof (" << *this << "))\n";
 }
 
-void CobolFile :: GenWriteData (ostringstream& os, CobolData * data)
+void CobolFile::GenWriteData (ostringstream& os, CobolData * data)
 {
-char StreamName[80];
+    char StreamName[80];
 
     strcpy (StreamName, GetFullCName());
     if (IsDBF)
-       strcat (StreamName, "->DataDesc");
+	strcat (StreamName, "->DataDesc");
 
     if (data != NULL)
-       data->GenWrite (os, StreamName);
+	data->GenWrite (os, StreamName);
     else {
-       data = (CobolData*) LookupIdentifier (RecordName);
-       data->GenWrite (os, StreamName);
+	data = (CobolData*) LookupIdentifier (RecordName);
+	data->GenWrite (os, StreamName);
     }
     Changed = true;
 }
 
-void CobolFile :: GenReadData (ostringstream& os, CobolData * data)
+void CobolFile::GenReadData (ostringstream& os, CobolData * data)
 {
-char StreamName[80];
+    char StreamName[80];
 
     strcpy (StreamName, GetFullCName());
     if (IsDBF)
@@ -358,7 +358,7 @@ char StreamName[80];
     }
 }
 
-void CobolFile :: GenReadEnd (ostringstream& os)
+void CobolFile::GenReadEnd (ostringstream& os)
 {
     if (NewlineFlag) {
 	GenIndent();
@@ -370,7 +370,7 @@ void CobolFile :: GenReadEnd (ostringstream& os)
     }
 }
 
-void CobolFile :: GenWriteEnd (ostringstream& os)
+void CobolFile::GenWriteEnd (ostringstream& os)
 {
     if (NewlineFlag) {
 	GenIndent();
@@ -382,7 +382,7 @@ void CobolFile :: GenWriteEnd (ostringstream& os)
     }
 }
 
-void CobolFile :: GenSetupForAppend (ostringstream& os)
+void CobolFile::GenSetupForAppend (ostringstream& os)
 {
     if (IsDBF) {
 	GenIndent();
@@ -398,8 +398,7 @@ void CobolFile :: GenSetupForAppend (ostringstream& os)
     }
 }
 
-CobolFile :: ~CobolFile (void)
+CobolFile::~CobolFile (void)
 {
     // Nothing is needed here yet
 }
-
