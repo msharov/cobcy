@@ -51,7 +51,7 @@ int _FirstParagraph (void)
     _WriteIntegerVar (stdout, var3, "9999");
     fprintf (stdout, "\n");
     if (var2 != 0)
-        var3 = _RoundResult ((double) var1 / (double) var2, 9999);
+        var3 = _RoundResult ((double) var1 / (double) var2, "9999");
     fprintf (stdout, "3 / 5 rounded = ");
     _WriteIntegerVar (stdout, var3, "9999");
     fprintf (stdout, "\n");

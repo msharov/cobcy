@@ -32,8 +32,11 @@ int main (int argc, const char* const* argv)
     if ((yyin = fopen (CobcyConfig.SourceFile, "r")) == NULL) {
 	cerr << "FATAL: Could not open '" << CobcyConfig.SourceFile << "'!\n";
 	return (1);
-    } else
+    }
+#ifndef NDEBUG
+    else
 	cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
+#endif
     
     yyparse();
     fclose (yyin);

@@ -264,8 +264,11 @@ CobolVar * dest;
     if (RoundResult) {
        codef << ", ";
        dest = (CobolVar*) LookupIdentifier (prms[0]->ident);
-       if (dest != NULL)
+       if (dest != NULL) {
+	  codef << '\"';
 	  dest->WritePicture (codef);
+	  codef << '\"';
+       }
        codef << ")";
        RoundResult = false;
     }

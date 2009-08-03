@@ -75,11 +75,11 @@ start_x:
 int loop_x (void)
 {
 loop_x:
-    _ReadStringVar (card_in, &card_in_record.card_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    _ReadStringVar (card_in, &card_in_record.card_social_security_number.digits_one_to_three, "xxx");
-    _ReadStringVar (card_in, &card_in_record.card_social_security_number.digits_four_and_five, "xx");
-    _ReadStringVar (card_in, &card_in_record.card_social_security_number.digits_six_to_nine, "xxxx");
-    _ReadStringVar (card_in, &card_in_record.filler000, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _ReadStringVar (card_in, card_in_record.card_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_one_to_three, "xxx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_four_and_five, "xx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_six_to_nine, "xxxx");
+    _ReadStringVar (card_in, card_in_record.filler000, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     fgetc (card_in);
     if (feof (card_in))
     {

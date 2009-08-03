@@ -54,7 +54,7 @@ int _FirstParagraph (void)
     _WriteIntegerVar (stdout, varx.varz, "9999");
     fprintf (stdout, " is not rounded");
     fprintf (stdout, "\n");
-    varx.varz = _RoundResult (((double) 6 + (double) varx.vary) / (double) 5, 9999);
+    varx.varz = _RoundResult (((double) 6 + (double) varx.vary) / (double) 5, "9999");
     _WriteIntegerVar (stdout, varx.varz, "9999");
     fprintf (stdout, " is rounded");
     fprintf (stdout, "\n");

@@ -43,8 +43,10 @@ void CobolVar :: GenRead (ostringstream& os, const char* stream)
 #endif
     GenIndent();
     Picture.GenReadFunction (os);
-    os << " (" << stream << ", &" << *this << ", ";
-    os << "\"" << Picture << "\");\n";
+    os << " (" << stream << ", ";
+    if (IsNumeric())
+	os << '&';
+    os << *this << ", \"" << Picture << "\");\n";
 }
 
 void CobolVar :: GenWrite (ostringstream& os, const char* stream)
@@ -126,7 +128,7 @@ void CobolVar :: GenArith (ostringstream& os, CobolSymbol* op1, CobolSymbol* op2
 	  os << "(double) ";
        os << *op2;
        if (RoundResult)
-	  os << ", " << Picture << ")";
+	  os << ", \"" << Picture << "\")";
        os << ";\n";
 
        if (opc == '/')
