@@ -68,7 +68,7 @@ int start_x (void)
 {
 start_x:
     _OpenSequentialFile (&card_in, "card-reader", "rb");
-    _OpenSequentialFile (&print_out, "/tmp/cobol.prn", "wb");
+    _OpenSequentialFile (&print_out, "output-file", "wb");
     return(1);
 }
 
@@ -84,9 +84,7 @@ loop_x:
     if (feof (card_in))
     {
         fflush (print_out);
-        system ("lpr -h /tmp/cobol.prn");
         _CloseSequentialFile (print_out);
-        unlink ("/tmp/cobol.prn");
         _CloseSequentialFile (card_in);
         return (32001);
     }

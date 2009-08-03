@@ -10,7 +10,7 @@ object-computer.	Intel486.
 input-output section.
 file-control.
 	select card-in		assign to card-reader.
-	select print-out	assign to printer.
+	select print-out	assign to output-file.
 
 data division.
 file section.
