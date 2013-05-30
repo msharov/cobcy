@@ -23,33 +23,23 @@ INSTALLLIB	:= ${INSTALLDATA}
 ################ Destination #########################################
 
 prefix		:= @prefix@
-exec_prefix	:= @exec_prefix@
 BINDIR		:= @bindir@
 INCDIR		:= @includedir@
 LIBDIR		:= @libdir@
 
 ################ Compiler options ####################################
 
-CWARNOPTS	:= -Wall -Wextra -Wno-cast-align -Wcast-qual -Wshadow\
-		-Wredundant-decls -Wwrite-strings -Wpointer-arith @SYSWARNS@
-WARNOPTS	:= -Wall -Wextra -Wpointer-arith -Wcast-qual -Wsynth \
-		-Wwrite-strings -Wno-cast-align -Wno-strict-aliasing \
-		-Woverloaded-virtual -Wredundant-decls -Wno-overflow \
-		-Wsign-promo -Wshadow @SYSWARNS@
-TGTOPTS		:= @PROCESSOR_OPTS@
-INLINEOPTS	:= @INLINE_OPTS@
-
-CFLAGS		:= ${CWARNOPTS} ${PROCOPTS} -std=c99 @CUSTOMINCDIR@
-CXXFLAGS	:= ${WARNOPTS} ${TGTOPTS} @CUSTOMINCDIR@
+WARNOPTS	:= -Wall -W -Winline -Wpointer-arith -Wno-cast-align \
+		-Wshadow -Wwrite-strings -Wredundant-decls @SYSWARNS@
+CFLAGS		:= -std=c99 -march=native ${WARNOPTS} @CUSTOMINCDIR@
 LDFLAGS		:= @CUSTOMLIBDIR@
 LIBS		:= @libustl@ @libfl@
 ifdef DEBUG
     CFLAGS	+= -O0 -g
-    CXXFLAGS	+= -O0 -g
     LDFLAGS	+= -rdynamic
 else
-    CFLAGS	+= -Os -g0 -DNDEBUG=1 ${INLINEOPTS} -ffunction-sections -fdata-sections
-    CXXFLAGS	+= -Os -g0 -DNDEBUG=1 ${INLINEOPTS}
+    CFLAGS	+= -Os -g0 -DNDEBUG=1 -ffunction-sections -fdata-sections
     LDFLAGS	+= -s -Wl,-gc-sections
 endif
+CXXFLAGS	:= $(subst c99,c++11,${CFLAGS}) @INLINE_OPTS@
 O		:= .o/

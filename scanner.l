@@ -28,7 +28,7 @@ static char ErrorBuffer [80];
 
 /* Read everything in lowercase	*/
 #define YY_INPUT(buf,result,max_size) 					\
-	if ((result = read (fileno(yyin), (char*) buf, max_size)) < 0) 	\
+	if ((ssize_t)(result = read (fileno(yyin), (char*) buf, max_size)) < 0) \
 	    YY_FATAL_ERROR ("read() in flex scanner failed");		\
 	StringToLowercase (buf);
 

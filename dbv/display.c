@@ -28,7 +28,7 @@ void ViewDBF (DBF_FILE * df)
 {
     uint32_t Row = 0, TopRow = 0;
     int32_t Field = 0;
-    uint32_t maxx, maxy, MaxVisRecords;
+    uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords;
     uint32_t key = 0, i;
     static const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
 
@@ -162,7 +162,7 @@ static void SetAttrHeader (WINDOW * win)
 
 static void DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df)
 {
-    uint32_t x = 0, maxy, maxx;
+    uint32_t x = 0, maxy __attribute__((unused)), maxx;
     char OutputBuffer[128], dummy[5];
 
     getmaxyx (win, maxy, maxx);
@@ -193,7 +193,7 @@ static void DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FI
     int ri;
     char OutputBuffer[128], dummy[5];
     uint32_t NameLength, FieldLength, DataLength;
-    uint32_t x = 0, maxx, maxy;
+    uint32_t x = 0, maxx, maxy __attribute__((unused));
     char* RecordBuffer;
 
     getmaxyx (win, maxy, maxx);

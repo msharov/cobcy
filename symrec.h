@@ -13,6 +13,7 @@
 class CobolRecord : public CobolData {
 public:
 				CobolRecord (void);
+    inline			~CobolRecord (void) noexcept {}
     void			AddChild (CobolData* NewChild);
     CobolSymbolType		Kind (void);
     void			GenDeclareBegin (ostringstream& os);
