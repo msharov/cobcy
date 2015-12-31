@@ -38,8 +38,8 @@ void CobolSymbol::SetParent (const char* NewParent)
     char ErrorBuffer [80];
 
     if (NewParent == NULL) {
-	memset (ParentCobolName, MAX_SYMBOL_LENGTH, 0);
-	memset (Prefix, MAX_PREFIX_LENGTH, 0);
+	memset (ParentCobolName, 0, MAX_SYMBOL_LENGTH);
+	memset (Prefix, 0, MAX_PREFIX_LENGTH);
 	strcpy (FullCName, CName);
     }
     else {
