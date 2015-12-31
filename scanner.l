@@ -22,6 +22,10 @@ static char ErrorBuffer [80];
 #define TRUE	1
 #endif
 
+#define YY_DECL 		\
+extern "C" int yylex (void);	\
+int yylex (void)
+
 /*-------------------------------------------------*/
   void StringToLowercase (char * string);
 /*-------------------------------------------------*/

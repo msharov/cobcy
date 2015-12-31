@@ -21,7 +21,7 @@ long int FillerIndex = 0;
 //----------------------------------------------------------------------
 
 static int yyerror (const char* msg);
-extern int yylex (void);
+extern "C" int yylex (void);
 
 //----------------------------------------------------------------------
 
