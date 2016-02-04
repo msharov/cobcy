@@ -10,7 +10,7 @@
 CobolConstant::CobolConstant (void)
 {
     CurKind = CC_Undefined;
-    data.cval = NULL;
+    data.cval = nullptr;
 }
 
 CobolConstant::CobolConstant (const char* cval)
@@ -35,46 +35,59 @@ CobolConstant::CobolConstant (double fval)
     CurKind = CC_Float;
 }
 
+CobolConstant::CobolConstant (const StackEntry& e)
+{
+    CurKind = CC_Undefined;
+    data.cval = nullptr;
+    switch (e.kind) {
+	case SE_Bool:
+	case SE_Integer:operator= (e.ival); break;
+	case SE_Float:	operator= (e.fval); break;
+	case SE_String:	operator= (e.ident); break;
+	default:	break;
+    };
+}
+
 CobolConstant& CobolConstant::operator= (const char* cval)
 {
     int length;
     length = strlen (cval);
-    if (CurKind == CC_String && data.cval != NULL)
+    if (CurKind == CC_String && data.cval != nullptr)
 	free (data.cval);
     data.cval = new char [length + 1];
     strncpy (data.cval, cval, length);
     data.cval [length] = '\x0';
     CurKind = CC_String;
-    return (*this);
+    return *this;
 }
 
 CobolConstant& CobolConstant::operator= (long int ival)
 {
-    if (CurKind == CC_String && data.cval != NULL) {
+    if (CurKind == CC_String && data.cval != nullptr) {
 	delete [] data.cval;
-	data.cval = NULL;
+	data.cval = nullptr;
     }
     data.ival = ival;
     CurKind = CC_Integer;
-    return (*this);
+    return *this;
 }
 
 CobolConstant& CobolConstant::operator= (double fval)
 {
-    if (CurKind == CC_String && data.cval != NULL) {
+    if (CurKind == CC_String && data.cval != nullptr) {
 	delete [] data.cval;
-	data.cval = NULL;
+	data.cval = nullptr;
     }
     data.fval = fval;
     CurKind = CC_Float;
-    return (*this);
+    return *this;
 }
 
 CobolConstant& CobolConstant::operator= (StackEntry * se)
 {
     int length;
 
-    if (CurKind == CC_String && data.cval != NULL)
+    if (CurKind == CC_String && data.cval != nullptr)
 	free (data.cval);
 
     switch (se->kind) {
@@ -103,7 +116,7 @@ CobolConstant& CobolConstant::operator= (StackEntry * se)
 	default:		WriteError ("internal: se not a constant");
 				break;
     }
-    return (*this);
+    return *this;
 }
 
 void CobolConstant::text_write (ostringstream& os) const
@@ -133,8 +146,8 @@ void CobolConstant::GenWrite (ostringstream& os, const char* stream)
 
 CobolConstant::~CobolConstant (void)
 {
-    if (CurKind == CC_String && data.cval != NULL) {
+    if (CurKind == CC_String && data.cval != nullptr) {
 	delete [] data.cval;
-	data.cval = NULL;
+	data.cval = nullptr;
     }
 }

@@ -21,11 +21,6 @@ void CobolVar::SetPicture (const char* NewPicture)
     CSize = Picture.Set (NewPicture);
 }
 
-CobolSymbolType CobolVar::Kind (void)
-{
-    return (CS_Variable);
-}
-
 void CobolVar::GenDeclare (ostringstream& os)
 {
     GenIndent();
@@ -37,10 +32,10 @@ void CobolVar::GenDeclare (ostringstream& os)
 
 void CobolVar::GenRead (ostringstream& os, const char* stream)
 {
-#ifndef NDEBUG
-    cout << "\t\tReading variable " << *this;
-    cout << " from stream " << stream << "\n";
-#endif
+    #ifndef NDEBUG
+	if (g_Config.GenDebug)
+	    cout << "\t\tReading variable " << *this << " from stream " << stream << "\n";
+    #endif
     GenIndent();
     Picture.GenReadFunction (os);
     os << " (" << stream << ", ";
@@ -51,10 +46,10 @@ void CobolVar::GenRead (ostringstream& os, const char* stream)
 
 void CobolVar::GenWrite (ostringstream& os, const char* stream)
 {
-#ifndef NDEBUG
-    cout << "\t\tWriting variable " << *this;
-    cout << " to stream " << stream << "\n";
-#endif
+    #ifndef NDEBUG
+	if (g_Config.GenDebug)
+	    cout << "\t\tWriting variable " << *this << " to stream " << stream << "\n";
+    #endif
     GenIndent();
     Picture.GenWriteFunction (os);
     os << " (" << stream << ", " << *this << ", ";

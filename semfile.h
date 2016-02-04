@@ -3,9 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SEMFILE_H_6C1765536B1AFB8760AE803D46A0673F
-#define SEMFILE_H_6C1765536B1AFB8760AE803D46A0673F
-
+#pragma once
 #include "semtypes.h"
 
 #define PRINTER_COMMAND		"lpr -h"
@@ -31,5 +29,3 @@ void SetRelativeKey (void);
 void SetRecordKey (void);
 void OpenSpecialFiles (void);
 void CloseSpecialFiles (void);
-
-#endif

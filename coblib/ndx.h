@@ -7,13 +7,13 @@
 /// \brief This is an implementation of an index file for Cobcy.
 ///
 
-#ifndef NDX_H_090C07BB6A4BA18A2304CEC370541651
-#define NDX_H_090C07BB6A4BA18A2304CEC370541651
-
+#pragma once
 #include <stdint.h>
 
-#define NDX_KEY_NAME_LENGTH	488	// Yup. it can be THAT big.
-#define NDX_PAGE_SIZE		512
+enum {
+    NDX_KEY_NAME_LENGTH	= 488,
+    NDX_PAGE_SIZE	= 512
+};
 
 typedef struct {
     uint32_t	LeftPage;
@@ -49,6 +49,3 @@ int NDX_LookupKey (NDX_FILE* fp, const char* key);
 void NDX_Close (NDX_FILE** fp);
 
 //----------------------------------------------------------------------
-
-#endif
-

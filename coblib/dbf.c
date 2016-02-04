@@ -35,7 +35,7 @@ DBF_FILE* DBF_Open (const char* filename, const char* mode)
 	DBF_Close (fp);
 	fp = NULL;
     }
-    return (fp);
+    return fp;
 }
 
 /// Creates a new database in \p filename with \p nFields described in \p Fields.
@@ -63,7 +63,7 @@ DBF_FILE* DBF_Create (const char* filename, uint16_t nFields, DBF_Field* Fields)
 	DBF_Close (fp);
 	fp = NULL;
     }
-    return (fp);
+    return fp;
 }
 
 /// Sets the header access date to today.
@@ -109,7 +109,7 @@ static int DBF_ReadHeader (DBF_FILE* dfd)
     // First, the static data.
     fread (&dfd->Header, 1, 12, dfd->DataDesc);
     if (dfd->Header.Version != 0x03 && dfd->Header.Version != 0x83)
-	return (1);	// Incompatible version error
+	return 1;	// Incompatible version error
     fseek (dfd->DataDesc, 20, SEEK_CUR); // Reserved 20 bytes are all zero
 
     // Now at 0x20 in the file, the fields.
@@ -121,10 +121,10 @@ static int DBF_ReadHeader (DBF_FILE* dfd)
 	fread (&dfd->Fields[i], 1, 18, dfd->DataDesc);
 	fseek (dfd->DataDesc, 14, SEEK_CUR); // Reserved 14 bytes are all zero
 	if (feof (dfd->DataDesc))
-	    return (2);	/* Premature end of file */
+	    return 2;	/* Premature end of file */
     }
     fseek (dfd->DataDesc, 1, SEEK_CUR); // And terminate the header
-    return (0);
+    return 0;
 }
 
 /// Seeks to \p record index in \p fp.

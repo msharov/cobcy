@@ -7,14 +7,12 @@
 /// \brief Defines ANSI C structures to deal with dBASE IV files.
 ///
 
-#ifndef DBF_H_3DA1E0F75FD740083F92610B470AE378
-#define DBF_H_3DA1E0F75FD740083F92610B470AE378
-
+#pragma once
 #include <stdint.h>
 #include <stdio.h>
 
 #define HEADER_END_CHAR		'\x0D'
-#define DBF_FIELD_NAME_LENGTH	11
+enum { DBF_FIELD_NAME_LENGTH = 11 };
 
 typedef struct {
     uint8_t		Version;
@@ -61,6 +59,3 @@ void		DBF_Pack (DBF_FILE* fp);
 void		DBF_Close (DBF_FILE* fp);
 
 //----------------------------------------------------------------------
-
-#endif
-

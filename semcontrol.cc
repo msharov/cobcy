@@ -1,6 +1,6 @@
 // This file is part of cobcy, a COBOL-to-C compiler.
 //
-// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
@@ -9,124 +9,73 @@
 #include "symvar.h"
 #include <stdio.h>
 
-// This is just a very rough estimate of the maximum
-//	It will not really place the limit on how many paragraphs
-//	you may have, but if you have 40000 paragraphs and use
-//	STOP RUN in paragraph 3, it will not work!
-#define MAX_PARAGRAPHS		32000
+//----------------------------------------------------------------------
 
-//-----------------------| Globals |--------------------------
-static vector<CobolLabel*> 	ParagraphList;
-CobolLabel *		CurPar = NULL;
-char			CurLoopVar [32] = "";
-int			LoopNesting = 0;
-//------------------------------------------------------------
+CobolLabel*		CurPar = nullptr;
+
+static vector<CobolLabel*> s_ParagraphList;
+static string s_CurLoopVar;
+static int s_LoopNesting = 0;
+
+//----------------------------------------------------------------------
 
 void GenParagraph (void)
 {
-    CobolLabel * NewLabel;
-    StackEntry * CurEntry;
-    char ErrorBuffer [80];
-
-    CurEntry = SemStack.back(); SemStack.pop_back();
-
-    if ((NewLabel = (CobolLabel*) SymTable [CurEntry->ident]) == NULL) {
-	// Allocate new symbol table entry
-	NewLabel = new CobolLabel;
-	NewLabel->SetName (CurEntry->ident);
-	// Enter it in the table
-#ifndef NDEBUG
-	cout << "DBG: Inserting paragraph " << CurEntry->ident;
-	cout << " into symbol table.\n";
-#endif
-	SymTable[CurEntry->ident] = NewLabel;
+    auto id = PopIdentifier();
+    auto label = g_Symbols.lookup<CobolLabel> (id.ident);
+    if (!label) {
+	DTRACE ("DBG: Inserting paragraph %s into symbol table.\n", id.ident.c_str());
+	label = g_Symbols.emplace<CobolLabel> (id.ident);
+	label->SetName (id.ident);
+    } else {
+	if (label->Kind() == CS_Label && label->Undeclared)
+	    label->Undeclared = false;
+	else
+	    WriteError ("name %s is already in use", label->GetName().c_str());
     }
-    else {
-	if (NewLabel->Kind() == CS_Label && NewLabel->Undeclared)
-	    NewLabel->Undeclared = false;
-	else {
-	    sprintf (ErrorBuffer, "name %s is already used",
-		    NewLabel->GetName());
-	    WriteError (ErrorBuffer);
-	    delete CurEntry;
-	    return;
-	}
-    }
-    delete (CurEntry);
-
-    // A paragraph finishes previous proc and starts a new one.
-    GenEndProc();
-
-    // Then declare a new function
-    NewLabel->GenDeclare (codef);
-    // Change the current paragraph
-    CurPar = NewLabel;
-
-    // Setup for insertion in main proc
-    ParagraphList.push_back (NewLabel);
+    GenEndProc();		// A paragraph finishes previous proc and starts a new one.
+    label->GenDeclare (codef);	// Then declare a new function
+    CurPar = label;		// Change the current paragraph
+    s_ParagraphList.push_back (label);	// Setup for insertion in main proc
 }
 
 void GenGoto (void)
 {
-    CobolLabel * DestLabel;
-    StackEntry * CurEntry;
-
-    CurEntry = SemStack.back(); SemStack.pop_back();
-
-    if ((DestLabel = (CobolLabel*) SymTable [CurEntry->ident]) == NULL) {
-	DestLabel = new CobolLabel;
-	DestLabel->SetName (CurEntry->ident);
-#ifndef NDEBUG
-	cout << "DBG: Forward declaring label " << CurEntry->ident << "\n";
-#endif
-	DestLabel->Undeclared = true;
-	SymTable[CurEntry->ident] = DestLabel;
+    auto id = PopIdentifier();
+    auto label = g_Symbols.lookup<CobolLabel> (id.ident);
+    if (!label) {
+	DTRACE ("DBG: Forward declaring label %s\n", id.ident.c_str());
+	label = g_Symbols.emplace<CobolLabel> (id.ident);
+	label->SetName (id.ident);
+	label->Undeclared = true;
     }
-    delete (CurEntry);
-
-    CurPar->GenJump (codef, DestLabel);
+    CurPar->GenJump (codef, label);
 }
 
 void GenPerform (void)
 {
-    StackEntry * Proc, * Count;
-    CobolLabel * ProcAttr;
-
-    Count = SemStack.back(); SemStack.pop_back();
-    Proc = SemStack.back(); SemStack.pop_back();
-
-    if ((ProcAttr = (CobolLabel*) SymTable [Proc->ident]) == NULL) {
-	ProcAttr = new CobolLabel;
-	ProcAttr->SetName (Proc->ident);
-	ProcAttr->Undeclared = true;
-#ifndef NDEBUG
-	cout << "DBG: Forward declaring proc " << Proc->ident << "\n";
-#endif
-	SymTable[Proc->ident] = ProcAttr;
+    auto count = PopIdentifier();
+    auto eproc = PopIdentifier();
+    auto proc = g_Symbols.lookup<CobolLabel> (eproc.ident);
+    if (!proc) {
+	DTRACE ("DBG: Forward declaring proc %s\n", eproc.ident.c_str());
+	proc = g_Symbols.emplace<CobolLabel> (eproc.ident);
+	proc->SetName (eproc.ident);
+	proc->Undeclared = true;
     }
-
-    if (Count->ival > 1) {
+    if (count.ival > 1) {
 	GenIndent();
-	codef << "for (_index = 0; _index < " << Count->ival;
-	codef << "; ++ _index)\n";
+	codef << "for (_index = 0; _index < " << count.ival << "; ++ _index)\n";
 	++ NestingLevel;
     }
-
-    GenIndent();
-    ProcAttr->text_write (codef);
-    codef << "();\n";
-
-    if (Count->ival > 1)
+    GenIndent(); codef << *proc << "();\n";
+    if (count.ival > 1)
 	-- NestingLevel;
-
     // Take care of the loops generated by VARYING statements
-    while (LoopNesting > 0) {
-	-- LoopNesting;
+    while (s_LoopNesting > 0) {
+	--s_LoopNesting;
 	-- NestingLevel;
     }
-
-    delete Count;
-    delete Proc;
 }
 
 // This ends either a procedure or a paragraph
@@ -134,8 +83,7 @@ void GenEndProc (void)
 {
     // A paragraph finishes previous proc and starts a new one.
     GenIndent();
-    codef << "return(1);\n";
-
+    codef << "return 1;\n";
     -- NestingLevel;
     GenIndent();
     codef << "}\n\n";
@@ -185,72 +133,48 @@ void GenElse (void)
 
 void GenBool (void)
 {
-    StackEntry *entry[3];
-    CobolVar *attrs[2] = { NULL, NULL };
-    int i;
+    vector<StackEntry> e;
+    for (auto i = 0; i < 2; ++i)
+	e.emplace_back (PopIdentifier());
 
-    for (i = 0; i < 2; ++ i) {
-	entry[i] = SemStack.back(); SemStack.pop_back();
-    }
-
-    if (!(strcmp(entry[0]->ident,"Alphabetic")) ||
-	    !(strcmp(entry[0]->ident,"Alphabetic-Upper")) ||
-	    !(strcmp(entry[0]->ident,"Alphabetic-Lower")) )
-    {
-	if ((attrs[0] = (CobolVar*) LookupIdentifier (entry[1]->ident)) == NULL)
+    if (e[0].ident == "Alphabetic" || e[0].ident == "Alphabetic-Upper" || e[0].ident == "Alphabetic-Lower") {
+	auto v1 = LookupIdentifier<CobolVar> (e[1].ident);
+	if (!v1)
 	    return;
-
-	if (attrs[0]->IsNumeric()) {
+	if (v1->IsNumeric()) {
 	    WriteError ("cannot do alphabetic tests on non-strings");
 	    return;
 	}
-
-	if (!strcmp(entry[0]->ident,"Alphabetic"))
-	    codef << "(_Alphabetic (" << entry[1]->ident << "))";
-	if (!strcmp(entry[0]->ident,"Alphabetic-Upper"))
-	    codef << "(_AlphabeticCase (" << entry[1]->ident << ",2))";
-	if (!strcmp(entry[0]->ident,"Alphabetic-Lower"))
-	    codef << "(_AlphabeticCase (" << entry[1]->ident << ",1))";
-
-	delete entry[0];
-	delete entry[1];
-    }
-    else {
-	entry[2] = SemStack.back(); SemStack.pop_back();
-
-	if (entry[0]->kind == SE_Identifier)
-	    if ((attrs[0] = (CobolVar*)
-			LookupIdentifier (entry[0]->ident)) == NULL)
-		return;
-	if (entry[2]->kind == SE_Identifier)
-	    if ((attrs[1] = (CobolVar*)
-			LookupIdentifier (entry[2]->ident)) == NULL)
-		return;
-
+	if (e[0].ident == "Alphabetic")
+	    codef << "(_Alphabetic (" << e[1].ident << "))";
+	if (e[0].ident == "Alphabetic-Upper")
+	    codef << "(_AlphabeticCase (" << e[1].ident << ",2))";
+	if (e[0].ident == "Alphabetic-Lower")
+	    codef << "(_AlphabeticCase (" << e[1].ident << ",1))";
+    } else {
+	e.emplace_back (PopIdentifier());
+	auto id0 = LookupIdentifier<CobolVar> (e[0].ident);
+	auto id2 = LookupIdentifier<CobolVar> (e[2].ident);
+	if ((e[0].kind == SE_Identifier && !id0) || (e[2].kind == SE_Identifier && !id2))
+	    return;
 	codef << "(";
-	if (entry[2]->kind == SE_Identifier)
-	    attrs[1]->text_write (codef);
+	if (e[2].kind == SE_Identifier)
+	    id2->text_write (codef);
 	else
-	    PrintConstant (entry[2], codef);
-	codef << " " << entry[1]->ident << " ";
-	if (entry[0]->kind == SE_Identifier)
-	    attrs[0]->text_write (codef);
+	    PrintConstant (e[2], codef);
+	codef << " " << e[1].ident << " ";
+	if (e[0].kind == SE_Identifier)
+	    id0->text_write (codef);
 	else
-	    PrintConstant (entry[0], codef);
+	    PrintConstant (e[0], codef);
 	codef << ")";
-
-	for (i = 0; i < 3; ++ i)
-	    delete entry[i];
     }
 }
 
 void GenConnect (void)
 {
-    StackEntry * CurEntry;
-
-    CurEntry = SemStack.back(); SemStack.pop_back();
-    codef << " " << CurEntry->ident << " ";
-    delete (CurEntry);
+    auto idc = PopIdentifier();
+    codef << " " << idc.ident << " ";
 }
 
 void GenStopRun (void)
@@ -261,109 +185,88 @@ void GenStopRun (void)
     //	But that should not happen until you nest MAXINT paragraphs,
     //	which is a very big number!
     GenIndent();
-    codef << "return (" << MAX_PARAGRAPHS + 1 << ");\n";
+    codef << "return " << INT_MAX << ";\n";
 }
 
 void GenParagraphCalls (void)
 {
-    int pi = 0;
-
-    const size_t nPars = ParagraphList.size();
     // Now make the references
-    foreach (vector<CobolLabel*>::const_iterator, i, ParagraphList)
-	declf << "const int _pi_" << **i << " = " << ++pi << ";\n";
+    declf << "enum {\n"
+	<< "    _pi__FirstParagraph,\n";
+    for (auto& p : s_ParagraphList)
+	declf << "    _pi_" << *p << ",\n";
+    declf << "    _pi__NParagraphs,\n    _pi__Exit\n};\n";
 
     // The calling structure is basically a while loop with a switch statement
     //	inside. There is a current paragraph variable _cpi, which is parsed in
     //	that switch statement to decide which paragraph to execute. This is
     //	done to support complex calling chains with gotos.
     //	And it is <= because you can call par 10 if there are 10 pars
-    GenIndent();
-    codef << "_cpi = _pi__FirstParagraph;\n";
-    GenIndent();
-    codef << "while (_cpi <= " << nPars << ") {\n";
+    GenIndent(); codef << "_cpi = _pi__FirstParagraph;\n";
+    GenIndent(); codef << "while (_cpi <= _pi__NParagraphs) {\n";
     ++ NestingLevel;
 
     // Debugging information is generated with -g switch
-    if (CobcyConfig.GenDebug) {
+    if (g_Config.GenDebug) {
 	GenIndent();
-	codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\"";
-	codef << ", _cpi, " << nPars << ");\n";
+	codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\", _cpi, _pi__NParagraphs);\n";
     }
 
     // This is the switch statement
-    GenIndent();
-    codef << "switch (_cpi) {\n";
+    GenIndent(); codef << "switch (_cpi) {\n";
     ++ NestingLevel;
 
     // Each paragraph call will return the displacement from current
     GenIndent();
-    codef << "case 0: _cpi += _FirstParagraph (); break;\n";
-    // Could use the above defined constants here, but they would just
-    //	add more clutter :)
-    pi = 0;
-    foreach (vector<CobolLabel*>::iterator, i, ParagraphList) {
-	++ pi;
+    codef << "case _pi__FirstParagraph:\t_cpi += _FirstParagraph(); break;\n";
+    for (auto& p : s_ParagraphList) {
 	GenIndent();
-	codef << "case " << pi << ": _cpi += " << **i << "(); break;\n";
-	delete *i;
+	codef << "case _pi_" << *p << ":\t_cpi += " << *p << "(); break;\n";
     }
-    ParagraphList.clear();
+    s_ParagraphList.clear();
 
     // This should never happen, but if it does, quit gracefully
-    GenIndent();
-    codef << "default:\n";
+    GenIndent(); codef << "default:\n";
     NestingLevel += 2;
-    GenIndent();
-    codef << "fprintf (stderr, \"Broken paragraph chain!\\n\");\n";
-    GenIndent();
-    codef << "_cpi = " << nPars + 1 << ";\n";
-    GenIndent();
-    codef << "break;\n";
+    GenIndent(); codef << "fprintf (stderr, \"Broken paragraph chain!\\n\");\n";
+    GenIndent(); codef << "_cpi = _pi__Exit;\n";
+    GenIndent(); codef << "break;\n";
     NestingLevel -= 2;
 
     // First close the switch, then while loop
     -- NestingLevel;
-    GenIndent();
-    codef << "}\n";
+    GenIndent(); codef << "}\n";
     -- NestingLevel;
-    GenIndent();
-    codef << "}\n";
+    GenIndent(); codef << "}\n";
 }
 
 void GenStartLoop (void)
 {
-    GenIndent();
-    codef << "for (";
-    ++ LoopNesting;
+    GenIndent(); codef << "for (";
+    ++s_LoopNesting;
     ++ NestingLevel;
 }
 
 void GenLoopInit (void)
 {
-    StackEntry *ivar, *ival;    // Stack contains the iterator variable and its
-    // 	initial value
-
-    ival = SemStack.back(); SemStack.pop_back();
-    ivar = SemStack.back(); SemStack.pop_back();
-    strcpy (CurLoopVar, ivar->ident);
+    // Stack contains the iterator variable and its initial value
+    auto ival = PopIdentifier();
+    auto ivar = PopIdentifier();
+    s_CurLoopVar = ivar.ident;
 
     // Generate the x = 0 type assignment in the beginning of the loop
     // Note: no indent is generated.
-    PrintIdentifier (CurLoopVar, codef);
+    PrintIdentifier (s_CurLoopVar, codef);
 
     codef << " = ";
-    if (ival->kind == SE_Identifier)
-	PrintIdentifier (ival->ident, codef);
+    if (ival.kind == SE_Identifier)
+	PrintIdentifier (ival.ident, codef);
     else
 	PrintConstant (ival, codef);
     codef << "; ";
 
     // This will be followed by a boolean or an end-value condition, which is
     //	a special case of a boolean.
-
-    delete (ival);
-    delete (ivar);
 }
 
 // This proc handles the case VARYING x FROM y TO z
@@ -372,49 +275,37 @@ void GenLoopInit (void)
 //	The problem is that from, to, and increment values can be variables.
 void GenLoopCondition (void)
 {
-    StackEntry * endval;
-
-    endval = SemStack.back(); SemStack.pop_back();
-
-    PrintIdentifier (CurLoopVar, codef);
+    auto endval = PopIdentifier();
+    PrintIdentifier (s_CurLoopVar, codef);
     codef << " <= ";
-    if (endval->kind == SE_Identifier)
-	PrintIdentifier (endval->ident, codef);
+    if (endval.kind == SE_Identifier)
+	PrintIdentifier (endval.ident, codef);
     else
 	PrintConstant (endval, codef);
-
     // Let GenLoopIncrement take care of the semicolon
-
-    delete (endval);
 }
 
 // This simply handles the BY option
-//	Note that the increment can be a variable
+// Note that the increment can be a variable
 void GenLoopIncrement (void)
 {
-    StackEntry * incr;
-
-    incr = SemStack.back(); SemStack.pop_back();
-
+    auto incr = PopIdentifier();
     // First, close the booleans
     codef << "; ";
-
-    PrintIdentifier (CurLoopVar, codef);
+    PrintIdentifier (s_CurLoopVar, codef);
     codef << " += ";
-    if (incr->kind == SE_Identifier)
-	PrintIdentifier (incr->ident, codef);
+    if (incr.kind == SE_Identifier)
+	PrintIdentifier (incr.ident, codef);
     else
 	PrintConstant (incr, codef);
     codef << ")\n";
     // No braces are needed, since there will only be one statement in the
     //	innermost loop (the procedure call)
-
-    delete (incr);
 }
 
 void GenEmptyClause (void)
 {
     GenIndent();
     GenIndent();
-    codef << ";\n";
+    codef << "{}\n";
 }

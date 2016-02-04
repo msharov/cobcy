@@ -19,21 +19,20 @@ INSTALL		:= @INSTALL@
 INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
 INSTALLDATA	:= ${INSTALL} -D -p -m 644
 INSTALLLIB	:= ${INSTALLDATA}
+RMPATH		:= rmdir -p --ignore-fail-on-non-empty
 
 ################ Destination #########################################
 
-prefix		:= @prefix@
 BINDIR		:= @bindir@
 INCDIR		:= @includedir@
 LIBDIR		:= @libdir@
 
 ################ Compiler options ####################################
 
-WARNOPTS	:= -Wall -W -Winline -Wpointer-arith -Wno-cast-align \
-		-Wshadow -Wwrite-strings -Wredundant-decls @SYSWARNS@
+WARNOPTS	:= -Wall -Wextra -Wshadow -Wredundant-decls -Wcast-qual -Wpointer-arith -Wwrite-strings
 CFLAGS		:= -std=c99 -march=native ${WARNOPTS} @CUSTOMINCDIR@
 LDFLAGS		:= @CUSTOMLIBDIR@
-LIBS		:= @libustl@ @libfl@
+LIBS		:= @libustl@ @libsupc++@ @libfl@
 ifdef DEBUG
     CFLAGS	+= -O0 -g
     LDFLAGS	+= -rdynamic
@@ -41,5 +40,6 @@ else
     CFLAGS	+= -Os -g0 -DNDEBUG=1 -ffunction-sections -fdata-sections
     LDFLAGS	+= -s -Wl,-gc-sections
 endif
-CXXFLAGS	:= $(subst c99,c++11,${CFLAGS}) @INLINE_OPTS@
+CXXFLAGS	:= $(subst c99,c++14,${CFLAGS})
+BUILDDIR	:= @builddir@/${NAME}
 O		:= .o/

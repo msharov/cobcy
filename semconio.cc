@@ -1,6 +1,6 @@
 // This file is part of cobcy, a COBOL-to-C compiler.
 //
-// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include "semextern.h"
@@ -11,29 +11,22 @@
 #include "semcontrol.h"
 
 //---------------------| Globals |--------------------------------
-char 				DisplayOutput [MAX_SYMBOL_LENGTH];
-AcceptSourceType		AcceptSource;
+
+static string s_DisplayOutput;
+static AcceptSourceType s_AcceptSource;
+
 //----------------------------------------------------------------
 
 void GenAccept (void)
 {
-    StackEntry * entry;
-    CobolData * attr;
-    int i, nIds;
-
-#ifndef NDEBUG
-    cout << "\tIn GenAccept\n";
-#endif
-
-    nIds = CountIdentifiers();
-
-    for (i = 0; i < nIds; ++ i) {
-	entry = SemStack.back(); SemStack.pop_back();
-	if (entry->kind == SE_Identifier) {
-	    if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
+    DTRACE ("\tIn GenAccept\n");
+    auto stmt = PopStatement();
+    for (auto& e : stmt) {
+	if (e.kind == SE_Identifier) {
+	    auto attr = LookupIdentifier<CobolData> (e.ident);
+	    if (!attr)
 		return;
-
-	    switch (AcceptSource) {
+	    switch (s_AcceptSource) {
 		case AS_Console:
 		    attr->GenRead (codef, "stdin");
 		    GenEmptyClause();
@@ -61,60 +54,39 @@ void GenAccept (void)
 		    break;
 	    }
 	}
-	delete entry;
     }
 }
 
 void SetAcceptSource (AcceptSourceType NewSrc)
 {
-    AcceptSource = NewSrc;
+    s_AcceptSource = NewSrc;
 }
 
 void GenDisplay (void)
 {
-    StackEntry * entry;
-    CobolData * attr;
-    CobolConstant cattr;
-    int i, nIds;
-
-#ifndef NDEBUG
-    cout << "\tIn GenDisplay\n";
-#endif
-
-    nIds = CountIdentifiers();
-    ReverseIdentifiers (nIds);
-
-#ifndef NDEBUG
-    cout << "\t\t" << nIds << " things on stack\n";
-#endif
-
-    for (i = 0; i < nIds; ++ i) {
-	entry = SemStack.back(); SemStack.pop_back();
-
-	if (entry->kind == SE_Identifier) {
-	    if ((attr = (CobolData*) LookupIdentifier (entry->ident)) == NULL)
+    auto stmt = PopStatement();
+    DTRACE ("\tIn GenDisplay: %zu things on stack\n", stmt.size());
+    reverse (stmt.begin(), stmt.end());
+    for (auto& e : stmt) {
+	if (e.kind == SE_Identifier) {
+	    auto attr = LookupIdentifier<CobolData> (e.ident);
+	    if (!attr)
 		return;
-	    attr->GenWrite (codef, DisplayOutput);
+	    attr->GenWrite (codef, s_DisplayOutput);
 	} else {
-	    cattr = entry;
-	    cattr.GenWrite (codef, DisplayOutput);
+	    CobolConstant ce = e;
+	    ce.GenWrite (codef, s_DisplayOutput);
 	}
     }
-
     GenIndent();
-    codef << "fprintf (" << DisplayOutput << ", \"\\n\");\n";
+    codef << "fprintf (" << s_DisplayOutput << ", \"\\n\");\n";
 }
 
 void SetDisplayOutput (void)
 {
-    StackEntry* OutputStream = SemStack.back(); SemStack.pop_back();
-    CobolFile* OutStrSym = (CobolFile*) LookupIdentifier (OutputStream->ident);
-    if (OutStrSym != NULL)
-	strcpy (DisplayOutput, OutStrSym->GetFullCName());
-
-#ifndef NDEBUG
-    cout << "\tDISPLAY output set to " << DisplayOutput << "\n";
-#endif
-
-    delete OutputStream;
+    auto id = PopIdentifier();
+    auto outStrSym = LookupIdentifier<CobolFile> (id.ident);
+    if (outStrSym)
+	s_DisplayOutput = outStrSym->GetFullCName();
+    DTRACE ("\tDISPLAY output set to %s\n", s_DisplayOutput.c_str());
 }

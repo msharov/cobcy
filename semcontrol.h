@@ -3,8 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SEMCONTROL_H_53E3AA77780572B600D9D421352480CC
-#define SEMCONTROL_H_53E3AA77780572B600D9D421352480CC
+#pragma once
 
 void GenParagraph (void);
 void GenGoto (void);
@@ -26,5 +25,3 @@ void GenLoopInit (void);
 void GenLoopCondition (void);
 void GenLoopIncrement (void);
 void GenEmptyClause (void);
-
-#endif

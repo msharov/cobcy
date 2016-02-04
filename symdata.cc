@@ -10,12 +10,12 @@ CobolData::CobolData (void)
 {
     CSize = 0;
     DeclLevel = 0;
-    AssociatedStream = NULL;
+    AssociatedStream = nullptr;
 }
 
 CobolFile * CobolData::GetStream (void)
 {
-    return (AssociatedStream);
+    return AssociatedStream;
 }
 
 void CobolData::AssociateWithStream (CobolFile * NewStream)

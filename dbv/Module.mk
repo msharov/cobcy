@@ -1,9 +1,10 @@
 ################ Source files ##########################################
 
-dbv/EXE		:= dbv/dbv
+dbv/EXE		:= $Odbv/dbv
 dbv/SRCS	:= $(wildcard dbv/*.c)
 dbv/OBJS	:= $(addprefix $O,$(dbv/SRCS:.c=.o))
 dbv/LIBS	:= ${COBLIB} -lncurses
+dbv/DEPS	:= ${dbv/OBJS:.o=.d}
 
 ################ Compilation ###########################################
 
@@ -18,7 +19,7 @@ ${dbv/EXE}:	${dbv/OBJS} ${COBLIB}
 .PHONY:		dbv/install dbv/uninstall dbv/clean
 
 ifdef BINDIR
-dbv/EXEI	:= $(addprefix ${BINDIR}/,$(notdir ${dbv/EXE}))
+dbv/EXEI	:= ${BINDIR}/$(notdir ${dbv/EXE})
 install:	dbv/install
 dbv/install:	${dbv/EXEI}
 ${dbv/EXEI}:	${dbv/EXE}
@@ -26,16 +27,24 @@ ${dbv/EXEI}:	${dbv/EXE}
 	@${INSTALLBIN} $< $@
 uninstall:	dbv/uninstall
 dbv/uninstall:
-	@echo "Removing ${dbv/EXEI} ..."
-	@rm -f ${dbv/EXEI}
+	@if [ -f ${dbv/EXEI} ]; then\
+	    echo "Removing ${dbv/EXEI} ..."\
+	    rm -f ${dbv/EXEI}\
+	fi
 endif
 
 ################ Compilation ###########################################
 
 clean:		dbv/clean
 dbv/clean:
-	@rm -f ${dbv/EXE} ${dbv/OBJS} $(dbv/OBJS:.o=.d)
-	@rmdir $Odbv &> /dev/null || true
+	@if [ -d $Odbv ]; then\
+	    rm -f ${dbv/EXE} ${dbv/OBJS} ${dbv/DEPS} $Odbv/.d;\
+	    rmdir $Odbv;\
+	fi
 
-${dbv/OBJS}:	Makefile Config.mk dbv/Module.mk
--include ${dbv/OBJS:.o=.d}
+$Odbv/.d:	$O.d
+	@[ -d $Odbv ] || mkdir $Odbv
+	@touch $@
+
+${dbv/OBJS}:	${MKDEPS} dbv/Module.mk $Odbv/.d
+-include ${dbv/DEPS}

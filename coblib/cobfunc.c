@@ -22,30 +22,30 @@ static int _IsInSet (char c, const char* set)
 {
     for (size_t i = 0; i < strlen(set); ++i)
 	if (set[i] == c)
-	    return (1);
-    return (0);
+	    return 1;
+    return 0;
 }
 
 int _Alphabetic (const char* str)
 {
     for (size_t i = 0; i < strlen(str); i++)
 	if (!isalpha(str[i]) && str[i] != ' ')
-	    return (0);
-    return (1);
+	    return 0;
+    return 1;
 }
 
 /// Returns 1 for lower case, 2 for upper.
 int _AlphabeticCase (const char* str, int what)
 {
     if (!_Alphabetic(str))
-	return (0);
+	return 0;
     for (size_t i = 0; i < strlen(str); i++) {
 	if (what == 2 && islower(str[i]))
-	    return (0);
+	    return 0;
 	else if (what == 1 && isupper(str[i]))
-	    return (0);
+	    return 0;
     }
-    return (1);
+    return 1;
 }
 
 void _RuntimeError (const char* message)
@@ -154,7 +154,7 @@ const char* _IntegerToString (long int var, const char* pic)
 	    _strbuf[sp++] = (fl - 1 <= nl) ? pic[i] : ' ';
     }
     _strbuf[sp] = '\x0';
-    return (_strbuf);
+    return _strbuf;
 }
 
 const char* _FloatToString (double var, const char* pic)
@@ -229,7 +229,7 @@ const char* _FloatToString (double var, const char* pic)
     }
     _strbuf[sp] = '\x0';
 
-    return (_strbuf);
+    return _strbuf;
 }
 
 void _AssignVarString (char* var1, const char* var2, int p1, int p2)
@@ -246,7 +246,7 @@ void _AssignVarString (char* var1, const char* var2, int p1, int p2)
 double _RoundResult (double num, const char* pic)
 {
     pic = pic;
-    return ((double)(long)(num + 0.5));
+    return (long)(num + 0.5);
 }
 
 static int _FieldsInSig (const char*sig)
@@ -261,7 +261,7 @@ static int _FieldsInSig (const char*sig)
 	    IsToken = 1;
 	}
     }
-    return (nTokens / 4); // Each field is defined by NAME TYPE SIZE DECIMAL
+    return nTokens / 4; // Each field is defined by NAME TYPE SIZE DECIMAL
 }
 
 // The syntax is same as strcpy, only that the source pointer
@@ -307,7 +307,7 @@ static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
 	_TokenCopy(buffer, &cursigpos);
 	Fields[i].DecimalPlaces = atoi(buffer);
     }
-    return (Fields); // Fields is freed in DBF_Close
+    return Fields; // Fields is freed in DBF_Close
 }
 
 void _OpenSequentialFile (FILE** fp, const char* filename, const char* mode)

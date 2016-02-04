@@ -31,9 +31,9 @@ void CobolLabel::GenJump (ostringstream& os, CobolLabel * dest)
 	//	and the current paragraph. This is done so that when
 	//	that paragraph is through, and we return here, we could
 	//	tell the main routine how many paragraphs to advance.
-	os << "return (";
+	os << "return ";
 	os << "_pi_" << *dest << " - ";
-	os << "_pi_" << *this << ");\n";
+	os << "_pi_" << *this << ";\n";
     }
 }
 

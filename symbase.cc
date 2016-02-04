@@ -8,64 +8,84 @@
 #include <stdio.h>
 
 CobolSymbol::CobolSymbol (void)
+:_prefix()
+,_cobolName()
+,_parentCobolName()
+,_cName()
+,_cNameFull()
 {
-    memset (ParentCobolName, 0, MAX_SYMBOL_LENGTH);
-    memset (CobolName, 0, MAX_SYMBOL_LENGTH);
-    memset (CName, 0, MAX_SYMBOL_LENGTH);
-    memset (Prefix, 0, MAX_PREFIX_LENGTH);
-    memset (FullCName, 0, MAX_FULLNAME_LENGTH);
 }
 
-void CobolSymbol::CobolToCName (char* str)
+// Virtual dtor
+CobolSymbol::~CobolSymbol (void) {}
+
+void CobolSymbol::SetName (const char* name)
 {
-    for (unsigned i = 0; i < strlen(str); ++ i)
-	if (str[i] == '-')
-	    str[i] = '_';
+    _cName = _cobolName = name;
+    replace (_cName, '-', '_');	// C name made from Cobol name by converting dashes
+    _cNameFull = _prefix;
+    _cNameFull += _cName;
 }
 
-void CobolSymbol::SetName (const char* NewName)
+void CobolSymbol::SetParent (const char* pname)
 {
-    strcpy (CobolName, NewName);
-    strcpy (CName, NewName);
-    CobolToCName (CName);
-    strcpy (FullCName, Prefix);
-    strcat (FullCName, CName);
-}
-
-void CobolSymbol::SetParent (const char* NewParent)
-{
-    CobolSymbol * pattr;
-    char ErrorBuffer [80];
-
-    if (NewParent == NULL) {
-	memset (ParentCobolName, 0, MAX_SYMBOL_LENGTH);
-	memset (Prefix, 0, MAX_PREFIX_LENGTH);
-	strcpy (FullCName, CName);
-    }
-    else {
-	if ((pattr = SymTable [NewParent]) == NULL) {
-	    sprintf (ErrorBuffer,
-		    "cannot find parent %s; wanted for child support; reward",
-		    NewParent);
-	    WriteError (ErrorBuffer);
-	    return;
-	}
-
-	strcpy (Prefix, pattr->Prefix);
-	strcat (Prefix, pattr->CName);
-	strcat (Prefix, ".");
-
-	strcpy (FullCName, Prefix);
-	strcat (FullCName, CName);
+    if (!pname) {
+	_parentCobolName.clear();
+	_prefix.clear();
+	_cNameFull = _cName;
+    } else {
+	auto pattr = g_Symbols.find (pname);
+	if (!pattr)
+	    return WriteError ("cannot find parent %s", pname);
+	_prefix = pattr->_prefix;
+	_prefix += pattr->_cName;
+	_prefix += '.';
+	_cNameFull = _prefix;
+	_cNameFull += _cName;
     }
 }
 
 void CobolSymbol::text_write (ostringstream& os) const
 {
-    os << FullCName;
+    os << _cNameFull;
 }
 
-CobolSymbol::~CobolSymbol (void)
+//----------------------------------------------------------------------
+
+SymbolTable::SymbolTable (void)
+:_names()
+,_syms()
 {
-    // Keep it around just in case...
 }
+
+auto SymbolTable::find (const key_type& key) const noexcept -> value_type
+{
+    auto ikey = lower_bound (_names, key);
+    if (ikey == _names.end() || *ikey != key)
+	return nullptr;
+    return ibyi (ikey, _names, _syms)->get();
+}
+
+auto SymbolTable::insert (const key_type& key, value_type sym) -> value_type
+{
+    auto ikey = lower_bound (_names, key);
+    auto isym = ibyi (ikey, _names, _syms);
+    if (ikey == _names.end() || *ikey != key) {
+	_names.insert (ikey, key);
+	isym = _syms.emplace (isym, move(sym));
+    } else
+	WriteError ("symbol %s redefined", key.c_str());
+    return isym->get();
+}
+
+void SymbolTable::erase (const key_type& key)
+{
+    auto ikey = lower_bound (_names, key);
+    if (ikey == _names.end() || *ikey != key)
+	return;
+    _syms.erase (ibyi (ikey, _names, _syms));
+}
+
+//----------------------------------------------------------------------
+
+SymbolTable	 	g_Symbols;

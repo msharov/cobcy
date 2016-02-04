@@ -1,31 +1,24 @@
 // This file is part of cobcy, a COBOL-to-C compiler.
 //
-// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SEMEXTERN_H_00C77BAD5E27EA510B548B8E1FFD9409
-#define SEMEXTERN_H_00C77BAD5E27EA510B548B8E1FFD9409
-
+#pragma once
 #include "config.h"
 #include "semtypes.h"
 #include "semutil.h"
 
-#define MAX_FILENAME	30
-
 /// Cobcy global configuration options
-typedef struct {
-    char 	SourceFile [MAX_FILENAME];	// Input COBOL file
-    char 	CodeFile [MAX_FILENAME];	// Output .c file
-    char 	DeclFile [MAX_FILENAME];	// Output .h file
+struct CobcyConfigType {
+    string	SourceFile;	// Input COBOL file
+    string	CodeFile;	// Output .c file
+    string	DeclFile;	// Output .h file
     bool	GenDebug;			// Generate debugging code?
-} CobcyConfigType;
+    inline	CobcyConfigType (void) : SourceFile(),CodeFile(),DeclFile(),GenDebug(false) {}
+};
 
 // All of these are defined in seminit.cc
-extern vector<StackEntry*> SemStack;
-typedef map<string,CobolSymbol*> symtable_t;
-extern symtable_t SymTable;
+extern vector<StackEntry> g_Tokens;
 extern int NestingLevel;
 extern ofstream codef, declf;
-extern CobcyConfigType CobcyConfig;
-
-#endif
+extern CobcyConfigType g_Config;

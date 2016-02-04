@@ -3,9 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SYMREC_H_07577D003AAC209C30EF0B4E53998B58
-#define SYMREC_H_07577D003AAC209C30EF0B4E53998B58
-
+#pragma once
 #include "symdata.h"
 #include "symfile.h"
 
@@ -13,16 +11,13 @@
 class CobolRecord : public CobolData {
 public:
 				CobolRecord (void);
-    inline			~CobolRecord (void) noexcept {}
     void			AddChild (CobolData* NewChild);
-    CobolSymbolType		Kind (void);
+    virtual CobolSymbolType	Kind (void) const override { return CS_Record; }
     void			GenDeclareBegin (ostringstream& os);
     void			GenDeclareEnd (ostringstream& os);
-    void			GenRead (ostringstream& os, const char* stream);
-    void			GenWrite (ostringstream& os, const char* stream);
-    void			GenSignature (ostringstream& os);
+    virtual void		GenRead (ostringstream& os, const char* stream) override;
+    virtual void		GenWrite (ostringstream& os, const char* stream) override;
+    virtual void		GenSignature (ostringstream& os) override;
 private:
     vector<CobolData*>		ChildList;
 };
-
-#endif

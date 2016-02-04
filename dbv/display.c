@@ -28,85 +28,85 @@ void ViewDBF (DBF_FILE * df)
 {
     uint32_t Row = 0, TopRow = 0;
     int32_t Field = 0;
-    uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords;
+    uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords = 0;
     uint32_t key = 0, i;
-    static const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
+    static const char c_UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit";
 
     getmaxyx (stdscr, maxy, maxx);
     SetAttrNormal (stdscr);
 
     do {
-       switch (key) {
-	  case KEY_UP:	
-	  	if (Row > 0)
-	  	   -- Row;
+	switch (key) {
+	    case KEY_UP:
+		if (Row > 0)
+		    -- Row;
 		break;
-	  case KEY_DOWN:	
-	  	if (Row < df->Header.nRecords - 1)
-	  	   ++ Row;
+	    case KEY_DOWN:
+		if (Row < df->Header.nRecords - 1)
+		    ++ Row;
 		break;
-	  case KEY_LEFT:
-	  	if (Field > 0)
-	  	   -- Field;
+	    case KEY_LEFT:
+		if (Field > 0)
+		    -- Field;
 		break;
-	  case KEY_RIGHT:
-	  	if (Field < df->nFields - 1)
-	  	   ++ Field;
+	    case KEY_RIGHT:
+		if (Field < df->nFields - 1)
+		    ++ Field;
 		break;
-	  case KEY_PPAGE:
-	  	if (Row > MaxVisRecords)
-	  	   Row -= MaxVisRecords;
+	    case KEY_PPAGE:
+		if (Row > MaxVisRecords)
+		    Row -= MaxVisRecords;
 		else
-		   Row = 0;
-	  	if (TopRow > MaxVisRecords)
-	  	   TopRow -= MaxVisRecords;
+		    Row = 0;
+		if (TopRow > MaxVisRecords)
+		    TopRow -= MaxVisRecords;
 		else
-		   TopRow = 0;
+		    TopRow = 0;
 		break;
-	  case KEY_NPAGE:
-	  	if (Row < df->Header.nRecords - 1 - MaxVisRecords)
-	  	   Row += MaxVisRecords;
+	    case KEY_NPAGE:
+		if (Row < df->Header.nRecords - MaxVisRecords)
+		    Row += MaxVisRecords;
 		else
-		   Row = df->Header.nRecords - 1;
-	  	if (TopRow < df->Header.nRecords - 1 - MaxVisRecords)
-	  	   TopRow += MaxVisRecords;
+		    Row = df->Header.nRecords - 1;
+		if (TopRow < df->Header.nRecords - MaxVisRecords)
+		    TopRow += MaxVisRecords;
 		else
-		   TopRow = df->Header.nRecords - 1 - MaxVisRecords;
+		    TopRow = df->Header.nRecords - MaxVisRecords;
 		break;
-	  case KEY_HOME:
-	        Row = 0;
+	    case KEY_HOME:
+		Row = 0;
 		TopRow = 0;
 		break;
-	  case KEY_END:
-	        Row = df->Header.nRecords - 1;
-		TopRow = Row - MaxVisRecords;
+	    case KEY_END:
+		Row = df->Header.nRecords - 1;
+		TopRow = Row - min (Row, MaxVisRecords);
 		break;
-       }
+	}
 
-       while (Row >= TopRow + maxy - 2)
-	  ++ TopRow;
-       while (Row < TopRow)
-	  -- TopRow;
-       MaxVisRecords = min (maxy - 2, df->Header.nRecords - TopRow);
+	while (Row >= TopRow + maxy - 2)
+	    ++ TopRow;
+	while (Row < TopRow)
+	    -- TopRow;
+	MaxVisRecords = min (maxy - 2, df->Header.nRecords - TopRow);
 
-       erase();
-       SetAttrHeader (stdscr);
-       DisplayDBFHeader (stdscr, 0, Field, df);
-       SetAttrHeader (stdscr);
-       mvwaddstr (stdscr, maxy - 1, 0, UsageString);
-       for (i = 0; i < MaxVisRecords; ++ i){
-	  if (i + TopRow == Row)
-	     SetAttrHighlight (stdscr);
-	  else
-	     SetAttrNormal (stdscr);
-	  DisplayDBFRecord (stdscr, i + 1, Field, df, i + TopRow);
-       }
-       refresh();
-
-       key = 0;
-       key = getch();
-    }
-    while (key != 'q');
+	erase();
+	SetAttrHeader (stdscr);
+	DisplayDBFHeader (stdscr, 0, Field, df);
+	for (i = 0; i < MaxVisRecords; ++i){
+	    if (i + TopRow == Row)
+		SetAttrHighlight (stdscr);
+	    else
+		SetAttrNormal (stdscr);
+	    DisplayDBFRecord (stdscr, i + 1, Field, df, i + TopRow);
+	}
+	SetAttrNormal (stdscr);
+	wmove (stdscr, TopRow+MaxVisRecords+1, 0);
+	wclrtobot (stdscr);
+	SetAttrHeader (stdscr);
+	mvwaddstr (stdscr, maxy-1, 0, c_UsageString);
+	wclrtoeol (stdscr);
+	refresh();
+    } while ((key = getch()) != 'q');
 }
 
 void DisplayOpen (void)
@@ -114,13 +114,14 @@ void DisplayOpen (void)
     initscr();
     noecho();
     cbreak();
+    curs_set (0);
     leaveok (stdscr, true);
     keypad (stdscr, true);
     if (has_colors()) {
-       start_color();
-       init_pair (1, COLOR_WHITE, COLOR_BLUE);
-       init_pair (2, COLOR_YELLOW, COLOR_MAGENTA);
-       init_pair (3, COLOR_BLUE, COLOR_WHITE);
+	start_color();
+	init_pair (1, COLOR_WHITE, COLOR_BLUE);
+	init_pair (2, COLOR_YELLOW, COLOR_MAGENTA);
+	init_pair (3, COLOR_BLUE, COLOR_WHITE);
     }
 }
 
@@ -128,6 +129,7 @@ void DisplayClose (void)
 {
     echo();
     nocbreak();
+    curs_set (1);
     keypad (stdscr, false);
     leaveok (stdscr, false);
     attrset (A_NORMAL);
@@ -138,97 +140,71 @@ void DisplayClose (void)
 
 static void SetAttrNormal (WINDOW * win)
 {
+    int attr = A_NORMAL;
     if (has_colors())
-       wattrset (win, A_NORMAL | COLOR_PAIR(1));
-    else
-       wattrset (win, A_NORMAL);
+	attr |= COLOR_PAIR(1);
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
 static void SetAttrHighlight (WINDOW * win)
 {
+    int attr = A_BOLD;
     if (has_colors())
-       wattrset (win, A_BOLD | COLOR_PAIR(2));
-    else
-       wattrset (win, A_BOLD);
+	attr |= COLOR_PAIR(2);
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
 static void SetAttrHeader (WINDOW * win)
 {
-    if (has_colors())
-       wattrset (win, COLOR_PAIR(3));
-    else
-       wattrset (win, A_BOLD);
+    int attr = has_colors() ? COLOR_PAIR(3) : A_BOLD;
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
-static void DisplayDBFHeader (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df)
+static void DisplayDBFHeader (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE * df)
 {
-    uint32_t x = 0, maxy __attribute__((unused)), maxx;
-    char OutputBuffer[128], dummy[5];
-
+    wmove (win, row, 0);
+    wclrtoeol (win);
+    unsigned x = 0, maxy __attribute__((unused)), maxx;
     getmaxyx (win, maxy, maxx);
-    memset (OutputBuffer, 0, 128);
-
-    for (int i = field; i < df->nFields && x < maxx; ++ i) {
-	int NameLength = min (maxx - x, strlen (df->Fields[i].Name));
-	int FieldLength = min (maxx - x, df->Fields[i].FieldLength);
-
-	strcat (OutputBuffer, " ");
-	strncat (OutputBuffer, df->Fields[i].Name, NameLength);
-	for (int j = 0; j < FieldLength - NameLength; ++ j)
-	    strcat (OutputBuffer, " ");
-	strcat (OutputBuffer, " ");
-	dummy[0] = '|';
-	strncat (OutputBuffer, dummy, 1);
-
-	x += 3 + max (FieldLength, NameLength);
+    for (int i = field; i < df->nFields && x+4 < maxx; ++i) {
+	mvwaddch (win, row, x++, ' ');
+	unsigned namelen = strlen (df->Fields[i].Name);
+	unsigned fieldlen = df->Fields[i].FieldLength;
+	unsigned outsz = min (max (namelen, fieldlen), maxx-x-2);
+	waddnstr (win, df->Fields[i].Name, outsz);
+	x += outsz;
+	mvwaddstr (win, row, x, " |");
+	x += 2;
     }
-    if (x >= maxx)
-	memset (&OutputBuffer[maxx], 0, 128 - maxx);
-
-    mvwaddstr (win, row, 0, OutputBuffer);
 }
 
-static void DisplayDBFRecord (WINDOW * win, uint32_t row, uint32_t field, DBF_FILE * df, uint32_t record)
+static void DisplayDBFRecord (WINDOW* win, uint32_t row, uint32_t field, DBF_FILE* df, uint32_t record)
 {
-    int ri;
-    char OutputBuffer[128], dummy[5];
-    uint32_t NameLength, FieldLength, DataLength;
-    uint32_t x = 0, maxx, maxy __attribute__((unused));
-    char* RecordBuffer;
-
-    getmaxyx (win, maxy, maxx);
-    memset (OutputBuffer, 0, 128);
-
     DBF_SeekToRecord (df, record);
-    RecordBuffer = (char*) malloc (df->Header.RecordLength);
-    DBF_ReadRecord (df, RecordBuffer);
+    char* recordBuffer = (char*) malloc (df->Header.RecordLength);
+    DBF_ReadRecord (df, recordBuffer);
+    const char* ftext = recordBuffer;
 
-    ri = 0;
-    for (uint32_t i = 0; i < field; ++i)
-	ri += df->Fields[i].FieldLength;
-    for (int i = field; i < df->nFields && x < maxx; ++ i) {
-	NameLength = min (maxx - x, strlen (df->Fields[i].Name));
-	FieldLength = min (maxx - x, df->Fields[i].FieldLength);
-	DataLength = min (strlen (&RecordBuffer[ri]), FieldLength);
-	DataLength = min (maxx - x, DataLength);
-
-	strcat (OutputBuffer, " ");
-	strncat (OutputBuffer, &RecordBuffer[ri], DataLength);
-	for (int j = 0; j < (int)(FieldLength - DataLength); ++j)
-	    strncat (OutputBuffer, " ", 1);
-	for (int j = 0; j < (int)(NameLength - FieldLength); ++j)
-	    strncat (OutputBuffer, " ", 1);
-	strncat (OutputBuffer, " ", 1);
-	dummy[0] = '|';
-	strncat (OutputBuffer, dummy, 1);
-
-	x += 3 + max (FieldLength, NameLength);
-	ri += FieldLength;
+    wmove (win, row, 0);
+    wclrtoeol (win);
+    unsigned x = 0, maxy __attribute__((unused)), maxx;
+    getmaxyx (win, maxy, maxx);
+    for (unsigned i = 0; i < field; ++i)
+	ftext += df->Fields[i].FieldLength;
+    for (int i = field; i < df->nFields && x+4 < maxx; ++i) {
+	mvwaddch (win, row, x++, ' ');
+	unsigned fieldlen = df->Fields[i].FieldLength;
+	unsigned namelen = strlen (df->Fields[i].Name);
+	unsigned outsz = min (max (namelen, fieldlen), maxx-x-2);
+	waddnstr (win, ftext, min (outsz, fieldlen));
+	ftext += fieldlen;
+	x += outsz;
+	wclrtoeol (win);
+	mvwaddstr (win, row, x, " |");
+	x += 2;
     }
-    if (x >= maxx)
-	memset (&OutputBuffer[maxx], 0, 128 - maxx);
-
-    mvwaddstr (win, row, 0, OutputBuffer);
-
-    free (RecordBuffer);
+    free (recordBuffer);
 }

@@ -4,6 +4,7 @@ COBLIB		:= $Ocoblib/libcobcy.a
 coblib/SRCS	:= $(wildcard coblib/*.c)
 coblib/INCS	:= $(wildcard coblib/*.h)
 coblib/OBJS	:= $(addprefix $O,${coblib/SRCS:.c=.o})
+coblib/DEPS	:= ${coblib/OBJS:.o=.d}
 
 ################ Compilation ###########################################
 
@@ -44,15 +45,22 @@ coblib/uninstall:	coblib/uninstall-incs
 coblib/uninstall-incs:
 	@echo "Removing ${LIDIR}/ ..."
 	@rm -f ${coblib/INCSI}
-	@rmdir ${LIDIR} &> /dev/null || true
+	@${RMPATH} ${LIDIR}
 endif
 
 ################ Housekeeping ##########################################
 
 clean:		coblib/clean
 coblib/clean:
-	@rm -f ${coblib/OBJS} $(coblib/OBJS:.o=.d) ${COBLIB}
-	@rmdir $Ocoblib &> /dev/null || true
+	@if [ -d $Ocoblib ]; then\
+	    rm -f ${coblib/OBJS} ${coblib/DEPS} ${COBLIB} $Ocoblib/.d;\
+	    rmdir $Ocoblib;\
+	fi
 
-${coblib/OBJS}:	Makefile Config.mk coblib/Module.mk
--include ${coblib/OBJS:.o=.d}
+$Ocoblib/.d:	$O.d
+	@[ -d $Ocoblib ] || mkdir $Ocoblib
+	@touch $@
+
+${coblib/OBJS}:	${MKDEPS} coblib/Module.mk $Ocoblib/.d
+
+-include ${coblib/DEPS}

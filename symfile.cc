@@ -9,28 +9,22 @@
 #include "symvar.h"
 
 CobolFile::CobolFile (void)
+:_dataFileName()
+,_indexFileName()
+,_recordName()
+,_statusVar()
+,_recordKey()
+,_flushCommand()
+,NewlineFlag (true)
+,AccessMode (AM_Sequential)
+,Organization (ORG_Sequential)
+,Changed (false)
+,Open()
+,OpenMode()
+,UnlinkOnClose()
+,IsDBF (false)
+,IsFormatted()
 {
-    memset (DataFileName, 0, PATH_MAX);
-    memset (IndexFileName, 0, PATH_MAX);
-    memset (RecordName, 0, MAX_SYMBOL_LENGTH);
-    memset (StatusVar, 0, MAX_SYMBOL_LENGTH);
-    memset (RecordKey, 0, MAX_SYMBOL_LENGTH);
-    memset (FlushCommand, 0, PATH_MAX);
-    AccessMode = AM_Sequential;
-    Organization = ORG_Sequential;
-    NewlineFlag = true;
-    Changed = false;
-    IsDBF = false;
-}
-
-CobolSymbolType CobolFile::Kind (void)
-{
-    return (CS_FileDesc);
-}
-
-void CobolFile::SetFilename (const char* filename)
-{
-    strcpy (DataFileName, filename);
 }
 
 void CobolFile::SetAccessMode (AccessModeType mode)
@@ -75,19 +69,19 @@ void CobolFile::SetOrganization (OrganizationType org)
 
 void CobolFile::SetKey (const char* keyname)
 {
-    strcpy (RecordKey, keyname);
-    strcpy (IndexFileName, RecordKey);
-    strcat (IndexFileName, ".ndx");
+    _recordKey = keyname;
+    _indexFileName = _recordKey;
+    _indexFileName += ".ndx";
 }
 
 void CobolFile::SetStatusVar (const char* varname)
 {
-    strcpy (StatusVar, varname);
+    _statusVar = varname;
 }
 
 void CobolFile::SetRecord (const char* recname)
 {
-    strcpy (RecordName, recname);
+    _recordName = recname;
 }
 
 void CobolFile::SetNewlineFlag (bool NewFlag)
@@ -102,7 +96,7 @@ void CobolFile::SetUnlinkOnClose (bool NewFlag)
 
 void CobolFile::SetFlushCommand (const char* NewCommand)
 {
-    strcpy (FlushCommand, NewCommand);
+    _flushCommand = NewCommand;
 }
 
 void CobolFile::WriteIndexCName (ostringstream& os)
@@ -131,38 +125,30 @@ void CobolFile::WriteOpenMode (ostringstream& os, OpenModeType mode)
 
 void CobolFile::GenRecordSignature (ostringstream& os)
 {
-    CobolRecord * rec;
-
-    if (strlen (RecordName) && (rec = (CobolRecord*)
-		LookupIdentifier (RecordName)) != NULL) {
+    CobolRecord* rec;
+    if (!_recordName.empty() && (rec = LookupIdentifier<CobolRecord> (_recordName))) {
 	os << "\"";
 	rec->GenSignature (os);
 	os << "\"";
-    }
-    else
+    } else
 	WriteError ("file is not associated with any record");
 }
 
 void CobolFile::GenKeySignature (ostringstream& os)
 {
-    CobolVar * var;
-
-    if (strlen (RecordKey) && (var = (CobolVar*)
-		LookupIdentifier (RecordKey)) != NULL) {
+    CobolVar* var;
+    if (!_recordKey.empty() && (var = LookupIdentifier<CobolVar> (_recordKey))) {
 	os << "\"";
 	var->GenSignature (os);
 	os << "\"";
-    }
-    else
+    } else
 	WriteError ("file is not associated with any record");
 }
 
 void CobolFile::AssociateRecord (void)
 {
-    CobolRecord * rec;
-
-    if (strlen (RecordName) && (rec = (CobolRecord*)
-		LookupIdentifier (RecordName)) != NULL)
+    CobolVar* rec;
+    if (!_recordKey.empty() && (rec = LookupIdentifier<CobolVar> (_recordKey)))
 	rec->AssociateWithStream (this);
     else
 	WriteError ("file is not associated with any record");
@@ -197,7 +183,7 @@ void CobolFile::GenOpen (ostringstream& os, OpenModeType mode)
 	}
 	OpenMode = mode;
 	os << " (&" << GetFullCName() << ", ";
-	os << "\"" << DataFileName << "\"";
+	os << "\"" << _dataFileName << "\"";
 
 	// For DBF files add the index file descriptor and a
 	//	record signature for creation of new files and
@@ -216,7 +202,7 @@ void CobolFile::GenOpen (ostringstream& os, OpenModeType mode)
 	    GenIndent();
 	    os << "_OpenIndexFile (&";
 	    WriteIndexCName (os);
-	    os << ", \"" << IndexFileName << "\", ";
+	    os << ", \"" << _indexFileName << "\", ";
 	    GenKeySignature (os);
 	    os << ", ";
 	    WriteOpenMode (os, mode);
@@ -237,10 +223,10 @@ void CobolFile::GenFlush (ostringstream& os)
     else
 	os << "fflush (" << GetFullCName() << ");\n";
 
-    if (strlen (FlushCommand) > 0)  {
+    if (!_flushCommand.empty())  {
 	GenIndent();
-	os << "system (\"" << FlushCommand << " ";
-	os << DataFileName << "\");\n";
+	os << "system (\"" << _flushCommand << " ";
+	os << _dataFileName << "\");\n";
     }
 }
 
@@ -270,10 +256,8 @@ void CobolFile::GenSeek (ostringstream& os)
 	}
 
 	// Now look up the bound record to determine block size for the file
-	if ((BoundRecord = (CobolData*) SymTable [RecordName]) == NULL){
-	    WriteError ("record bound to file does not exist");
-	    return;
-	}
+	if (!(BoundRecord = g_Symbols.lookup<CobolData>(_recordName)))
+	    return WriteError ("record bound to file does not exist");
 
 	os << " (" << GetFullCName() << ", ";
 	if (Organization == ORG_Indexed) {
@@ -281,7 +265,7 @@ void CobolFile::GenSeek (ostringstream& os)
 	    os << ", ";
 	}
 
-	((CobolVar*) LookupIdentifier (RecordKey))->GenCharCast (os);
+	LookupIdentifier<CobolVar>(_recordKey)->GenCharCast (os);
 	os << ");\n";
     }
 }
@@ -314,7 +298,7 @@ void CobolFile::GenClose (ostringstream& os)
 
 	if (UnlinkOnClose) {
 	    GenIndent();
-	    os << "unlink (\"" << DataFileName << "\");\n";
+	    os << "unlink (\"" << _dataFileName << "\");\n";
 	}
     }
 }
@@ -325,37 +309,27 @@ void CobolFile::GenEOFCheck (ostringstream& os)
     os << "if (feof (" << *this << "))\n";
 }
 
-void CobolFile::GenWriteData (ostringstream& os, CobolData * data)
+void CobolFile::GenWriteData (ostringstream& os, CobolData* data)
 {
-    char StreamName[80];
-
-    strcpy (StreamName, GetFullCName());
+    string streamName = GetFullCName();
     if (IsDBF)
-	strcat (StreamName, "->DataDesc");
-
-    if (data != NULL)
-	data->GenWrite (os, StreamName);
-    else {
-	data = (CobolData*) LookupIdentifier (RecordName);
-	data->GenWrite (os, StreamName);
-    }
+	streamName += "->DataDesc";
+    if (!data)
+	data = LookupIdentifier<CobolData> (_recordName);
+    if (data)
+	data->GenWrite (os, streamName);
     Changed = true;
 }
 
-void CobolFile::GenReadData (ostringstream& os, CobolData * data)
+void CobolFile::GenReadData (ostringstream& os, CobolData* data)
 {
-    char StreamName[80];
-
-    strcpy (StreamName, GetFullCName());
+    string streamName = GetFullCName();
     if (IsDBF)
-	strcat (StreamName, "->DataDesc");
-
-    if (data != NULL)
-	data->GenRead (os, StreamName);
-    else {
-	data = (CobolData*) LookupIdentifier (RecordName);
-	data->GenRead (os, StreamName);
-    }
+	streamName += "->DataDesc";
+    if (!data)
+	data = LookupIdentifier<CobolData> (_recordName);
+    if (data)
+	data->GenRead (os, streamName);
 }
 
 void CobolFile::GenReadEnd (ostringstream& os)
@@ -393,7 +367,7 @@ void CobolFile::GenSetupForAppend (ostringstream& os)
 	os << "NDX_InsertKey (";
 	WriteIndexCName (os);
 	os << ", ";
-	((CobolVar*) LookupIdentifier (RecordKey))->GenCharCast (os);
+	LookupIdentifier<CobolVar>(_recordKey)->GenCharCast (os);
 	os << ", " << GetFullCName() << "->Header.nRecords - 1);\n";
     }
 }

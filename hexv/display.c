@@ -26,9 +26,9 @@ static void DisplayRecord (WINDOW* win, uint32_t row, char FileBuffer[16], uint3
 void ViewBin (FILE * df)
 {
 uint32_t Row = 0, TopRow = 0;
-uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords;
+uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords = 0;
 uint32_t key = 0, i;
-const char UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit                            ";
+static const char c_UsageString[] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit";
 uint32_t FileLength;
 uint32_t MaxRows;
 typedef char	OneRowType [16];
@@ -41,14 +41,13 @@ OneRowType * FileBuffer;
     FileLength = ftell (df);
     MaxRows = FileLength / 16 + ((FileLength % 16 == 0) ? 0 : 1);
     FileBuffer = (OneRowType*) malloc (MaxRows * sizeof(OneRowType));
-    if (FileBuffer == NULL) {
+    if (!FileBuffer) {
 	printf ("Sorry, out of memory.\n");
 	DisplayClose();
 	exit (1);
     }
     fseek (df, 0, SEEK_SET);
     fread ((char*) FileBuffer, FileLength, 1, df);
-    fclose (df);
 
     do {
 	switch (key) {
@@ -71,14 +70,14 @@ OneRowType * FileBuffer;
 		    TopRow = 0;
 		break;
 	    case KEY_NPAGE:
-		if (Row < MaxRows - 1 - MaxVisRecords)
+		if (Row < MaxRows - MaxVisRecords)
 		    Row += MaxVisRecords;
 		else
 		    Row = MaxRows - 1;
-		if (TopRow < MaxRows - 1 - MaxVisRecords)
+		if (TopRow < MaxRows - MaxVisRecords)
 		    TopRow += MaxVisRecords;
 		else
-		    TopRow = MaxRows - 1 - MaxVisRecords;
+		    TopRow = MaxRows - MaxVisRecords;
 		break;
 	    case KEY_HOME:
 		Row = 0;
@@ -86,7 +85,7 @@ OneRowType * FileBuffer;
 		break;
 	    case KEY_END:
 		Row = MaxRows - 1;
-		TopRow = Row - MaxVisRecords;
+		TopRow = Row - min (Row, MaxVisRecords);
 		break;
 	}
 
@@ -100,14 +99,14 @@ OneRowType * FileBuffer;
 	SetAttrHeader (stdscr);
 	DisplayHeader (stdscr, 0);
 	SetAttrHeader (stdscr);
-	mvwaddstr (stdscr, maxy - 1, 0, UsageString);
+	mvwaddstr (stdscr, maxy-1, 0, c_UsageString);
+	wclrtoeol (stdscr);
 	for (i = 0; i < MaxVisRecords; ++ i){
 	    if (i + TopRow == Row)
 		SetAttrHighlight (stdscr);
 	    else
 		SetAttrNormal (stdscr);
-	    DisplayRecord (stdscr, i + 1, FileBuffer[i + TopRow], 
-		    (i + TopRow) * 16);
+	    DisplayRecord (stdscr, i + 1, FileBuffer[i + TopRow], (i + TopRow) * 16);
 	}
 	refresh();
 
@@ -124,6 +123,7 @@ void DisplayOpen (void)
     initscr();
     noecho();
     cbreak();
+    curs_set (0);
     leaveok (stdscr, true);
     keypad (stdscr, true);
     if (has_colors()) {
@@ -138,6 +138,7 @@ void DisplayClose (void)
 {
     echo();
     nocbreak();
+    curs_set (1);
     keypad (stdscr, false);
     leaveok (stdscr, false);
     attrset (A_NORMAL);
@@ -146,36 +147,35 @@ void DisplayClose (void)
     endwin();
 }
 
-static void SetAttrNormal (WINDOW * win)
+static void SetAttrNormal (WINDOW* win)
 {
+    int attr = A_NORMAL;
     if (has_colors())
-	wattrset (win, A_NORMAL | COLOR_PAIR(1));
-    else
-	wattrset (win, A_NORMAL);
+	attr |= COLOR_PAIR(1);
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
-static void SetAttrHighlight (WINDOW * win)
+static void SetAttrHighlight (WINDOW* win)
 {
+    int attr = A_BOLD;
     if (has_colors())
-	wattrset (win, A_BOLD | COLOR_PAIR(2));
-    else
-	wattrset (win, A_BOLD);
+	attr |= COLOR_PAIR(2);
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
-static void SetAttrHeader (WINDOW * win)
+static void SetAttrHeader (WINDOW* win)
 {
-    if (has_colors())
-	wattrset (win, COLOR_PAIR(3));
-    else
-	wattrset (win, A_BOLD);
+    int attr = has_colors() ? COLOR_PAIR(3) : A_BOLD;
+    wattrset (win, attr);
+    wbkgdset (win, ' '|attr);
 }
 
-static void DisplayHeader (WINDOW * win, uint32_t row)
+static void DisplayHeader (WINDOW* win, uint32_t row)
 {
-    char OutputBuffer [81];
-    memset (OutputBuffer, ' ', 80);
-    OutputBuffer [80] = '\x0';
-    mvwaddstr (win, row, 0, OutputBuffer);
+    wmove (win, row, 0);
+    wclrtoeol (win);
 }
 
 static void IntToHex (uint32_t num, int dp, char* strbuf)
@@ -201,7 +201,7 @@ static void DisplayRecord (WINDOW* win, uint32_t row, char FileBuffer[16], uint3
     char NumInAscii[10];
     IntToHex (offset, 8, NumInAscii);
     int opp = 0;
-    char OutputBuffer[128];
+    char OutputBuffer[81];
     OutputBuffer[opp++] = ' ';
     strncpy (&OutputBuffer[opp], NumInAscii, 8);
     opp += 8;
@@ -228,7 +228,8 @@ static void DisplayRecord (WINDOW* win, uint32_t row, char FileBuffer[16], uint3
 
     for (int j = 0; j < 3; ++j)
 	OutputBuffer [opp++] = ' ';
-    OutputBuffer[opp] = '\x0';
+    OutputBuffer[opp] = 0;
 
-    mvwaddstr (win, row, 0, OutputBuffer);
+    mvwaddnstr (win, row, 0, OutputBuffer, min ((int)sizeof(OutputBuffer)-1, maxx));
+    wclrtoeol (win);
 }

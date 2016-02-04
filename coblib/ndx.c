@@ -96,7 +96,7 @@ NDX_FILE* NDX_Open (const char* filename, const char* mode)
 	imode = O_RDWR;
     int fd = open (filename, imode);
     if (fd < 0)
-	return (NULL);
+	return NULL;
 
     NDX_FILE* fp = (NDX_FILE*) calloc (1, sizeof(NDX_FILE));
     fp->PageLoaded = -1;
@@ -105,16 +105,16 @@ NDX_FILE* NDX_Open (const char* filename, const char* mode)
     NDX_ReadHeader (fp);
     NDX_AllocatePage (fp);	// Load the root index page
     NDX_ReadPage (fp, fp->Info.RootPageOffset);
-    return (fp);
+    return fp;
 }
 
 NDX_FILE* NDX_Create (const char* filename, const char* keyname, int keytype, int keylength)
 {
     if (access (filename, 0) == 0)
-	return (NULL);
+	return NULL;
     int fd = open (filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fd < 0)
-	return (NULL);
+	return NULL;
 
     NDX_FILE* fp = (NDX_FILE*) calloc (1, sizeof(NDX_FILE));
     fp->PageLoaded = -1;
@@ -134,7 +134,7 @@ NDX_FILE* NDX_Create (const char* filename, const char* keyname, int keytype, in
     // Load the root index page
     NDX_AllocatePage (fp);
     NDX_ReadPage (fp, fp->Info.RootPageOffset);
-    return (fp);
+    return fp;
 }
 
 static int NDX_AddPage (NDX_FILE * fp)
@@ -145,7 +145,7 @@ static int NDX_AddPage (NDX_FILE * fp)
     memset (PageFiller, 0, sizeof(PageFiller));
     write (fp->FileDesc, PageFiller, NDX_PAGE_SIZE);
     ++ fp->Info.nPages;
-    return (PagePos);
+    return PagePos;
 }
 
 static int NDX_FindKeyPlace (NDX_FILE* fp, const char* key, int AddPage)
@@ -178,7 +178,7 @@ static int NDX_FindKeyPlace (NDX_FILE* fp, const char* key, int AddPage)
     }
     if (NewPageIndex == 0)
 	DBF_RecordIndex = IndexInPage;
-    return (DBF_RecordIndex);
+    return DBF_RecordIndex;
 }
 
 void NDX_InsertKey (NDX_FILE* fp, const char* key, int recnum)
@@ -208,9 +208,9 @@ int NDX_LookupKey (NDX_FILE* fp, const char* key)
     int IndexInPage = NDX_FindKeyPlace (fp, key, 0);
     if (IndexInPage >= 0 && IndexInPage < (int) fp->RecordsInPage &&
 	strncmp (fp->CurPage [IndexInPage].KeyData, key, fp->Info.KeyLength) == 0)
-	return (fp->CurPage [IndexInPage].DBFRecordNumber);
+	return fp->CurPage [IndexInPage].DBFRecordNumber;
     else
-	return (-1);
+	return -1;
 }
 
 void NDX_Close (NDX_FILE** fp)

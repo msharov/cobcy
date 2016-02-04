@@ -3,14 +3,14 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SEMTYPES_H_593765E061DA031311A565E326CBF80D
-#define SEMTYPES_H_593765E061DA031311A565E326CBF80D
+#pragma once
+#include "config.h"
 
-#define STACK_IDENT_LENGTH	50
+enum { STACK_IDENT_LENGTH = 50 };
 
 //----------------------| StackEntry stuff |----------------------------
 
-typedef enum {
+enum StackEntryKind {
     SE_Error,
     SE_Mark,
     SE_Null,
@@ -23,9 +23,9 @@ typedef enum {
     SE_Connector,
     SE_Operator,
     SE_Quote
-} StackEntryKind;
+};
 
-typedef enum {
+enum SEOperatorKind {
     OP_Addition,
     OP_Subtraction,
     OP_Multiplication,
@@ -33,48 +33,45 @@ typedef enum {
     OP_LParen,
     OP_RParen,
     OP_Equal
-} SEOperatorKind;
+};
 
-typedef struct {
+struct StackEntry {
     StackEntryKind	kind;
-    char		ident [STACK_IDENT_LENGTH];
+    SEOperatorKind	opkind;
     long int		ival;
     double		fval;
-    SEOperatorKind	opkind;
-} StackEntry;
-
+    string		ident;
+};
 
 //--------------------------| File declaration enums |--------------------
 
-typedef enum {
+enum AccessModeType {
     AM_Sequential,
     AM_Random,
     AM_Dynamic
-} AccessModeType;
+};
 
-typedef enum {
+enum OrganizationType {
     ORG_Sequential,
     ORG_Line_sequential,
     ORG_Relative,
     ORG_Indexed
-} OrganizationType;
+};
 
-typedef enum {
+enum OpenModeType {
     OM_Input,
     OM_Output,
     OM_Extend,
     OM_InputOutput
-} OpenModeType;
+};
 
 
 //---------------------| Display and accept enums |----------------------
 
-typedef enum {
+enum AcceptSourceType {
     AS_Date,
     AS_Day,
     AS_Weekday,
     AS_Time,
     AS_Console
-} AcceptSourceType;
-
-#endif
+};

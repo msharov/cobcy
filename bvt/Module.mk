@@ -1,10 +1,11 @@
 ################ Source files ##########################################
 
-bvt/COBS:= $(wildcard bvt/bvt*.cob)
-bvt/SRCS:= $(bvt/COBS:.cob=.c)
-bvt/INCS:= $(bvt/COBS:.cob=.h)
-bvt/OBJS:= $(addprefix $O,$(bvt/SRCS:.c=.o))
-bvt/BVTS:= $(bvt/COBS:.cob=)
+bvt/COBS:= $(sort $(wildcard bvt/bvt*.cob))
+bvt/SRCS:= $(addprefix $O,${bvt/COBS:.cob=.c})
+bvt/INCS:= $(addprefix $O,${bvt/COBS:.cob=.h})
+bvt/BVTS:= $(addprefix $O,${bvt/COBS:.cob=})
+bvt/OBJS:= ${bvt/SRCS:.c=.o}
+bvt/DEPS:= ${bvt/OBJS:.o=.d}
 bvt/LIBS:= ${COBLIB}
 CFLAGS	+= -I.
 bvt/SEP	:= "------------------------------------------------------------"
@@ -24,23 +25,31 @@ bvt/run:	${bvt/BVTS}
 	    cat $$i.h >> $$i.out;	echo ${bvt/SEP} >> $$i.out;	\
 	    cat $$i.c >> $$i.out;	echo ${bvt/SEP} >> $$i.out;	\
 	    ./$$i >> $$i.out;		echo ${bvt/SEP} >> $$i.out;	\
-	    diff $$i.std $$i.out && rm $$i.out;				\
+	    diff $$i.std $$i.out && rm -f $$i.h $$i.c $$i.out;		\
 	done)
 
-${bvt/BVTS}:	bvt/bvt%:	$Obvt/bvt%.o ${COBLIB}
+${bvt/BVTS}:	$Obvt/bvt%:	$Obvt/bvt%.o ${COBLIB}
 	@echo "Linking $@ ..."
 	@${LD} ${LDFLAGS} -o $@ $< ${bvt/LIBS}
 
-%.c:	%.cob ${EXE}
+$O%.c:	%.cob ${EXE}
 	@echo "    Converting $< ..."
-	@./${EXE} -o $@ $<
+	@${EXE} -o $@ $<
+
+$Obvt/%.o:	$Obvt/%.c
+	@echo "    Compiling $< ..."
+	@${CC} ${CFLAGS} -MMD -MT "$(<:.c=.s) $@" -o $@ -c $<
 
 clean:	bvt/clean
 bvt/clean:
-	@rm -f ${bvt/BVTS} ${bvt/OBJS} $(bvt/OBJS:.o=.d) ${bvt/SRCS} ${bvt/INCS}
-	@rmdir $Obvt &> /dev/null || true
-	@rm -f bvt/output-file bvt/*.dbf bvt/*.ndx
+	@if [ -d $Obvt ]; then\
+	    rm -f ${bvt/BVTS} ${bvt/OBJS} ${bvt/DEPS} ${bvt/SRCS} ${bvt/INCS} $Obvt/output-file $Obvt/*.dbf $Obvt/*.ndx $Obvt/.d;\
+	    rmdir $Obvt;\
+	fi
 
-${bvt/OBJS}:	Makefile Config.mk bvt/Module.mk
+$Obvt/.d:	$O.d
+	@[ -d $Obvt ] || mkdir $Obvt
+	@touch $@
 
--include ${bvt/OBJS:.o=.d}
+${bvt/SRCS}:	${MKDEPS} bvt/Module.mk $Obvt/.d
+-include ${bvt/DEPS}

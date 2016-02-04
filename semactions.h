@@ -3,9 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SEMACTIONS_H_4FCB7DF9483E72B928D403B82888FF14
-#define SEMACTIONS_H_4FCB7DF9483E72B928D403B82888FF14
-
+#pragma once
 #include "semfile.h"
 #include "semarith.h"
 #include "semdecl.h"
@@ -15,5 +13,3 @@
 #include "semutil.h"
 #include "semconio.h"
 #include "semcontrol.h"
-
-#endif

@@ -1,13 +1,4 @@
-*.o
-*.a
+.o
 config.status
 Config.mk
 config.h
-cobcy
-parser.hh
-scanner.cc
-parser.cc
-bvt/output-file
-bvt/relative.dbf
-hexv/hexv
-dbv/dbv

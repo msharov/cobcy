@@ -3,16 +3,16 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SYMBASE_H_64F2F952279411DC249C520D6596F0D6
-#define SYMBASE_H_64F2F952279411DC249C520D6596F0D6
-
+#pragma once
 #include "config.h"
 
-#define MAX_SYMBOL_LENGTH	50
-#define MAX_PREFIX_LENGTH	80
-#define MAX_FULLNAME_LENGTH	(MAX_SYMBOL_LENGTH + MAX_PREFIX_LENGTH)
+enum {
+    MAX_SYMBOL_LENGTH	= 50,
+    MAX_PREFIX_LENGTH	= 80,
+    MAX_FULLNAME_LENGTH	= (MAX_SYMBOL_LENGTH + MAX_PREFIX_LENGTH)
+};
 
-typedef enum {
+enum CobolSymbolType {
     CS_Undefined,
     CS_Record, 
     CS_Variable,
@@ -21,47 +21,49 @@ typedef enum {
     CS_Label,
     CS_Constant,
     CS_Picture
-} CobolSymbolType;
+};
 
 /// Defines an abstract symbol table entry.
 class CobolSymbol {
-private:
-    char		ParentCobolName [MAX_SYMBOL_LENGTH];
-    char		Prefix [MAX_PREFIX_LENGTH];
-    char		CName [MAX_SYMBOL_LENGTH];	   // C name
-    char		FullCName [MAX_FULLNAME_LENGTH];   // C name with prefix
-    char		CobolName [MAX_SYMBOL_LENGTH];	   // Cobol name
-
-protected:
-    void		CobolToCName (char* str);
-
 public:
 			CobolSymbol (void);
     virtual		~CobolSymbol (void);
-    void		SetName (const char* NewName);
-    inline const char*	GetName (void);
-    inline const char*	GetCName (void);
-    inline const char*	GetFullCName (void);
-    void		SetParent (const char* NewParent);
-    virtual CobolSymbolType	Kind (void) { return (CS_Undefined); }
+    void		SetName (const char* name);
+    inline auto&	GetName (void) const		{ return _cobolName; }
+    inline auto&	GetCName (void) const		{ return _cName; }
+    inline auto&	GetFullCName (void) const	{ return _cNameFull; }
+    void		SetParent (const char* pname);
+    virtual CobolSymbolType	Kind (void) const	{ return CS_Undefined; }
     virtual void	text_write (ostringstream& os) const;
+private:
+    string		_prefix;
+    string		_cobolName;	// Cobol name
+    string		_parentCobolName;
+    string		_cName;		// C name
+    string		_cNameFull;	// C name with prefix
 };
 
-//------------------------------------------------------------------------
+class SymbolTable {
+public:
+    using value_type	= CobolSymbol*;
+    using key_type	= string;
+    using value_ptr	= unique_ptr<CobolSymbol>;
+private:
+    using keyvec_t	= vector<key_type>;
+    using datavec_t	= vector<value_ptr>;
+public:
+			SymbolTable (void);
+    value_type		find (const key_type& key) const noexcept;
+    template <typename Sym>
+    inline Sym*		lookup (const key_type& key) const noexcept	{ return dynamic_cast<Sym*>(find(key)); }
+    value_type		insert (const key_type& key, value_type sym);
+    void		erase (const key_type& key);
+    template <typename Sym, typename... Args>
+    inline Sym*		emplace (const key_type& key, Args&&... args)	{ return static_cast<Sym*>(insert (key, new Sym (forward<Args>(args)...))); }
+    inline bool		empty (void) const	{ return _names.empty(); }
+private:
+    keyvec_t		_names;
+    datavec_t		_syms;
+};
 
-inline const char* CobolSymbol :: GetName (void)
-{
-    return (CobolName);
-}
-
-inline const char* CobolSymbol :: GetCName (void)
-{
-    return (CName);
-}
-
-inline const char* CobolSymbol :: GetFullCName (void)
-{
-    return (FullCName);
-}
-
-#endif
+extern SymbolTable g_Symbols;

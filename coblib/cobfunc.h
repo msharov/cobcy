@@ -5,16 +5,12 @@
 //
 // Cobol function library.
 
-#ifndef COBFUNC_H_5F505570391DF1261B8F7F0537665407
-#define COBFUNC_H_5F505570391DF1261B8F7F0537665407
-
+#pragma once
 #include "dbf.h"
 #include "ndx.h"
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-//----------------------------------------------------------------------
 
 int 	_Alphabetic (const char* str);
 int 	_AlphabeticCase (const char* str, int what);
@@ -41,8 +37,3 @@ void	_CloseIndexFile (NDX_FILE** ifd);
 void	_SeekRelativeFile (DBF_FILE* fp, long int record);
 void	_SeekIndexedFile (DBF_FILE* fpd, NDX_FILE* fpi, const char* key);
 double 	_RoundResult (double num, const char* pic);
-
-//----------------------------------------------------------------------
-
-#endif
-

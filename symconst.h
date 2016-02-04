@@ -3,9 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SYMCONST_H_06AC2DD61E5065A760B47DBD4CA38338
-#define SYMCONST_H_06AC2DD61E5065A760B47DBD4CA38338
-
+#pragma once
 #include "symbase.h"
 #include "semtypes.h"
 
@@ -16,15 +14,16 @@ public:
 				CobolConstant (const char* cval);
 				CobolConstant (long int ival);
 				CobolConstant (double fval);
-    virtual			~CobolConstant (void);
+				CobolConstant (const StackEntry& e);
+    virtual			~CobolConstant (void) override;
     CobolConstant&		operator= (const char* cval);
     CobolConstant&		operator= (long int ival);
     CobolConstant&		operator= (double fval);
     CobolConstant&		operator= (StackEntry * se);
-    virtual CobolSymbolType	Kind (void) { return (CS_Constant); }
-    virtual void		text_write (ostringstream& os) const;
+    virtual CobolSymbolType	Kind (void) const override { return CS_Constant; }
+    virtual void		text_write (ostringstream& os) const override;
     void			GenWrite (ostringstream& os, const char* stream);
-    inline bool			IsNumeric (void)	{ return (CurKind == CC_Integer || CurKind == CC_Float); }
+    inline bool			IsNumeric (void)	{ return CurKind == CC_Integer || CurKind == CC_Float; }
 protected:
     union UData {
         char*		cval;
@@ -41,5 +40,3 @@ protected:
     UData			data;
     EKind			CurKind;
 };
-
-#endif

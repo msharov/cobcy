@@ -1,12 +1,12 @@
 %{
 // This file is part of cobcy, a COBOL-to-C compiler.
 //
-// Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include <stdio.h>
 #include <string.h>
-#include "../semactions.h"
+#include <semactions.h>
 
 extern int CurrentLine;
 extern long int ival;

@@ -16,11 +16,6 @@ void CobolRecord::AddChild (CobolData * NewChild)
     CSize += NewChild->GetSize();
 }
 
-CobolSymbolType CobolRecord::Kind (void)
-{
-    return (CS_Record);
-}
-
 void CobolRecord::GenDeclareBegin (ostringstream& os)
 {
     GenIndent();
@@ -35,41 +30,45 @@ void CobolRecord::GenDeclareEnd (ostringstream& os)
 
 void CobolRecord::GenRead (ostringstream& os, const char* stream)
 {
-#ifndef NDEBUG
-    cout << "\tReading record " << *this;
-    cout << " from stream " << stream << "\n";
-#endif
+    #ifndef NDEBUG
+	if (g_Config.GenDebug)
+	    cout << "\tReading record " << *this << " from stream " << stream << "\n";
+    #endif
     foreach (vector<CobolData*>::const_iterator, i, ChildList) {
-#ifndef NDEBUG
-	cout << "\t\tReading child " << **i << "\n";
-#endif
+	#ifndef NDEBUG
+	    if (g_Config.GenDebug)
+		cout << "\t\tReading child " << **i << "\n";
+	#endif
 	(*i)->GenRead (os, stream);
     }
 }
 
 void CobolRecord::GenWrite (ostringstream& os, const char* stream)
 {
-#ifndef NDEBUG
-    cout << "\tWriting record " << *this;
-    cout << " to stream " << stream << "\n";
-#endif
+    #ifndef NDEBUG
+	if (g_Config.GenDebug)
+	    cout << "\tWriting record " << *this << " to stream " << stream << "\n";
+    #endif
     foreach (vector<CobolData*>::const_iterator, i, ChildList) {
-#ifndef NDEBUG
-	cout << "\t\tWriting child " << **i << "\n";
-#endif
+	#ifndef NDEBUG
+	    if (g_Config.GenDebug)
+		cout << "\t\tWriting child " << **i << "\n";
+	#endif
 	(*i)->GenWrite (os, stream);
     }
 }
 
 void CobolRecord::GenSignature (ostringstream& os)
 {
-#ifndef NDEBUG
-    cout << "\tSigning record " << *this << "\n";
-#endif
+    #ifndef NDEBUG
+	if (g_Config.GenDebug)
+	    cout << "\tSigning record " << *this << "\n";
+    #endif
     foreach (vector<CobolData*>::const_iterator, i, ChildList) {
-#ifndef NDEBUG
-	cout << "\t\tSigning child " << **i << "\n";
-#endif
+	#ifndef NDEBUG
+	    if (g_Config.GenDebug)
+		cout << "\t\tSigning child " << **i << "\n";
+	#endif
 	(*i)->GenSignature (os);
     }
 }

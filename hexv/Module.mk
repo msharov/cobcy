@@ -1,9 +1,10 @@
 ################ Source files ##########################################
 
-hexv/EXE	:= hexv/hexv
+hexv/EXE	:= $Ohexv/hexv
 hexv/SRCS	:= $(wildcard hexv/*.c)
 hexv/OBJS	:= $(addprefix $O,$(hexv/SRCS:.c=.o))
 hexv/LIBS	:= ${COBLIB} -lncurses
+hexv/DEPS	:= ${hexv/OBJS:.o=.d}
 
 ################ Compilation ###########################################
 
@@ -18,7 +19,7 @@ ${hexv/EXE}:	${hexv/OBJS} ${COBLIB}
 .PHONY:		hexv/install hexv/uninstall hexv/clean
 
 ifdef BINDIR
-hexv/EXEI	:= $(addprefix ${BINDIR}/,$(notdir ${hexv/EXE}))
+hexv/EXEI	:= ${BINDIR}/$(notdir ${hexv/EXE})
 install:	hexv/install
 hexv/install:	${hexv/EXEI}
 ${hexv/EXEI}:	${hexv/EXE}
@@ -26,16 +27,24 @@ ${hexv/EXEI}:	${hexv/EXE}
 	@${INSTALLBIN} $< $@
 uninstall:	hexv/uninstall
 hexv/uninstall:
-	@echo "Removing ${hexv/EXEI} ..."
-	@rm -f ${hexv/EXEI}
+	@if [ -f ${hexv/EXEI} ]; then\
+	    echo "Removing ${hexv/EXEI} ...";\
+	    rm -f ${hexv/EXEI};\
+	fi
 endif
 
 ################ Compilation ###########################################
 
 clean:		hexv/clean
 hexv/clean:
-	@rm -f ${hexv/EXE} ${hexv/OBJS} $(hexv/OBJS:.o=.d)
-	@rmdir $Ohexv &> /dev/null || true
+	@if [ -d $Ohexv ]; then\
+	    rm -f ${hexv/EXE} ${hexv/OBJS} ${hexv/DEPS} $Ohexv/.d;\
+	    rmdir $Ohexv;\
+	fi
 
-${hexv/OBJS}:	Makefile Config.mk hexv/Module.mk
--include ${hexv/OBJS:.o=.d}
+$Ohexv/.d:	$O.d
+	@[ -d $Ohexv ] || mkdir $Ohexv
+	@touch $@
+
+${hexv/OBJS}:	${MKDEPS} hexv/Module.mk $Ohexv/.d
+-include ${hexv/DEPS}

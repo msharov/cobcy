@@ -6,53 +6,42 @@
 #include "semextern.h"
 #include <unistd.h>
 #include <stdio.h>
+#include <signal.h>
 
 //----------------------------------------------------------------------
 
 extern FILE* yyin;
 extern int yyparse (void);
-CobcyConfigType CobcyConfig;
+CobcyConfigType g_Config;
 
 //----------------------------------------------------------------------
 
-static void Usage (const char* progname);
-static int ProcessFlags (int argc, const char* const* argv);
-static void SetInitialConfiguration (void);
+class Cobcy {
+public:
+    static Cobcy&	Instance (void)	{ static Cobcy s_App; return s_App; }
+    void		ProcessArgs (int argc, char* const* argv);
+    int			Run (void);
+private:
+			Cobcy (void) = default;
+			~Cobcy (void) noexcept;
+    static void		Usage (void);
+};
 
 //----------------------------------------------------------------------
 
-int main (int argc, const char* const* argv)
+Cobcy::~Cobcy (void) noexcept
 {
-    SetInitialConfiguration();
-    if (ProcessFlags (argc, argv) == -1) {
-	Usage (argv[0]);
-	return (2);
-    }
-
-    if ((yyin = fopen (CobcyConfig.SourceFile, "r")) == NULL) {
-	cerr << "FATAL: Could not open '" << CobcyConfig.SourceFile << "'!\n";
-	return (1);
-    }
-#ifndef NDEBUG
-    else cout << "Compiling " << CobcyConfig.SourceFile << " ...\n";
-#endif
-
-    yyparse();
-    fclose (yyin);
-
     if (ErrorOccured()) {
-	unlink (CobcyConfig.CodeFile);
-	unlink (CobcyConfig.DeclFile);
+	unlink (g_Config.CodeFile);
+	unlink (g_Config.DeclFile);
     }
-    return (0);
 }
 
-static void Usage (const char* progname)
+/*static*/ void Cobcy::Usage (void)
 {
-    cout << "\n"
-	    "Cobol to C compiler v0.1, Copyright (c) Mike Sharov, 1996\n"
-	    "Usage:\n"
-	    "\t" << progname << " [options] <file.cob>\n"
+    cout << "Cobol to C compiler " COBCY_VERSTRING ", Copyright (c) 1996 by " COBCY_BUGREPORT
+	    "\nUsage:\n"
+	    "\t" COBCY_NAME " [options] <file.cob>\n"
 	    "\n"
 	    "\tOptions:\n"
 	    "\t-g\t\tGenerate compiler debugging info (_cpi trace)\n"
@@ -63,80 +52,114 @@ static void Usage (const char* progname)
 	    "\n";
 }
 
-static int ProcessFlags (int argc, const char* const* argv)
+void Cobcy::ProcessArgs (int argc, char* const* argv)
 {
-    int NameLength;
-    enum {
-	FlagMode,
-	SourceFileMode,	// This will be the default
-	OutputFileMode
-    } mode = FlagMode;
-    bool SourceSet = false, OutputSet = false;
-
-    mode = SourceFileMode;
-    for (int i = 1; i < argc; ++ i) {
-	if (argv[i][0] == '-')
-	    mode = FlagMode;
-
-	switch (mode) {
-	    case FlagMode:
-		if (strcmp (argv[i], "-o") == 0)
-		    mode = OutputFileMode;
-		else if (strcmp (argv[i], "-g") == 0)
-		    CobcyConfig.GenDebug = true;
-
-		// If not -o, revert to looking for the source file
-		if (mode != OutputFileMode)
-		    mode = SourceFileMode;
-		break;
-	    case SourceFileMode:
-		if (!SourceSet) {
-		    strcpy (CobcyConfig.SourceFile, argv[i]);
-		    if (!OutputSet) {
-			strcpy (CobcyConfig.CodeFile, CobcyConfig.SourceFile);
-			strcat (CobcyConfig.CodeFile, ".c");
-			strcpy (CobcyConfig.DeclFile, CobcyConfig.SourceFile);
-			strcat (CobcyConfig.DeclFile, ".h");
-		    }
-		    SourceSet = true;
-		}
-		break;
-	    case OutputFileMode:
-		if (!OutputSet) {
-		    strcpy (CobcyConfig.CodeFile, argv[i]);
-		    strcpy (CobcyConfig.DeclFile, argv[i]);
-		    // If possible, remove the ending .c extension
-		    // Do this by replacing the dot with EOS
-		    NameLength = strlen (CobcyConfig.DeclFile);
-		    if (CobcyConfig.DeclFile [NameLength - 1] == 'c' &&
-		        CobcyConfig.DeclFile [NameLength - 2] == '.')
-		        CobcyConfig.DeclFile [NameLength - 2] = '\x0';
-
-		    strcat (CobcyConfig.DeclFile, ".h");
-		    mode = SourceFileMode;
-		    OutputSet = true;
-		}
-		break;
+    bool outputSet = false;
+    for (int o; -1 != (o = getopt (argc, argv, "go:"));) {
+	if (o == 'g')
+	    g_Config.GenDebug = true;
+	else if (o == 'o') {
+	    g_Config.CodeFile = optarg;
+	    g_Config.DeclFile = optarg;
+	    g_Config.DeclFile.replace (g_Config.DeclFile.rfind (".c"), string::npos, ".h");
+	    outputSet = true;
 	}
     }
-
-#ifndef NDEBUG
-    cerr << "Reading from " << CobcyConfig.SourceFile << "\n";
-    cerr << "Compiling into " << CobcyConfig.CodeFile << " and ";
-    cerr << CobcyConfig.DeclFile << "\n";
-#endif
-
-    if (!SourceSet) {
-	cerr << "No cobol file specified\n";
-	return (-1);
+    if (optind >= argc) {
+	Usage();
+	return;
     }
-    return (0);
+    g_Config.SourceFile = argv[optind];
+    if (!outputSet) {
+	g_Config.CodeFile = g_Config.SourceFile + ".c";
+	g_Config.DeclFile = g_Config.SourceFile + ".h";
+    }
 }
 
-static void SetInitialConfiguration (void)
+int Cobcy::Run (void)
 {
-    memset (CobcyConfig.SourceFile, 0, MAX_FILENAME);
-    memset (CobcyConfig.CodeFile, 0, MAX_FILENAME);
-    memset (CobcyConfig.DeclFile, 0, MAX_FILENAME);
-    CobcyConfig.GenDebug = false;
+    if (!g_Config.SourceFile[0]) {
+	cerr << "Error: no COBOL source specified\n";
+	return EXIT_FAILURE;
+    }
+    DTRACE ("Compiling %s into %s and %s\n", g_Config.SourceFile.c_str(), g_Config.CodeFile.c_str(), g_Config.DeclFile.c_str());
+    if (!(yyin = fopen (g_Config.SourceFile, "r"))) {
+	cerr.format ("Error: could not open source file \"%s\"\n", g_Config.SourceFile.c_str());
+	return EXIT_FAILURE;
+    } else
+	DTRACE ("Compiling %s ...\n", g_Config.SourceFile.c_str());
+    yyparse();
+    fclose (yyin);
+    return ErrorOccured() ? EXIT_FAILURE : EXIT_SUCCESS;
 }
+
+//----------------------------------------------------------------------
+//{{{ Process cleanup handlers
+
+static void OnSignal (int sig) noexcept
+{
+    static atomic_flag doubleSignal = ATOMIC_FLAG_INIT;
+    bool bFirst = !doubleSignal.test_and_set();
+    WriteError (strsignal(sig));
+    #ifndef NDEBUG
+	if (bFirst)
+	    try { CBacktrace bt; cerr << bt; } catch (...) {}
+    #endif
+    enum { qc_ShellSignalQuitOffset = 128 };
+    auto exitCode = sig + qc_ShellSignalQuitOffset;
+    if (bFirst)
+	exit (exitCode);
+    _Exit (exitCode);
+}
+
+/// Called by the framework on unrecoverable exception handling errors.
+static void OnTerminate (void) noexcept
+{
+    assert (!"Unrecoverable exception handling error detected.");
+    WriteError ("unrecoverable exception handling error");
+    raise (SIGABRT);
+    exit (EXIT_FAILURE);
+}
+
+/// Called when an exception violates a throw specification.
+static void OnUnexpected (void) noexcept
+{
+    WriteError ("unexpected exception caught");
+    OnTerminate();
+}
+
+/// Installs OnSignal as handler for signals.
+static void InstallCleanupHandlers (void) noexcept
+{
+    static const uint8_t c_Signals[] = {
+	SIGINT, SIGQUIT, SIGILL,  SIGTRAP, SIGABRT,
+	SIGIOT, SIGBUS,  SIGFPE,  SIGSEGV, SIGTERM,
+	SIGIO,  SIGCHLD
+    };
+    for (auto i = 0u; i < VectorSize(c_Signals); ++i)
+	signal (c_Signals[i], OnSignal);
+    std::set_terminate (OnTerminate);
+    std::set_unexpected (OnUnexpected);
+}
+
+//}}}-------------------------------------------------------------------
+//{{{ main
+
+int main (int argc, char* const* argv)
+{
+    int ec = EXIT_FAILURE;
+    InstallCleanupHandlers();
+    try {
+	auto& app (Cobcy::Instance());
+	app.ProcessArgs (argc, argv);
+	ec = app.Run();
+    } catch (exception& e) {
+	cerr.format ("Error: %s\n", e.what());
+	#ifndef NDEBUG
+	    cerr << e.backtrace();
+	#endif
+    }
+    return ec;
+}
+
+//}}}-------------------------------------------------------------------

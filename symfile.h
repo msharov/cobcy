@@ -3,9 +3,7 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#ifndef SYMFILE_H_21AF9B80775D0334054DEA8C2F74C4B1
-#define SYMFILE_H_21AF9B80775D0334054DEA8C2F74C4B1
-
+#pragma once
 #include "symbase.h"
 #include "symdata.h"
 #include "semtypes.h"
@@ -26,9 +24,9 @@ private:
 
 public:
 				CobolFile (void);
-				~CobolFile (void);
-    CobolSymbolType		Kind (void);
-    void			SetFilename (const char* filename);
+    virtual			~CobolFile (void) override;
+    virtual CobolSymbolType	Kind (void) const override		{ return CS_FileDesc; }
+    inline void			SetFilename (const char* filename)	{ _dataFileName = filename; }
     void			SetAccessMode (AccessModeType mode);
     void			SetOrganization (OrganizationType org);
     void			SetKey (const char* keyname);
@@ -38,7 +36,7 @@ public:
     void			SetNewlineFlag (bool NewFlag);
     void			SetUnlinkOnClose (bool NewFlag);
     void			AssociateRecord (void);
-    virtual void		text_write (ostringstream& os) const;
+    virtual void		text_write (ostringstream& os) const override;
 
     void			GenDeclare (ostringstream& os);
     void			GenOpen (ostringstream& os, OpenModeType mode);
@@ -46,19 +44,19 @@ public:
     void			GenSeek (ostringstream& os);
     void			GenClose (ostringstream& os);
     void			GenEOFCheck (ostringstream& os);
-    void			GenWriteData (ostringstream& os, CobolData* data = NULL);
-    void			GenReadData (ostringstream& os, CobolData* data = NULL);
+    void			GenWriteData (ostringstream& os, CobolData* data = nullptr);
+    void			GenReadData (ostringstream& os, CobolData* data = nullptr);
     void			GenWriteEnd (ostringstream& os);
     void			GenReadEnd (ostringstream& os);
     void			GenSetupForAppend (ostringstream& os);
 private:
-    char			DataFileName [PATH_MAX];
-    char			IndexFileName [PATH_MAX];
-    char			RecordName [MAX_SYMBOL_LENGTH];
-    char			StatusVar [MAX_SYMBOL_LENGTH];
-    char			RecordKey [MAX_SYMBOL_LENGTH];
+    string			_dataFileName;
+    string			_indexFileName;
+    string			_recordName;
+    string			_statusVar;
+    string			_recordKey;
 
-    char			FlushCommand [PATH_MAX];
+    string			_flushCommand;
     bool			NewlineFlag;
     AccessModeType		AccessMode;
     OrganizationType		Organization;
@@ -71,5 +69,3 @@ private:
     bool			IsDBF;		// To avoid 'if Organization ==
     bool			IsFormatted;
 };
-
-#endif
