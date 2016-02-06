@@ -27,7 +27,7 @@ static void _SetVarValues (void)
 
 static int _FirstParagraph (void)
 {
-    var2 = var2 + var1;
+    var3 = var2 + var1;
     printf ("And the answer is (10 + 11 = 21):");
     printf ("\n");
     _WriteIntegerVar (stdout, var3, "9999");
@@ -35,12 +35,12 @@ static int _FirstParagraph (void)
     var1 = 3;
     var2 = 5;
     if (var2 != 0)
-	var1 = var1 / var2;
+	var3 = var1 / var2;
     printf ("3 / 5 unrounded = ");
     _WriteIntegerVar (stdout, var3, "9999");
     printf ("\n");
     if (var2 != 0)
-	var1 = _RoundResult ((double) var1 / (double) var2, "9999");
+	var3 = _RoundResult ((double) var1 / (double) var2, "9999");
     printf ("3 / 5 rounded = ");
     _WriteIntegerVar (stdout, var3, "9999");
     printf ("\n");
@@ -60,7 +60,7 @@ int main (void)
 }
 ------------------------------------------------------------
 And the answer is (10 + 11 = 21):
-   0
+  21
 3 / 5 unrounded =    0
-3 / 5 rounded =    0
+3 / 5 rounded =    1
 ------------------------------------------------------------

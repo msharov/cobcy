@@ -243,9 +243,8 @@ void _AssignVarString (char* var1, const char* var2, int p1, int p2)
 	var1[p2] = ' ';
 }
 
-double _RoundResult (double num, const char* pic)
+double _RoundResult (double num, const char* pic UNUSED)
 {
-    pic = pic;
     return (long)(num + 0.5);
 }
 

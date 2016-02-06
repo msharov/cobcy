@@ -58,19 +58,21 @@ static void GenericArithmetic (bool sourceFirst, char opChar)
 	edest = PopStatement();
 	esrc = PopIdentifier();
     }
+    const CobolVar* giving = nullptr;
+    if (egiving.kind == SE_Identifier)
+	giving = LookupIdentifier<CobolVar> (egiving.ident);
     for (auto& d : edest) {
 	auto dest = LookupIdentifier<CobolVar> (d.ident);
 	if (!dest)
 	    return WriteError ("unknown destination %s", d.ident.c_str());
+	CobolConstant csrc = esrc;
+	const CobolSymbol* src = &csrc;
 	if (esrc.kind == SE_Identifier) {
-	    auto src = LookupIdentifier<CobolVar> (esrc.ident);
+	    src = LookupIdentifier<CobolVar> (esrc.ident);
 	    if (!src)
 		return WriteError ("unknown source %s", esrc.ident.c_str());
-	    dest->GenArith (codef, dest, src, opChar);
-	} else {
-	    CobolConstant csrc = esrc;
-	    dest->GenArith (codef, dest, &csrc, opChar);
 	}
+	(giving ? giving : dest)->GenArith (codef, dest, src, opChar);
     }
     RoundResult = false;
 }
