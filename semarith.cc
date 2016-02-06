@@ -114,6 +114,8 @@ void GenCompute (void)
 	    case SE_Identifier:
 		// i > 0 because we only want casting on the righthand side
 		//	entry 0 is the variable where stuff will be placed
+		if (RoundResult && &p != prms.begin())
+		    codef << "(double)";
 		PrintIdentifier (p.ident, codef);
 		break;
 	    case SE_Operator:
@@ -134,6 +136,8 @@ void GenCompute (void)
 	    case SE_Integer:
 	    case SE_Float:
 		PrintConstant (p, codef);
+		if (RoundResult && p.kind == SE_Integer)
+		    codef << ".0";
 		break;
 	    default:
 		WriteError ("Invalid expression in COMPUTE");

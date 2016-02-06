@@ -43,7 +43,7 @@ static int _FirstParagraph (void)
     _WriteIntegerVar (stdout, varx.varz, "9999");
     printf (" is not rounded");
     printf ("\n");
-    varx.varz = _RoundResult ((6 + varx.vary) / 5, "9999");
+    varx.varz = _RoundResult ((6.0 + (double)varx.vary) / 5.0, "9999");
     _WriteIntegerVar (stdout, varx.varz, "9999");
     printf (" is rounded");
     printf ("\n");
@@ -65,5 +65,5 @@ int main (void)
   55
 vary is eight     
    2 is not rounded
-   2 is rounded
+   3 is rounded
 ------------------------------------------------------------
