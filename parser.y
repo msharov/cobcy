@@ -748,7 +748,7 @@ reverse_relational:	TOK_GREATER optional_than
 	;
 
 clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
-	|	TOK_DISPLAY display_args upon_option { GenDisplay(); }
+	|	TOK_DISPLAY display_args no_advancing_option upon_option { GenDisplay(); }
 	|	TOK_MOVE expression TOK_TO id_list { GenMove(); }
 	|	TOK_ADD expression TOK_TO id_list giving_option
 		{ GenAdd(); }
@@ -828,6 +828,10 @@ upon_option:	TOK_UPON identifier { SetDisplayOutput(); }
 		  Push (SE_Identifier);
 		  SetDisplayOutput();
 		}
+	;
+
+no_advancing_option:	TOK_WITH TOK_NO TOK_ADVANCING { SetDisplayNoAdvancing(); }
+	|
 	;
 
 giving_option:	TOK_GIVING identifier

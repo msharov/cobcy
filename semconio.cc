@@ -14,6 +14,7 @@
 
 static string s_DisplayOutput;
 static AcceptSourceType s_AcceptSource;
+static bool s_NoAdvancing = false;
 
 //----------------------------------------------------------------
 
@@ -78,7 +79,10 @@ void GenDisplay (void)
 	    ce.GenWrite (codef, s_DisplayOutput);
 	}
     }
-    CobolConstant("\\n").GenWrite (codef, s_DisplayOutput);
+    if (!s_NoAdvancing)
+	CobolConstant("\\n").GenWrite (codef, s_DisplayOutput);
+    else
+	s_NoAdvancing = false;
 }
 
 void SetDisplayOutput (void)
@@ -88,4 +92,9 @@ void SetDisplayOutput (void)
     if (outStrSym)
 	s_DisplayOutput = outStrSym->GetFullCName();
     DTRACE ("\tDISPLAY output set to %s\n", s_DisplayOutput.c_str());
+}
+
+void SetDisplayNoAdvancing (void)
+{
+    s_NoAdvancing = true;
 }

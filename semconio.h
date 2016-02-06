@@ -8,4 +8,5 @@
 void GenAccept (void);
 void GenDisplay (void);
 void SetDisplayOutput (void);
+void SetDisplayNoAdvancing (void);
 void SetAcceptSource (AcceptSourceType NewSrc);

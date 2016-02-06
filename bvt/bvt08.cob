@@ -9,7 +9,7 @@
 
         procedure division.
             add var1 to var2 giving var3.
-            display "And the answer is (10 + 11 = 21):".
+            display "And the answer is (10 + 11 = 21):" with no advancing.
             display var3.
 
             move 3 to var1.

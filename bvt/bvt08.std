@@ -29,7 +29,6 @@ static int _FirstParagraph (void)
 {
     var3 = var2 + var1;
     printf ("And the answer is (10 + 11 = 21):");
-    printf ("\n");
     _WriteIntegerVar (stdout, var3, "9999");
     printf ("\n");
     var1 = 3;
@@ -59,8 +58,7 @@ int main (void)
     return EXIT_SUCCESS;
 }
 ------------------------------------------------------------
-And the answer is (10 + 11 = 21):
-  21
+And the answer is (10 + 11 = 21):  21
 3 / 5 unrounded =    0
 3 / 5 rounded =    1
 ------------------------------------------------------------
