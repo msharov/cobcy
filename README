@@ -2,7 +2,7 @@
 			+-----------------------+
 			|       C O B C Y       |
 			+-----------------------+
-			|      Version 0.2      |
+			|      Version 0.5      |
 			+-----------------------+
 
 Cobcy is a free cobol compiler. It compiles cobol code into
@@ -16,9 +16,11 @@ like arrays, strings, and record-record MOVEs are still missing.
 This was a project of mine back in 1996, which is when the last release
 occured. I dug this up recently on uu.net, and decided to put it up to
 some public place. It might make a decent starting point if you want to
-make a COBOL compiler. I don't know yet if I want to maintain it much. I
-plan to clean it up a bit and maybe make one release that compiles on
-a modern gcc.
+make a COBOL compiler.
+
+I do not want to maintain it; I just cleaned it up a bit to get it to
+compile with current gcc and uSTL releases. So tell me if it crashes,
+but forget about new features.
 
 The "alberto" branch is for Alberto Santini's changes. He did some work
 on the project between 1996 and 1999, and made two releases. I ought to
@@ -28,16 +30,18 @@ merge some of that in, when I figure out exactly what he did.
 
 QuickStart:
 -----------
-download and install uSTL library from http://ustl.sourceforge.net
-./configure
-make
+you need gcc 4.7 for c++14 support
+    (for cobcy itself, the COBOL is compiled to c99)
+
+download and install uSTL library from https://github.com/msharov/ustl
+
+./configure && make
 compile things using 'cobcy -o program.c program.cob'
 
-There are some tests available in the 'bvt' directory, which can be run
-automatically with 'make check'. See documentation in the docs directory
-for more information about the program.  If you add code, I would
-appreciate it if you read docs/CODE.STY file.  If you have a problem,
+There are some tests available in the 'bvt' directory, which can be
+run automatically with 'make check'. See documentation in the docs
+directory for more information about the program. If you have a problem,
 run cobcy with -g flag and send me the output of thus generated program,
-the generated C code (.c and .h), and the test file you used.
+the generated C code, and the test file you used.
 
 -------------------------------------------------------------------------

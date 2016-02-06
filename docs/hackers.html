@@ -113,11 +113,6 @@ Functions:
 This file contains code generation of control structures. Paragraphs are
 implemented as separate functions with a same-name label in the beginning.
 The label is there to allow faster loops. See GenGoto for more details.
-There is an arbitrary limit on the number of paragraphs to allow STOP RUN
-to work. The limit is set to 32000 at present, which is a lot of paragraphs.
-The compiler will not give you any bad message about it, but if you have
-50000 paragraphs and STOP RUN in paragraph 3, you'll go to paragraph 32000.
-I'll fix that if anyone needs that many.
 Global variables are <tt>ParagraphList</tt>, which is a queue of all
 paragraphs for generation of the main control switch in generated C main().
 See <a href="#seminit">seminit.cc</a> for more detail. <tt>CurPar</tt>

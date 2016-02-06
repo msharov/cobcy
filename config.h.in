@@ -22,10 +22,10 @@
 // Include the uSTL library.
 #if HAVE_USTL_H
     #include <ustl.h>
-    #if USTL_VERSION < 0x120
-	#error "@PKG_NAME@ requires uSTL 1.2.0+. http://ustl.sourceforge.net"
+    #if USTL_VERSION < 0x230
+	#error "@PKG_NAME@ requires uSTL 2.3+. https://github.com/msharov/ustl"
     #endif
     using namespace ustl;
 #else
-    #error "uSTL library is required to compile @PKG_NAME@. http://ustl.sourceforge.net"
+    #error "uSTL library is required to compile @PKG_NAME@. https://github.com/msharov/ustl"
 #endif
