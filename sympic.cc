@@ -28,7 +28,7 @@ PictureType::PictureType (void)
 	    char* epic = const_cast<char*>(++pic);
 	    auto n = strtoul (epic, &epic, 10);
 	    pic = epic;
-	    expanded.append (n, pc);
+	    expanded.append (n-1, pc);
 	} else if (*pic != ')')
 	    expanded += *pic;
     }

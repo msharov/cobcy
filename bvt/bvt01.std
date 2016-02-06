@@ -16,13 +16,13 @@ enum {
 struct {
     long vary;
     long varz;
-    char name [20];
+    char name [19];
 } varx;
 
 static void _SetVarValues (void)
 {
     varx.varz = 60;
-    _AssignVarString (varx.name, "Hello world!", 19, 0);
+    _AssignVarString (varx.name, "Hello world!", 18, 0);
 }
 
 static int _FirstParagraph (void)
@@ -30,8 +30,8 @@ static int _FirstParagraph (void)
     printf ("This is a cobol program");
     printf ("\n");
     _WriteIntegerVar (stdout, varx.vary, "9999");
-    _WriteIntegerVar (stdout, varx.varz, "99999");
-    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxxx");
+    _WriteIntegerVar (stdout, varx.varz, "9999");
+    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxx");
     printf ("\n");
     return _po__Next;
 }
@@ -49,5 +49,5 @@ int main (void)
 }
 ------------------------------------------------------------
 This is a cobol program
-   0   60Hello world!       
+   0  60Hello world!      
 ------------------------------------------------------------

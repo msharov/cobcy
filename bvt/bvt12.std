@@ -16,7 +16,7 @@ enum {
 struct {
     long vary;
     long varz;
-    char tok1 [20];
+    char tok1 [19];
 } varx;
 
 static void _SetVarValues (void)
@@ -29,22 +29,22 @@ static int _FirstParagraph (void)
     varx.vary = 8;
     if ((varx.vary == 8))
     {
-	_AssignVarString (varx.tok1, "vary is eight", 19, 0);
+	_AssignVarString (varx.tok1, "vary is eight", 18, 0);
 	varx.varz = 55;
 	if ((varx.varz == 55))
 	{
-	    _WriteIntegerVar (stdout, varx.varz, "99999");
+	    _WriteIntegerVar (stdout, varx.varz, "9999");
 	    printf ("\n");
-	    _WriteStringVar (stdout, varx.tok1, "xxxxxxxxxxxxxxxxxxx");
+	    _WriteStringVar (stdout, varx.tok1, "xxxxxxxxxxxxxxxxxx");
 	    printf ("\n");
 	}
     }
     varx.varz = (6 + varx.vary) / 5;
-    _WriteIntegerVar (stdout, varx.varz, "99999");
+    _WriteIntegerVar (stdout, varx.varz, "9999");
     printf (" is not rounded");
     printf ("\n");
-    varx.varz = _RoundResult ((6 + varx.vary) / 5, "99999");
-    _WriteIntegerVar (stdout, varx.varz, "99999");
+    varx.varz = _RoundResult ((6 + varx.vary) / 5, "9999");
+    _WriteIntegerVar (stdout, varx.varz, "9999");
     printf (" is rounded");
     printf ("\n");
     return _po__Next;
@@ -62,8 +62,8 @@ int main (void)
     return EXIT_SUCCESS;
 }
 ------------------------------------------------------------
-   55
-vary is eight      
-    2 is not rounded
-    2 is rounded
+  55
+vary is eight     
+   2 is not rounded
+   2 is rounded
 ------------------------------------------------------------

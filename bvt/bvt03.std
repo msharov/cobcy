@@ -18,11 +18,11 @@ struct {
     long varz;
     long varf;
     char filler000 [2];
-    char name [20];
+    char name [19];
     char filler001 [2];
-    char names [20];
+    char names [19];
     char filler002 [2];
-    char city [17];
+    char city [16];
 } varx;
 
 static void _SetVarValues (void)
@@ -31,11 +31,11 @@ static void _SetVarValues (void)
     varx.varz = _zero_var;
     varx.varf = _zero_var;
     _AssignVarString (varx.filler000, " ", 1, 0);
-    _AssignVarString (varx.name, _space_var, 19, 201);
+    _AssignVarString (varx.name, _space_var, 18, 200);
     _AssignVarString (varx.filler001, " ", 1, 0);
-    _AssignVarString (varx.names, _space_var, 19, 201);
+    _AssignVarString (varx.names, _space_var, 18, 200);
     _AssignVarString (varx.filler002, " ", 1, 0);
-    _AssignVarString (varx.city, "Baltimore", 16, 0);
+    _AssignVarString (varx.city, "Baltimore", 15, 0);
 }
 
 static int _FirstParagraph (void)
@@ -43,28 +43,28 @@ static int _FirstParagraph (void)
     printf ("This is a cobol program");
     printf ("\n");
     _WriteIntegerVar (stdout, varx.vary, "9999");
-    _WriteIntegerVar (stdout, varx.varz, "999999");
-    _WriteIntegerVar (stdout, varx.varf, "999999");
+    _WriteIntegerVar (stdout, varx.varz, "99999");
+    _WriteIntegerVar (stdout, varx.varf, "99999");
     _WriteStringVar (stdout, varx.filler000, "x");
-    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxx");
     _WriteStringVar (stdout, varx.filler001, "x");
-    _WriteStringVar (stdout, varx.names, "xxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.names, "xxxxxxxxxxxxxxxxxx");
     _WriteStringVar (stdout, varx.filler002, "x");
-    _WriteStringVar (stdout, varx.city, "xxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.city, "xxxxxxxxxxxxxxx");
     printf ("\n");
     varx.vary = 5;
     varx.varz = 5;
-    _AssignVarString (varx.name, "Mike", 19, 0);
-    _AssignVarString (varx.names, "Mike", 19, 0);
+    _AssignVarString (varx.name, "Mike", 18, 0);
+    _AssignVarString (varx.names, "Mike", 18, 0);
     _WriteIntegerVar (stdout, varx.vary, "9999");
-    _WriteIntegerVar (stdout, varx.varz, "999999");
-    _WriteIntegerVar (stdout, varx.varf, "999999");
+    _WriteIntegerVar (stdout, varx.varz, "99999");
+    _WriteIntegerVar (stdout, varx.varf, "99999");
     _WriteStringVar (stdout, varx.filler000, "x");
-    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxx");
     _WriteStringVar (stdout, varx.filler001, "x");
-    _WriteStringVar (stdout, varx.names, "xxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.names, "xxxxxxxxxxxxxxxxxx");
     _WriteStringVar (stdout, varx.filler002, "x");
-    _WriteStringVar (stdout, varx.city, "xxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.city, "xxxxxxxxxxxxxxx");
     printf ("\n");
     return _po__Next;
 }
@@ -82,6 +82,6 @@ int main (void)
 }
 ------------------------------------------------------------
 This is a cobol program
-   0     0     0                                         Baltimore       
-   5     5     0 Mike                Mike                Baltimore       
+   0    0    0                                       Baltimore      
+   5    5    0 Mike               Mike               Baltimore      
 ------------------------------------------------------------

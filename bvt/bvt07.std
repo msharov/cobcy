@@ -24,30 +24,30 @@ FILE * print_out;
 
 struct {
     struct {
-	char print_one [5];
+	char print_one [4];
 	char print_two [2];
-	char print_three [4];
+	char print_three [3];
 	char print_four [2];
-	char print_five [6];
+	char print_five [5];
     } print_social_security_number;
-    char space_x [12];
-    char print_name [37];
+    char space_x [11];
+    char print_name [36];
 } print_out_record;
 
 struct {
     long id_number;
     char filler000 [2];
-    char name [17];
+    char name [16];
     char filler001 [2];
-    char address [37];
+    char address [36];
 } weird_record;
 long counter;
 
 
 static void _SetVarValues (void)
 {
-    _AssignVarString (weird_record.filler000, _space_var, 1, 201);
-    _AssignVarString (weird_record.filler001, _space_var, 1, 201);
+    _AssignVarString (weird_record.filler000, _space_var, 1, 200);
+    _AssignVarString (weird_record.filler001, _space_var, 1, 200);
 }
 
 static int _FirstParagraph (void)
@@ -72,13 +72,13 @@ loop_x: UNUSED
 	return _pi__Exit;
     }
     weird_record.id_number = counter;
-    _AssignVarString (weird_record.name, "Weirdo", 16, 0);
-    _AssignVarString (weird_record.address, "nowhere.loopback.edu", 36, 0);
+    _AssignVarString (weird_record.name, "Weirdo", 15, 0);
+    _AssignVarString (weird_record.address, "nowhere.loopback.edu", 35, 0);
     _WriteIntegerVar (print_out, weird_record.id_number, "999");
     _WriteStringVar (print_out, weird_record.filler000, "x");
-    _WriteStringVar (print_out, weird_record.name, "xxxxxxxxxxxxxxxx");
+    _WriteStringVar (print_out, weird_record.name, "xxxxxxxxxxxxxxx");
     _WriteStringVar (print_out, weird_record.filler001, "x");
-    _WriteStringVar (print_out, weird_record.address, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (print_out, weird_record.address, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     fprintf (print_out, "\n");
     goto loop_x;
     return _po__Next;

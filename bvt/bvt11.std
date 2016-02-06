@@ -41,7 +41,7 @@ static int _FirstParagraph (void)
     printf ("\n");
     _WriteStringVar (stdout, name_print, "x0bx");
     printf ("\n");
-    _WriteStringVar (stdout, name_3, "bbbbx");
+    _WriteStringVar (stdout, name_3, "bbbx");
     printf ("\n");
     _WriteIntegerVar (stdout, getal, "9,999");
     printf ("\n");
@@ -93,7 +93,7 @@ int main (void)
 ------------------------------------------------------------
 a cde
 a0  
-    a
+   a
 5,005
  53.00
 "hello"""

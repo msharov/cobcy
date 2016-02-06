@@ -21,10 +21,10 @@ static int end_loop (void);
 DBF_FILE * sample_rel_file;
 
 struct {
-    char name [27];
-    char address [27];
+    char name [26];
+    char address [26];
     long aptnum;
-    char city [17];
+    char city [16];
     long zip;
 } sample_rel_record;
 long count_var;
@@ -41,23 +41,23 @@ static int _FirstParagraph (void)
     printf ("\n");
     printf ("The file will be called 'relative.dbf'");
     printf ("\n");
-    _OpenRelativeFile (&sample_rel_file, "relative.dbf", " name C 26 0 address C 26 0 aptnum N 5 0 city C 16 0 zip N 10 0", "wb");
+    _OpenRelativeFile (&sample_rel_file, "relative.dbf", " name C 25 0 address C 25 0 aptnum N 4 0 city C 15 0 zip N 10 0", "wb");
     return _po__Next;
 }
 
 static int write_loop (void)
 {
 write_loop: UNUSED
-    _AssignVarString (sample_rel_record.name, "Whoever", 26, 0);
-    _AssignVarString (sample_rel_record.address, "Wherever", 26, 0);
+    _AssignVarString (sample_rel_record.name, "Whoever", 25, 0);
+    _AssignVarString (sample_rel_record.address, "Wherever", 25, 0);
     sample_rel_record.aptnum = count_var;
-    _AssignVarString (sample_rel_record.city, "I don't know", 16, 0);
+    _AssignVarString (sample_rel_record.city, "I don't know", 15, 0);
     sample_rel_record.zip = 837480985;
     DBF_AppendRecord (sample_rel_file);
-    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.name, "xxxxxxxxxxxxxxxxxxxxxxxxxx");
-    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.address, "xxxxxxxxxxxxxxxxxxxxxxxxxx");
-    _WriteIntegerVar (sample_rel_file->DataDesc, sample_rel_record.aptnum, "99999");
-    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.city, "xxxxxxxxxxxxxxxx");
+    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.name, "xxxxxxxxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.address, "xxxxxxxxxxxxxxxxxxxxxxxxx");
+    _WriteIntegerVar (sample_rel_file->DataDesc, sample_rel_record.aptnum, "9999");
+    _WriteStringVar (sample_rel_file->DataDesc, sample_rel_record.city, "xxxxxxxxxxxxxxx");
     _WriteIntegerVar (sample_rel_file->DataDesc, sample_rel_record.zip, "99999b9999");
     DBF_SeekToNext (sample_rel_file);
     count_var = count_var + 1;

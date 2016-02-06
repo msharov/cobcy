@@ -25,23 +25,23 @@ struct {
 //         this is a test of x(4) type pictures
     struct {
 	char filler000 [2];
-	char street [22];
+	char street [21];
 	char filler001 [2];
 	long house;
     } address;
-    char name [20];
+    char name [19];
 } varx;
-char city [17];
+char city [16];
 
 
 static void _SetVarValues (void)
 {
     varx.varz = 60;
     _AssignVarString (varx.address.filler000, " ", 1, 0);
-    _AssignVarString (varx.address.street, "Main st.", 21, 0);
+    _AssignVarString (varx.address.street, "Main st.", 20, 0);
     _AssignVarString (varx.address.filler001, " ", 1, 0);
     varx.address.house = 301;
-    _AssignVarString (city, "Baltimore", 16, 0);
+    _AssignVarString (city, "Baltimore", 15, 0);
 }
 
 static int _FirstParagraph (void)
@@ -61,12 +61,12 @@ static int display_address (void)
 {
 display_address: UNUSED
     _WriteIntegerVar (stdout, varx.vary, "9999");
-    _WriteIntegerVar (stdout, varx.varz, "999999");
+    _WriteIntegerVar (stdout, varx.varz, "99999");
     _WriteStringVar (stdout, varx.address.filler000, "x");
-    _WriteStringVar (stdout, varx.address.street, "xxxxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, varx.address.street, "xxxxxxxxxxxxxxxxxxxx");
     _WriteStringVar (stdout, varx.address.filler001, "x");
-    _WriteIntegerVar (stdout, varx.address.house, "9999999");
-    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxxx");
+    _WriteIntegerVar (stdout, varx.address.house, "999999");
+    _WriteStringVar (stdout, varx.name, "xxxxxxxxxxxxxxxxxx");
     printf ("\n");
     return _po__Next;
 }
@@ -85,16 +85,16 @@ int main (void)
 }
 ------------------------------------------------------------
 This is a cobol program
-   0    60 Main st.                  301
+   0   60 Main st.                301
 This is a cobol program 10 times
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
-   0    60 Main st.                  301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
+   0   60 Main st.                301
 ------------------------------------------------------------

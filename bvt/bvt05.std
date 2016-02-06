@@ -23,27 +23,27 @@ static int loop_x (void);
 FILE * card_in;
 
 struct {
-    char card_name [37];
+    char card_name [36];
     struct {
-	char digits_one_to_three [5];
-	char digits_four_and_five [4];
-	char digits_six_to_nine [6];
+	char digits_one_to_three [4];
+	char digits_four_and_five [3];
+	char digits_six_to_nine [5];
     } card_social_security_number;
-    char filler000 [38];
+    char filler000 [37];
 } card_in_record;
 
 FILE * print_out;
 
 struct {
     struct {
-	char print_one [5];
+	char print_one [4];
 	char print_two [2];
-	char print_three [4];
+	char print_three [3];
 	char print_four [2];
-	char print_five [6];
+	char print_five [5];
     } print_social_security_number;
-    char space_x [12];
-    char print_name [37];
+    char space_x [11];
+    char print_name [36];
 } print_out_record;
 
 static void _SetVarValues (void)
@@ -66,11 +66,11 @@ start_x: UNUSED
 static int loop_x (void)
 {
 loop_x: UNUSED
-    _ReadStringVar (card_in, card_in_record.card_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_one_to_three, "xxxx");
-    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_four_and_five, "xxx");
-    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_six_to_nine, "xxxxx");
-    _ReadStringVar (card_in, card_in_record.filler000, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _ReadStringVar (card_in, card_in_record.card_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_one_to_three, "xxx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_four_and_five, "xx");
+    _ReadStringVar (card_in, card_in_record.card_social_security_number.digits_six_to_nine, "xxxx");
+    _ReadStringVar (card_in, card_in_record.filler000, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     fgetc (card_in);
     if (feof (card_in))
     {
@@ -79,28 +79,28 @@ loop_x: UNUSED
 	_CloseSequentialFile (card_in);
 	return _pi__Exit;
     }
-    _AssignVarString (print_out_record.print_social_security_number.print_one, card_in_record.card_social_security_number.digits_one_to_three, 4, 4);
+    _AssignVarString (print_out_record.print_social_security_number.print_one, card_in_record.card_social_security_number.digits_one_to_three, 3, 3);
     _AssignVarString (print_out_record.print_social_security_number.print_two, "-", 1, 0);
-    _AssignVarString (print_out_record.print_social_security_number.print_three, card_in_record.card_social_security_number.digits_four_and_five, 3, 3);
+    _AssignVarString (print_out_record.print_social_security_number.print_three, card_in_record.card_social_security_number.digits_four_and_five, 2, 2);
     _AssignVarString (print_out_record.print_social_security_number.print_four, "-", 1, 0);
-    _AssignVarString (print_out_record.print_social_security_number.print_five, card_in_record.card_social_security_number.digits_six_to_nine, 5, 5);
-    _AssignVarString (print_out_record.space_x, _space_var, 11, 201);
-    _AssignVarString (print_out_record.print_name, card_in_record.card_name, 36, 36);
-    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_one, "xxxx");
+    _AssignVarString (print_out_record.print_social_security_number.print_five, card_in_record.card_social_security_number.digits_six_to_nine, 4, 4);
+    _AssignVarString (print_out_record.space_x, _space_var, 10, 200);
+    _AssignVarString (print_out_record.print_name, card_in_record.card_name, 35, 35);
+    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_one, "xxx");
     _WriteStringVar (print_out, print_out_record.print_social_security_number.print_two, "x");
-    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_three, "xxx");
+    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_three, "xx");
     _WriteStringVar (print_out, print_out_record.print_social_security_number.print_four, "x");
-    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_five, "xxxxx");
-    _WriteStringVar (print_out, print_out_record.space_x, "xxxxxxxxxxx");
-    _WriteStringVar (print_out, print_out_record.print_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (print_out, print_out_record.print_social_security_number.print_five, "xxxx");
+    _WriteStringVar (print_out, print_out_record.space_x, "xxxxxxxxxx");
+    _WriteStringVar (print_out, print_out_record.print_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     fprintf (print_out, "\n");
-    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_one, "xxxx");
+    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_one, "xxx");
     _WriteStringVar (stdout, print_out_record.print_social_security_number.print_two, "x");
-    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_three, "xxx");
+    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_three, "xx");
     _WriteStringVar (stdout, print_out_record.print_social_security_number.print_four, "x");
-    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_five, "xxxxx");
-    _WriteStringVar (stdout, print_out_record.space_x, "xxxxxxxxxxx");
-    _WriteStringVar (stdout, print_out_record.print_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    _WriteStringVar (stdout, print_out_record.print_social_security_number.print_five, "xxxx");
+    _WriteStringVar (stdout, print_out_record.space_x, "xxxxxxxxxx");
+    _WriteStringVar (stdout, print_out_record.print_name, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     printf ("\n");
     goto loop_x;
     return _po__Next;
@@ -120,8 +120,9 @@ int main (void)
     return EXIT_SUCCESS;
 }
 ------------------------------------------------------------
-5682-734-5               mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm4
-6827-345-                llllllllllllllllllllllllllllllllll45
-6827-345-                meememeememeememeememeememeememeem45
-6827-345-                888888888888888888888888888888888885
+456-82-7345          mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+456-82-7345          lllllllllllllllllllllllllllllllllll
+456-82-7345          emeememeememeememeememeememeememeem
+856-82-7345          88888888888888888888888888888888888
+456-82-7345          ttttttttttttttttttttttttttttttttttt
 ------------------------------------------------------------

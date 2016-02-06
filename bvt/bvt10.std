@@ -32,22 +32,22 @@ static int _FirstParagraph (void)
     printf ("\n");
     for (_index = 0; _index < 2; ++ _index)
 	proc_double();
-    _WriteIntegerVar (stdout, some_number, "9999999999");
+    _WriteIntegerVar (stdout, some_number, "999999999");
     printf ("\n");
     some_number = 1;
     for (counter = 1; counter <= 5; counter += 1)
 	proc_double();
-    _WriteIntegerVar (stdout, some_number, "9999999999");
+    _WriteIntegerVar (stdout, some_number, "999999999");
     printf ("\n");
     some_number = 1;
     for (counter = 1; counter <= 6; counter += 2)
 	proc_double();
-    _WriteIntegerVar (stdout, some_number, "9999999999");
+    _WriteIntegerVar (stdout, some_number, "999999999");
     printf ("\n");
     some_number = 1;
     for (counter = 1; (some_number <= 10000); counter += 2)
 	proc_double();
-    _WriteIntegerVar (stdout, some_number, "9999999999");
+    _WriteIntegerVar (stdout, some_number, "999999999");
     printf ("\n");
     printf ("All done");
     printf ("\n");
@@ -76,9 +76,9 @@ int main (void)
 }
 ------------------------------------------------------------
 Should get 4, 32, 8, 16384
-         4
-        32
-         8
-     16384
+        4
+       32
+        8
+    16384
 All done
 ------------------------------------------------------------
