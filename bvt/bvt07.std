@@ -20,9 +20,9 @@ static int start_x (void);
 static int loop_x (void);
 
 
-FILE * print_out;
+static FILE* print_out UNUSED;
 
-struct {
+static struct {
     struct {
 	char print_one [4];
 	char print_two [2];
@@ -32,16 +32,16 @@ struct {
     } print_social_security_number;
     char space_x [11];
     char print_name [36];
-} print_out_record;
+} print_out_record UNUSED;
 
-struct {
+static struct {
     long id_number;
     char filler000 [2];
     char name [16];
     char filler001 [2];
     char address [36];
-} weird_record;
-long counter;
+} weird_record UNUSED;
+static long counter UNUSED;
 
 
 static void _SetVarValues (void)

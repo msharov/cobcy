@@ -20,13 +20,18 @@ void CobolRecord::AddChild (const CobolData* NewChild)
 void CobolRecord::GenDeclareBegin (ostringstream& os) const
 {
     GenIndent();
+    if (!NestingLevel)
+	os << "static ";
     os << "struct {\n";
 }
 
 void CobolRecord::GenDeclareEnd (ostringstream& os) const
 {
     GenIndent();
-    os << "} " << GetCName() << ";\n";
+    os << "} " << GetCName();
+    if (!NestingLevel)
+	os << " UNUSED";
+    os << ";\n";
 }
 
 void CobolRecord::GenRead (ostringstream& os, const char* stream) const

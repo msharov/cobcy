@@ -17,9 +17,13 @@ extern bool RoundResult;
 void CobolVar::GenDeclare (ostringstream& os) const
 {
     GenIndent();
+    if (!NestingLevel)
+	os << "static ";
     Picture.GenTypePrefix (os);
     os << " " << GetCName();
     Picture.GenTypeSuffix (os);
+    if (!NestingLevel)
+	os << " UNUSED";
     os << ";\n";
 }
 

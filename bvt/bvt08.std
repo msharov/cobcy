@@ -12,11 +12,11 @@ enum {
     _po__Next = 1
 };
 
-long var1;
+static long var1 UNUSED;
 
-long var2;
+static long var2 UNUSED;
 
-long var3;
+static long var3 UNUSED;
 
 
 static void _SetVarValues (void)

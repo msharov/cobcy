@@ -20,9 +20,9 @@ static int start_x (void);
 static int loop_x (void);
 
 
-FILE * card_in;
+static FILE* card_in UNUSED;
 
-struct {
+static struct {
     char card_name [36];
     struct {
 	char digits_one_to_three [4];
@@ -30,11 +30,11 @@ struct {
 	char digits_six_to_nine [5];
     } card_social_security_number;
     char filler000 [37];
-} card_in_record;
+} card_in_record UNUSED;
 
-FILE * print_out;
+static FILE* print_out UNUSED;
 
-struct {
+static struct {
     struct {
 	char print_one [4];
 	char print_two [2];
@@ -44,7 +44,7 @@ struct {
     } print_social_security_number;
     char space_x [11];
     char print_name [36];
-} print_out_record;
+} print_out_record UNUSED;
 
 static void _SetVarValues (void)
 {

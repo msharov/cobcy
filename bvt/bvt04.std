@@ -19,7 +19,7 @@ enum {
 static int count_loop (void);
 static int done_counting (void);
 
-long counter_var;
+static long counter_var UNUSED;
 
 
 static void _SetVarValues (void)

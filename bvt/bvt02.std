@@ -15,7 +15,7 @@ enum {
 //  all of the above is required and
 //         no abbreviations are allowed.
 
-struct {
+static struct {
     long vary;
 //  this is a test of expanded pictures
     long varz;
@@ -27,8 +27,8 @@ struct {
 	long house;
     } address;
     char name [19];
-} varx;
-char city [16];
+} varx UNUSED;
+static char city [16] UNUSED;
 
 
 static void _SetVarValues (void)

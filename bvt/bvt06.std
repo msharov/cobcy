@@ -13,7 +13,7 @@ enum {
 };
 
 
-struct {
+static struct {
     long entry_one;
     char filler000 [2];
     long entry_two;
@@ -23,9 +23,9 @@ struct {
     long entry_four;
     char filler003 [2];
     long entry_five;
-} various_numbers;
+} various_numbers UNUSED;
 
-struct {
+static struct {
     double other_one;
     char filler004 [2];
     double other_two;
@@ -35,7 +35,7 @@ struct {
     double other_four;
     char filler007 [2];
     double other_five;
-} other_numbers;
+} other_numbers UNUSED;
 
 static void _SetVarValues (void)
 {

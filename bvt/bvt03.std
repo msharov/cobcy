@@ -13,7 +13,7 @@ enum {
 };
 
 
-struct {
+static struct {
     long vary;
     long varz;
     long varf;
@@ -23,7 +23,7 @@ struct {
     char names [19];
     char filler002 [2];
     char city [16];
-} varx;
+} varx UNUSED;
 
 static void _SetVarValues (void)
 {

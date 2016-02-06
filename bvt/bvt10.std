@@ -15,9 +15,9 @@ enum {
 
 static int proc_double (void);
 
-long counter;
+static long counter UNUSED;
 
-long some_number;
+static long some_number UNUSED;
 
 
 static void _SetVarValues (void)

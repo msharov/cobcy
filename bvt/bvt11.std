@@ -12,17 +12,17 @@ enum {
     _po__Next = 1
 };
 
-char name [6];
+static char name [6] UNUSED;
 
-char name_print [3];
+static char name_print [3] UNUSED;
 
-char name_3 [2];
+static char name_3 [2] UNUSED;
 
-long getal;
+static long getal UNUSED;
 
-double getal2;
+static double getal2 UNUSED;
 
-long teller;
+static long teller UNUSED;
 
 
 static void _SetVarValues (void)

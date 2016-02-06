@@ -131,17 +131,18 @@ void CobolFile::AssociateRecord (void) const
 void CobolFile::GenDeclare (ostringstream& os) const
 {
     GenIndent();
+    assert (!NestingLevel);
     if (IsDBF)
-	os << "DBF_FILE * ";
+	os << "static DBF_FILE* ";
     else
-	os << "FILE * ";
-    os << GetCName() << ";\n";
+	os << "static FILE* ";
+    os << GetCName() << " UNUSED;\n";
 
     if (Organization == ORG_Indexed) {
 	GenIndent();
-	os << "NDX_FILE * ";
+	os << "static NDX_FILE* ";
 	WriteIndexCName (os);
-	os << ";\n";
+	os << " UNUSED;\n";
     }
 }
 

@@ -18,16 +18,16 @@ static int write_loop (void);
 static int end_loop (void);
 
 
-DBF_FILE * sample_rel_file;
+static DBF_FILE* sample_rel_file UNUSED;
 
-struct {
+static struct {
     char name [26];
     char address [26];
     long aptnum;
     char city [16];
     long zip;
-} sample_rel_record;
-long count_var;
+} sample_rel_record UNUSED;
+static long count_var UNUSED;
 
 
 static void _SetVarValues (void)
