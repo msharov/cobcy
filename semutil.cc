@@ -95,18 +95,18 @@ void PrintStack (void)
 
 void NIY (const char* str)
 {
-    GenComment ("%s is unimplemented", str);
+    GenComment (codef, "%s is unimplemented", str);
     WriteWarning ("%s is unimplemented", str);
 }
 
-void GenComment (const char* fmt, ...)
+void GenComment (ostringstream& os, const char* fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
     string str;
     str.vformat (fmt, args);
     va_end (args);
-    codef.format ("// %s\n", str.c_str());
+    os.format ("// %s\n", str.c_str());
 }
 
 bool ErrorOccured (void)

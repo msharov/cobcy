@@ -10,7 +10,7 @@
 void WriteError (const char* fmt, ...) noexcept __attribute__((__format__(__printf__, 1, 2)));
 void WriteWarning (const char* fmt, ...) noexcept __attribute__((__format__(__printf__, 1, 2)));
 void NIY (const char* str);
-void GenComment (const char* fmt, ...) __attribute__((__format__(__printf__, 1, 2)));
+void GenComment (ostringstream& os, const char* fmt, ...) __attribute__((__format__(__printf__, 2, 3)));
 bool ErrorOccured (void);
 void PrintConstant (const StackEntry& entry, ostringstream& os);
 void PrintIdentifier (const char* id, ostringstream& os);

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <semactions.h>
+#include <semextern.h>
 
 extern int CurrentLine;
 extern long int ival;
@@ -14,9 +15,6 @@ extern double fval;
 extern char StringBuffer[];
 SEOperatorKind opkind;
 long int FillerIndex = 0;
-#ifndef TRUE
-#define TRUE		1
-#endif
 
 //----------------------------------------------------------------------
 
@@ -436,7 +434,7 @@ object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD
 	|
 	;
 memory_option:		TOK_MEMORY optional_size integer memsize_args
-                        { GenComment("Memory size is obsolete and ignored"); }
+                        { GenComment(declf, "Memory size is obsolete and ignored"); }
         |
         ;
 memsize_args:		TOK_WORDS

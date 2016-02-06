@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <semutil.h>
+#include <semextern.h>
 #include "parser.hh"
 
 #define STRINGBUFSIZE	200
@@ -16,10 +17,6 @@ int CurrentLine = 1;
 long int ival;
 double fval;
 char StringBuffer [STRINGBUFSIZE] = "";
-
-#ifndef TRUE
-#define TRUE	1
-#endif
 
 #define YY_DECL 		\
 extern "C" int yylex (void);	\
@@ -46,7 +43,7 @@ static void StringToLowercase (char* string, size_t maxSize);
 		  ++ CurrentLine;
 		  BEGIN INITIAL;
 		  yytext [strlen(yytext) - 1] = '\x0';	/* kill the newline */
-		  GenComment (yytext);
+		  GenComment (codef, yytext);
 		}
 
 <PICTURE_STATE>([\.]*[ax9vbpz09s,\*\+\-\$]+(\([0-9]+\))?)+	{ 

@@ -23,19 +23,10 @@ public:
     int			Run (void);
 private:
 			Cobcy (void) = default;
-			~Cobcy (void) noexcept;
     static void		Usage (void);
 };
 
 //----------------------------------------------------------------------
-
-Cobcy::~Cobcy (void) noexcept
-{
-    if (ErrorOccured()) {
-	unlink (g_Config.CodeFile);
-	unlink (g_Config.DeclFile);
-    }
-}
 
 /*static*/ void Cobcy::Usage (void)
 {
@@ -44,7 +35,7 @@ Cobcy::~Cobcy (void) noexcept
 	    "\t" COBCY_NAME " [options] <file.cob>\n"
 	    "\n"
 	    "\tOptions:\n"
-	    "\t-g\t\tGenerate compiler debugging info (_cpi trace)\n"
+	    "\t-g\t\tGenerate compiler debugging info (cpi trace)\n"
 	    "\t-o <file.c>\tFile where to put the C code\n"
 	    "\t\t\t<file.c>.h will also be made with decls.\n"
 	    "\t\t\tIf this is not specified, Cobcy uses\n"
@@ -60,8 +51,6 @@ void Cobcy::ProcessArgs (int argc, char* const* argv)
 	    g_Config.GenDebug = true;
 	else if (o == 'o') {
 	    g_Config.CodeFile = optarg;
-	    g_Config.DeclFile = optarg;
-	    g_Config.DeclFile.replace (g_Config.DeclFile.rfind (".c"), string::npos, ".h");
 	    outputSet = true;
 	}
     }
@@ -70,10 +59,8 @@ void Cobcy::ProcessArgs (int argc, char* const* argv)
 	return;
     }
     g_Config.SourceFile = argv[optind];
-    if (!outputSet) {
+    if (!outputSet)
 	g_Config.CodeFile = g_Config.SourceFile + ".c";
-	g_Config.DeclFile = g_Config.SourceFile + ".h";
-    }
 }
 
 int Cobcy::Run (void)
@@ -82,7 +69,7 @@ int Cobcy::Run (void)
 	cerr << "Error: no COBOL source specified\n";
 	return EXIT_FAILURE;
     }
-    DTRACE ("Compiling %s into %s and %s\n", g_Config.SourceFile.c_str(), g_Config.CodeFile.c_str(), g_Config.DeclFile.c_str());
+    DTRACE ("Compiling %s into %s\n", g_Config.SourceFile.c_str(), g_Config.CodeFile.c_str());
     if (!(yyin = fopen (g_Config.SourceFile, "r"))) {
 	cerr.format ("Error: could not open source file \"%s\"\n", g_Config.SourceFile.c_str());
 	return EXIT_FAILURE;

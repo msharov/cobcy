@@ -12,9 +12,8 @@
 struct CobcyConfigType {
     string	SourceFile;	// Input COBOL file
     string	CodeFile;	// Output .c file
-    string	DeclFile;	// Output .h file
     bool	GenDebug;			// Generate debugging code?
-    inline	CobcyConfigType (void) : SourceFile(),CodeFile(),DeclFile(),GenDebug(false) {}
+    inline	CobcyConfigType (void) : SourceFile(),CodeFile(),GenDebug(false) {}
 };
 
 // All of these are defined in seminit.cc

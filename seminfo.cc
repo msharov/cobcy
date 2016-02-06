@@ -9,7 +9,7 @@ void SetProgramName (void)
 {
     auto e = PopIdentifier();
     if (e.kind == SE_Identifier)
-	GenComment ("This program is called %s", e.ident.c_str());
+	GenComment (declf, "This program is called %s", e.ident.c_str());
     else
 	WriteError ("program name must be one word");
 }
@@ -18,7 +18,7 @@ void SetSourceComputer (void)
 {
     auto e = PopIdentifier();
     if (e.kind == SE_Identifier)
-	GenComment ("Written on %s", e.ident.c_str());
+	GenComment (declf, "Written on %s", e.ident.c_str());
     else
 	WriteError ("source computer name must be one word");
 }
@@ -29,7 +29,7 @@ void SetObjectComputer (void)
     if (e.kind == SE_Integer)
 	e = PopIdentifier();
     if (e.kind == SE_Identifier)
-	GenComment ("Written for %s", e.ident.c_str());
+	GenComment (declf, "Written for %s", e.ident.c_str());
     else
 	WriteError ("target computer name expected");
 }

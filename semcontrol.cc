@@ -192,8 +192,11 @@ void GenParagraphCalls (void)
 	declf << "    _pi_" << *p << ",\n";
     declf << "    _pi__NParagraphs,\n    _pi__Exit,\n    _po__Next = 1\n};\n\n";
 
-    for (auto& p : s_ParagraphList)
-	p->GenPrototype (declf);
+    if (!s_ParagraphList.empty()) {
+	for (auto& p : s_ParagraphList)
+	    p->GenPrototype (declf);
+	declf << "\n";
+    }
 
     // The calling structure is basically a while loop with a switch statement
     //	inside. There is a current paragraph variable cpi, which is parsed in
