@@ -25,3 +25,4 @@ void GenLoopInit (void);
 void GenLoopCondition (void);
 void GenLoopIncrement (void);
 void GenEmptyClause (void);
+void GenCall (void);

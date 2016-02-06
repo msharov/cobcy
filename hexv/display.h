@@ -5,6 +5,7 @@
 
 #pragma once
 #include <ncurses.h>
+#include "../coblib/cobfunc.h"
 
 void ViewBin (FILE* df);
 void DisplayOpen (void);

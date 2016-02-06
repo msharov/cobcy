@@ -4,7 +4,7 @@
 // This file is free software, distributed under the MIT License.
 
 #pragma once
-#include "coblib/dbf.h"
+#include "../coblib/cobfunc.h"
 #include <ncurses.h>
 
 void ViewDBF (DBF_FILE* df);

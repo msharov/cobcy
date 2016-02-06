@@ -20,10 +20,10 @@ PictureType::PictureType (void)
 }
 
 // The purpose of this function is to convert X(3) to XXX
-void PictureType::Expand (const char* pic, string& expanded)
+/*static*/ void PictureType::Expand (const char* pic, string& expanded)
 {
     expanded.clear();
-    for (char pc; *pic; pc = *pic++) {
+    for (char pc = 'x'; *pic; pc = *pic++) {
 	if (*pic == '(') {	// Handle x(5) type things
 	    char* epic = const_cast<char*>(++pic);
 	    auto n = strtoul (epic, &epic, 10);
@@ -71,7 +71,7 @@ uint32_t PictureType::Set (const char* NewPicture)
     return CSize;
 }
 
-void PictureType::GenTypePrefix (ostringstream& os)
+void PictureType::GenTypePrefix (ostringstream& os) const
 {
     if (Sign != NoSign)
 	os << "unsigned ";
@@ -83,14 +83,14 @@ void PictureType::GenTypePrefix (ostringstream& os)
     }
 }
 
-void PictureType::GenTypeSuffix (ostringstream& os)
+void PictureType::GenTypeSuffix (ostringstream& os) const
 {
     // Only strings need an array suffix.
     if (_kind == PictureType::String)
 	os << " [" << CSize << "]";
 }
 
-void PictureType::GenReadFunction (ostringstream& os)
+void PictureType::GenReadFunction (ostringstream& os) const
 {
     switch (_kind) {
 	case String:	os << "_ReadStringVar"; break;
@@ -100,7 +100,7 @@ void PictureType::GenReadFunction (ostringstream& os)
     }
 }
 
-void PictureType::GenWriteFunction (ostringstream& os)
+void PictureType::GenWriteFunction (ostringstream& os) const
 {
     switch (_kind) {
 	case String:	os << "_WriteStringVar"; break;
@@ -111,21 +111,18 @@ void PictureType::GenWriteFunction (ostringstream& os)
 }
 
 // Returns true if a cast is needed, so that (...) can be written
-bool PictureType::GenCastFrom (ostringstream& os, PictureType& pic)
+bool PictureType::GenCastFrom (ostringstream& os, const PictureType& pic) const
 {
     if (_kind == pic._kind)
 	return false;
-
     if (IsNumeric() == pic.IsNumeric())
 	return false;
-
     if (pic.IsNumeric()) {
 	if (pic._kind == PictureType::Integer)
 	    os << "_StringToInteger";
 	else
 	    os << "_StringToFloat";
-    }
-    else {
+    } else {
 	if (pic._kind == PictureType::Integer)
 	    os << "_IntegerToString";
 	else
@@ -135,21 +132,18 @@ bool PictureType::GenCastFrom (ostringstream& os, PictureType& pic)
 }
 
 // Returns true if a cast is needed, so that (...) can be written
-bool PictureType::GenCastTo (ostringstream& os, PictureType& pic)
+bool PictureType::GenCastTo (ostringstream& os, const PictureType& pic) const
 {
     if (_kind == pic._kind)
 	return false;
-
     if (IsNumeric() == pic.IsNumeric())
 	return false;
-
     if (IsNumeric()) {
 	if (_kind == PictureType::Integer)
 	    os << "_IntegerToString";
 	else
 	    os << "_FloatToString";
-    }
-    else {
+    } else {
 	if (_kind == PictureType::Integer)
 	    os << "_StringToInteger";
 	else
@@ -160,14 +154,13 @@ bool PictureType::GenCastTo (ostringstream& os, PictureType& pic)
 
 // Writes type character, size of field, and number of digits after d.p.
 //	Used for creation of DBF files.
-void PictureType::GenSignature (ostringstream& os)
+void PictureType::GenSignature (ostringstream& os) const
 {
     os << " ";
     if (IsNumeric())
 	os << "N ";
     else
 	os << "C ";
-
     // Fields are written in the file with all editing characters, so
     //	the size of the field in a file is the length of the whole picture.
     os << _text.size() << " " << nDigitsADP;

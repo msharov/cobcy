@@ -20,5 +20,5 @@ struct CobcyConfigType {
 // All of these are defined in seminit.cc
 extern vector<StackEntry> g_Tokens;
 extern int NestingLevel;
-extern ofstream codef, declf;
+extern ostringstream codef, declf;
 extern CobcyConfigType g_Config;

@@ -55,11 +55,11 @@ public:
 			SymbolTable (void);
     value_type		find (const key_type& key) const noexcept;
     template <typename Sym>
-    inline Sym*		lookup (const key_type& key) const noexcept	{ return dynamic_cast<Sym*>(find(key)); }
+    inline auto		lookup (const key_type& key) const noexcept	{ return dynamic_cast<Sym*>(find(key)); }
     value_type		insert (const key_type& key, value_type sym);
     void		erase (const key_type& key);
     template <typename Sym, typename... Args>
-    inline Sym*		emplace (const key_type& key, Args&&... args)	{ return static_cast<Sym*>(insert (key, new Sym (forward<Args>(args)...))); }
+    inline auto		emplace (const key_type& key, Args&&... args)	{ return static_cast<Sym*>(insert (key, new Sym (forward<Args>(args)...))); }
     inline bool		empty (void) const	{ return _names.empty(); }
 private:
     keyvec_t		_names;

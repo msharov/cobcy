@@ -16,36 +16,34 @@
 #define min(a,b)	((a) < (b) ? (a) : (b))
 #endif
 
+char _space_var [201] = "                                                                                                                                                                                                        ";
+long _zero_var = 0;
+long _index = 0;
+
 static char _strbuf[201];		// For ---toString routines. This is the buffer
 
-static int _IsInSet (char c, const char* set)
+bool _Alphabetic (const char* s)
 {
-    for (size_t i = 0; i < strlen(set); ++i)
-	if (set[i] == c)
-	    return 1;
-    return 0;
-}
-
-int _Alphabetic (const char* str)
-{
-    for (size_t i = 0; i < strlen(str); i++)
-	if (!isalpha(str[i]) && str[i] != ' ')
-	    return 0;
-    return 1;
+    if (!s)
+	return false;
+    for (; *s; ++s)
+	if (!isalpha(*s) && !isspace(*s))
+	    return false;
+    return true;
 }
 
 /// Returns 1 for lower case, 2 for upper.
-int _AlphabeticCase (const char* str, int what)
+bool _AlphabeticCase (const char* str, int what)
 {
     if (!_Alphabetic(str))
-	return 0;
+	return false;
     for (size_t i = 0; i < strlen(str); i++) {
 	if (what == 2 && islower(str[i]))
-	    return 0;
+	    return false;
 	else if (what == 1 && isupper(str[i]))
-	    return 0;
+	    return false;
     }
-    return 1;
+    return true;
 }
 
 void _RuntimeError (const char* message)
@@ -59,7 +57,7 @@ void _ReadStringVar (FILE* stream, char* var, const char* pic)
     size_t sl = 0, pi, pl = strlen(pic);
     // Find length of the string by excluding editing characters from pic
     for (pi = 0; pi < pl; ++pi)
-	if (!_IsInSet(pic[pi], ".,/bB0"))
+	if (!strchr(".,/bB0",pic[pi]))
 	    ++sl;
 
     memset(var, ' ', sl);	// All string variables are spaces by default
@@ -71,7 +69,7 @@ void _ReadStringVar (FILE* stream, char* var, const char* pic)
 	char c = fgetc(stream);
 	if (c == '\n' || c == '\x0' || feof(stream))
 	    break;
-	if (!_IsInSet(pic[pi], ".,/bB0"))
+	if (!strchr(".,/bB0",pic[pi]))
 	    var[si++] = c;
     }
 }
@@ -92,13 +90,15 @@ void _ReadFloatVar (FILE* stream, double* var, const char* pic)
 
 void _WriteStringVar (FILE* stream, const char* var, const char* pic)
 {
-    for (size_t i = 0, j = 0; i < strlen(pic); ++i) {
-	switch (pic[i]) {
-	    case 'x':	fprintf(stream, "%c", var[j++]);break;
-	    case 'b':	fprintf(stream, " ");		break;
-	    case '/':	fprintf(stream, "/");		break;
-	    case '0':	fprintf(stream, "0");		break;
-	    default:	fprintf(stream, "%c", pic[i]);	break;
+    if (!var || !pic)
+	return;
+    for (; *var && *pic; ++pic) {
+	switch (*pic) {
+	    case 'x':	fputc (*var++, stream);	break;
+	    case 'b':	fputc (' ', stream);	break;
+	    case '/':	fputc ('/', stream);	break;
+	    case '0':	fputc ('0', stream);	break;
+	    default:	fputc (*pic, stream);	break;
 	}
     }
 }
@@ -116,7 +116,7 @@ void _WriteFloatVar (FILE* stream, double var, const char* pic)
 const char* _IntegerToString (long int var, const char* pic)
 {
     char barenum [20];
-    sprintf (barenum, "%lu", var);
+    snprintf (barenum, 20, "%lu", var);
     size_t nl = strlen(barenum);
     size_t pl = strlen(pic);
 
@@ -131,7 +131,7 @@ const char* _IntegerToString (long int var, const char* pic)
 	j = nl - fl;
 
     for (size_t i = 0; i < pl; ++i) {
-	if (_IsInSet (pic[i], ".,/0$"))
+	if (strchr (".,/0$", pic[i]))
 	    _strbuf[sp++] = pic[i];
 	else if (pic[i] == 'b')
 	    _strbuf[sp++] = ' ';
@@ -180,8 +180,8 @@ const char* _FloatToString (double var, const char* pic)
 	    FoundPoint = 1;
     }
 
-    sprintf(format_s, "%%%d.%df", fbp, fap);
-    sprintf(barenum, format_s, var);
+    snprintf (format_s, sizeof(format_s), "%%%d.%df", fbp, fap);
+    snprintf (barenum, sizeof(barenum), format_s, var);
 
     // sprintf will print correct number of digits after point, but
     // only as many as needed before the point. We thus need to reset
@@ -313,9 +313,9 @@ static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
 void _OpenSequentialFile (FILE** fp, const char* filename, const char* mode)
 {
     if (!(*fp = fopen (filename, mode))) {
-	char ErrorBuffer [80];
-	sprintf (ErrorBuffer, "could not open file '%s'", filename);
-	_RuntimeError (ErrorBuffer);
+	char buf [80];
+	snprintf (buf, sizeof(buf), "could not open file '%s'", filename);
+	_RuntimeError (buf);
     }
 }
 

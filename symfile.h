@@ -17,38 +17,38 @@
 /// they developed for COBOL by any chance?
 class CobolFile : public CobolSymbol {
 private:
-    void			GenRecordSignature (ostringstream& os);
-    void			GenKeySignature (ostringstream& os);
-    void			WriteIndexCName (ostringstream& os);
-    void			WriteOpenMode (ostringstream& os, OpenModeType mode);
+    void			GenRecordSignature (ostringstream& os) const;
+    void			GenKeySignature (ostringstream& os) const;
+    void			WriteIndexCName (ostringstream& os) const;
+    void			WriteOpenMode (ostringstream& os, OpenModeType mode) const;
 
 public:
 				CobolFile (void);
-    virtual			~CobolFile (void) override;
     virtual CobolSymbolType	Kind (void) const override		{ return CS_FileDesc; }
     inline void			SetFilename (const char* filename)	{ _dataFileName = filename; }
     void			SetAccessMode (AccessModeType mode);
     void			SetOrganization (OrganizationType org);
     void			SetKey (const char* keyname);
-    void			SetStatusVar (const char* varname);
-    void			SetRecord (const char* recname);
-    void			SetFlushCommand (const char* NewCommand);
-    void			SetNewlineFlag (bool NewFlag);
-    void			SetUnlinkOnClose (bool NewFlag);
-    void			AssociateRecord (void);
+    void			SetStatusVar (const char* varname)	{ _statusVar = varname; }
+    void			SetRecord (const char* recname)		{ _recordName = recname; }
+    void			SetFlushCommand (const char* NewCommand){ _flushCommand = NewCommand; }
+    void			SetNewlineFlag (bool NewFlag)		{ NewlineFlag = NewFlag; }
+    void			SetUnlinkOnClose (bool NewFlag)		{ UnlinkOnClose = NewFlag; }
+
+    void			AssociateRecord (void) const;
     virtual void		text_write (ostringstream& os) const override;
 
-    void			GenDeclare (ostringstream& os);
+    void			GenDeclare (ostringstream& os) const;
     void			GenOpen (ostringstream& os, OpenModeType mode);
-    void			GenFlush (ostringstream& os);
-    void			GenSeek (ostringstream& os);
+    void			GenFlush (ostringstream& os) const;
+    void			GenSeek (ostringstream& os) const;
     void			GenClose (ostringstream& os);
-    void			GenEOFCheck (ostringstream& os);
-    void			GenWriteData (ostringstream& os, CobolData* data = nullptr);
-    void			GenReadData (ostringstream& os, CobolData* data = nullptr);
-    void			GenWriteEnd (ostringstream& os);
-    void			GenReadEnd (ostringstream& os);
-    void			GenSetupForAppend (ostringstream& os);
+    void			GenEOFCheck (ostringstream& os) const;
+    void			GenWriteData (ostringstream& os, const CobolData* data = nullptr) const;
+    void			GenReadData (ostringstream& os, const CobolData* data = nullptr) const;
+    void			GenWriteEnd (ostringstream& os) const;
+    void			GenReadEnd (ostringstream& os) const;
+    void			GenSetupForAppend (ostringstream& os) const;
 private:
     string			_dataFileName;
     string			_indexFileName;
@@ -61,7 +61,7 @@ private:
     AccessModeType		AccessMode;
     OrganizationType		Organization;
 
-    bool			Changed;
+    mutable bool		Changed;
     bool			Open;
     OpenModeType		OpenMode;
     bool			UnlinkOnClose;

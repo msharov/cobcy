@@ -12,24 +12,18 @@ class CobolConstant : public CobolSymbol {
 public:
 				CobolConstant (void);
 				CobolConstant (const char* cval);
-				CobolConstant (long int ival);
+				CobolConstant (long ival);
 				CobolConstant (double fval);
 				CobolConstant (const StackEntry& e);
-    virtual			~CobolConstant (void) override;
     CobolConstant&		operator= (const char* cval);
-    CobolConstant&		operator= (long int ival);
+    CobolConstant&		operator= (long ival);
     CobolConstant&		operator= (double fval);
-    CobolConstant&		operator= (StackEntry * se);
+    CobolConstant&		operator= (const StackEntry& se);
     virtual CobolSymbolType	Kind (void) const override { return CS_Constant; }
     virtual void		text_write (ostringstream& os) const override;
-    void			GenWrite (ostringstream& os, const char* stream);
-    inline bool			IsNumeric (void)	{ return CurKind == CC_Integer || CurKind == CC_Float; }
+    void			GenWrite (ostringstream& os, const char* stream) const;
+    inline bool			IsNumeric (void) const	{ return _kind == CC_Integer || _kind == CC_Float; }
 protected:
-    union UData {
-        char*		cval;
-	long int	ival;
-	double		fval;
-    };
     enum EKind {
         CC_Undefined,
         CC_String,
@@ -37,6 +31,8 @@ protected:
 	CC_Float
     };
 protected:
-    UData			data;
-    EKind			CurKind;
+    EKind		_kind;
+    long		_ival;
+    double		_fval;
+    string		_cval;
 };

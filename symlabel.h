@@ -10,10 +10,10 @@
 class CobolLabel : public CobolSymbol {
 public:
 			CobolLabel (void);
-    inline CobolSymbolType	Kind (void)	{ return CS_Label; }
-    void		GenDeclare (ostringstream& os);
-    void		GenJump (ostringstream& os, CobolLabel * dest);
-		       ~CobolLabel (void);
+    virtual CobolSymbolType	Kind (void) const override	{ return CS_Label; }
+    void		GenDeclare (ostringstream& os) const;
+    void		GenJump (ostringstream& os, const CobolLabel* dest) const;
+    void		GenPrototype (ostringstream& os) const;
 public:
     bool		Undeclared;	// For forward references
 };

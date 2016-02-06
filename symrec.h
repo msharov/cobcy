@@ -11,13 +11,13 @@
 class CobolRecord : public CobolData {
 public:
 				CobolRecord (void);
-    void			AddChild (CobolData* NewChild);
+    void			AddChild (const CobolData* NewChild);
     virtual CobolSymbolType	Kind (void) const override { return CS_Record; }
-    void			GenDeclareBegin (ostringstream& os);
-    void			GenDeclareEnd (ostringstream& os);
-    virtual void		GenRead (ostringstream& os, const char* stream) override;
-    virtual void		GenWrite (ostringstream& os, const char* stream) override;
-    virtual void		GenSignature (ostringstream& os) override;
+    void			GenDeclareBegin (ostringstream& os) const;
+    void			GenDeclareEnd (ostringstream& os) const;
+    virtual void		GenRead (ostringstream& os, const char* stream) const override;
+    virtual void		GenWrite (ostringstream& os, const char* stream) const override;
+    virtual void		GenSignature (ostringstream& os) const override;
 private:
-    vector<CobolData*>		ChildList;
+    vector<const CobolData*>	_fields;
 };

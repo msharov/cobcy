@@ -36,14 +36,12 @@ static inline bool IsInSet (char c, const char* s)
 } // namespace
 
 template <typename Sym>
-Sym* LookupIdentifier (const string& id)
+const Sym* LookupIdentifier (const string& id)
 {
-    auto sym = g_Symbols.find (id);
-    if (!sym) {
-	::WriteError ("identifier '%s' is unknown", id.c_str());
+    const auto sym = g_Symbols.find (id);
+    if (!sym)
 	return nullptr;
-    }
-    auto rv = dynamic_cast<Sym*>(sym);
+    auto rv = dynamic_cast<const Sym*>(sym);
     if (!rv) {
 	::WriteError ("identifier '%s' is of a different type", id.c_str());
 	return nullptr;

@@ -430,7 +430,7 @@ source_computer:	TOK_SOURCE_COMPUTER TOK_PERIOD
 source_debug_option:	optional_with TOK_DEBUGGING TOK_MODE
 	|
 	;
-object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD 
+object_computer:	TOK_OBJECT_COMPUTER TOK_PERIOD
 			identifier memory_option TOK_PERIOD
 			{ SetObjectComputer(); }
 	|
@@ -449,7 +449,7 @@ special_names:		TOK_SPECIAL_NAMES TOK_PERIOD special_name_list
 special_name_list:	special_name_decl special_name_list
 	|
 	;
-special_name_decl:	identifier TOK_IS identifier 
+special_name_decl:	identifier TOK_IS identifier
 			{ DeclareSpecialName(); }
 			TOK_PERIOD
 	;
@@ -467,7 +467,7 @@ select_block:	select_statement select_block_pl
 select_block_pl:	select_block
 	|
 	;
-select_statement:	TOK_SELECT optional_optional identifier 
+select_statement:	TOK_SELECT optional_optional identifier
 			TOK_ASSIGN optional_to identifier
 			{ BeginFileDecl(); }
 			select_option_list
@@ -481,7 +481,7 @@ select_option:	file_status_option
 	|	access_mode_option
 	|	organization_option
 	;
-file_status_option:	optional_file TOK_STATUS optional_is 
+file_status_option:	optional_file TOK_STATUS optional_is
 			identifier { SetFileStatus(); }
 	;
 access_mode_option:	TOK_ACCESS optional_mode optional_is access_mode
@@ -492,22 +492,22 @@ access_mode:	TOK_SEQUENTIAL	{ SetAccessMode (AM_Sequential); }
 	;
 organization_option:	TOK_ORGANIZATION optional_is organization_kind
 	;
-organization_kind:	TOK_SEQUENTIAL		
+organization_kind:	TOK_SEQUENTIAL
 			{ SetOrganization (ORG_Sequential); }
 	|		TOK_LINE TOK_SEQUENTIAL
 			{ SetOrganization (ORG_Line_sequential); }
-	|		TOK_RELATIVE 
+	|		TOK_RELATIVE
 			{ SetOrganization (ORG_Relative); }
 			relative_key_option
-	|		TOK_INDEXED 
+	|		TOK_INDEXED
 			{ SetOrganization (ORG_Indexed); }
 			record_key_option
 	;
-relative_key_option:	TOK_RELATIVE optional_key optional_is 
+relative_key_option:	TOK_RELATIVE optional_key optional_is
 			identifier { SetRelativeKey(); }
 	|
 	;
-record_key_option:	TOK_RECORD TOK_KEY optional_is 
+record_key_option:	TOK_RECORD TOK_KEY optional_is
 			identifier { SetRecordKey(); }
 	|
 	;
@@ -529,14 +529,14 @@ file_section:	TOK_FILE TOK_SECTION TOK_PERIOD
 file_desc_block:	file_desc_entry file_desc_block
 	|
 	;
-file_desc_entry:	TOK_FD identifier 
+file_desc_entry:	TOK_FD identifier
 			file_label_entry
 			file_name_entry
-			{ GenFileDesc(); } 
+			{ GenFileDesc(); }
 			TOK_PERIOD
-			file_record_desc 
+			file_record_desc
 	;
-file_label_entry:	TOK_LABEL TOK_RECORD optional_is file_label_type 
+file_label_entry:	TOK_LABEL TOK_RECORD optional_is file_label_type
 	|
 	;
 file_label_type:	TOK_STANDARD
@@ -544,8 +544,8 @@ file_label_type:	TOK_STANDARD
 	;
 file_name_entry:	TOK_VALUE optional_prep optional_is
 			file_name_string
-	|		{ StringBuffer[0] = 0; 
-			  Push (SE_Identifier); 
+	|		{ StringBuffer[0] = 0;
+			  Push (SE_Identifier);
 			}
 	;
 file_name_string:	identifier
@@ -560,7 +560,7 @@ file_record_desc_pl:	file_record_desc
 	|
 	;
 file_record_level:	integer level_name { AssociateFileRecord(); }
-			picture TOK_PERIOD 
+			picture TOK_PERIOD
 			{ Push (SE_Null); DeclareRecordLevel(); }
 
 record_level:	integer
@@ -574,14 +574,14 @@ record_level:	integer
 reclev_option_list:	record_level_option
 	|
 	;
-record_level_option:	usage_option 
-	|		sign_option 
-	|		sync_option 
-	|		justified_option 
+record_level_option:	usage_option
+	|		sign_option
+	|		sync_option
+	|		justified_option
 	;
 usage_option:          TOK_USAGE optional_is pict_usage_args
         ;
-sign_option:	optional_sign optional_is sign_args 
+sign_option:	optional_sign optional_is sign_args
 		sep_char_option { NIY("Sign is [leading/trailing]"); }
         ;
 sign_args:		TOK_LEADING
@@ -598,8 +598,8 @@ justified_just:		TOK_JUSTIFIED
 	|		TOK_JUST
 	;
 
-sync_option:		TOK_SYNC left_right_option 
-			{ NIY("Sync/Synchronized"); } 
+sync_option:		TOK_SYNC left_right_option
+			{ NIY("Sync/Synchronized"); }
 	;
 
 left_right_option:	TOK_LEFT
@@ -607,7 +607,7 @@ left_right_option:	TOK_LEFT
 	|
 	;
 level_name:	identifier
-	|	TOK_FILLER	
+	|	TOK_FILLER
 	 	{ sprintf (StringBuffer, "filler%03ld", FillerIndex);
 		  ++ FillerIndex;
 		  Push (SE_Identifier);
@@ -639,10 +639,9 @@ value:		integer
 	|	string
 	|	identifier
 	;
-	
+
 working_storage_section:	TOK_WORKING_STORAGE TOK_SECTION TOK_PERIOD
 				record_entry_block
-	|
 	;
 record_entry_block:	record_level record_entry_block_pl
 	;
@@ -662,15 +661,12 @@ report_section:         TOK_REPORT TOK_SECTION TOK_PERIOD
                           { NIY("Report Section"); }
         ;
 
-procedure_division:	TOK_PROCEDURE TOK_DIVISION using_option TOK_PERIOD
+procedure_division:	TOK_PROCEDURE TOK_DIVISION using_options TOK_PERIOD
 			{ StartCode(); }
 			statement_list
 			{ GenEndProc(); EndCode(); }
 	;
 
-using_option:	TOK_USING using_identifier
-	|
-	;
 statement_list:		statement statement_list
 	|
 	;
@@ -687,19 +683,6 @@ statement:	clause TOK_PERIOD
 	|	identifier TOK_PERIOD { GenParagraph(); }
 	;
 
-else_list:	TOK_ELSE { GenElse(); } compound_clause
-	|	elsif_list
-	|
-	; 
-elsif_list:	TOK_ELSIF elsif_clause elsif_list_pl
-	;
-elsif_list_pl:	elsif_list
-	|
-	;
-elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); } 
-			compound_clause
-	;
-
 boolean_list:	boolean boolean_list_pl
 	;
 
@@ -707,7 +690,7 @@ boolean_list_pl:	logic_connector { GenConnect(); } boolean_list
 	|
 	;
 
-boolean:	optional_lparen expression optional_is boolean2 
+boolean:	optional_lparen expression optional_is boolean2
 		optional_rparen { GenBool(); }
         ;
 
@@ -720,7 +703,7 @@ boolean2:           TOK_ALPHABETIC
         |           relational
                       expression
         ;
-	
+
 not_boolean_list:	not_boolean not_boolean_list_pl
 	;
 
@@ -728,13 +711,12 @@ not_boolean_list_pl:	logic_connector { GenConnect(); } not_boolean_list
 	|
 	;
 
-not_boolean:	optional_lparen expression optional_is not_boolean2 
+not_boolean:	optional_lparen expression optional_is not_boolean2
 		optional_rparen { GenBool(); }
         ;
 
 not_boolean2:	reverse_relational expression
         ;
-                    
 
 logic_connector:	TOK_AND
 			{ strcpy (StringBuffer, "&&"); Push (SE_Connector); }
@@ -744,13 +726,13 @@ logic_connector:	TOK_AND
 
 relational:	TOK_GREATER optional_than
 		{ strcpy (StringBuffer, ">"); Push (SE_Bool); }
-	|	TOK_LESS optional_than	
+	|	TOK_LESS optional_than
 		{ strcpy (StringBuffer, "<"); Push (SE_Bool); }
 	|	TOK_EQUAL optional_to
 		{ strcpy (StringBuffer, "=="); Push (SE_Bool); }
         |       TOK_GREATER_EQ
                 { strcpy (StringBuffer, ">="); Push (SE_Bool); }
-        |       TOK_LESS_EQ 
+        |       TOK_LESS_EQ
                 { strcpy (StringBuffer, "<="); Push (SE_Bool); }
 	|	TOK_NOT reverse_relational
 	;
@@ -761,9 +743,9 @@ reverse_relational:	TOK_GREATER optional_than
 		{ strcpy (StringBuffer, ">="); Push (SE_Bool); }
 	|	TOK_EQUAL optional_to
 		{ strcpy (StringBuffer, "!="); Push (SE_Bool); }
-        |       TOK_GREATER_EQ 
+        |       TOK_GREATER_EQ
                 { strcpy (StringBuffer, "<"); Push (SE_Bool); }
-        |       TOK_LESS_EQ 
+        |       TOK_LESS_EQ
                 { strcpy (StringBuffer, ">"); Push (SE_Bool); }
 	;
 
@@ -776,22 +758,22 @@ clause:		TOK_ACCEPT id_list accept_option { GenAccept(); }
 		{ GenSubtract(); }
 	|	TOK_MULTIPLY id_list TOK_BY expression giving_option
 		{ GenMultiply(); }
-	|	TOK_DIVIDE id_list divide_action_word expression 
+	|	TOK_DIVIDE id_list divide_action_word expression
 		giving_option round_option
 		{ GenDivide(); }
 		size_error_option
-	|	TOK_COMPUTE { Push (SE_Mark); } 
-		identifier round_option TOK_EQUAL 
+	|	TOK_COMPUTE { Push (SE_Mark); }
+		identifier round_option TOK_EQUAL
 		{ opkind = OP_Equal; Push (SE_Operator); }
 		compute_expr_list
 		{ GenCompute(); }
-	|	TOK_GO TOK_TO identifier { GenGoto(); } 
+	|	TOK_GO TOK_TO identifier { GenGoto(); }
 	|	TOK_PERFORM identifier perform_options { GenPerform(); }
 	|	TOK_OPEN open_list
 	|	TOK_CLOSE id_list close_options { GenClose(); }
 	|	TOK_WRITE identifier write_from_clause { GenWrite(); }
 	|	TOK_REWRITE identifier write_from_clause { GenRewrite(); }
-        |       TOK_CALL call_list using_options { NIY("CALL"); }
+        |       TOK_CALL call_list using_options { GenCall(); }
 	|	TOK_STOP TOK_RUN { GenStopRun(); }
         |       TOK_EXIT TOK_PROGRAM { GenStopRun(); }
 	|	TOK_IF { GenStartIf(); } boolean_list { GenEndIf(); } if_args
@@ -844,9 +826,9 @@ display_arg:	identifier
 	;
 
 upon_option:	TOK_UPON identifier { SetDisplayOutput(); }
-	|	{ strcpy (StringBuffer, "stdout"); 
+	|	{ strcpy (StringBuffer, "stdout");
 		  Push (SE_Identifier);
-		  SetDisplayOutput(); 
+		  SetDisplayOutput();
 		}
 	;
 
@@ -858,7 +840,7 @@ round_option:	TOK_ROUNDED { SetResultRounding(); }
 	|
 	;
 
-size_error_option:	TOK_ON TOK_SIZE TOK_ERROR 
+size_error_option:	TOK_ON TOK_SIZE TOK_ERROR
 			{ GenElse(); }
 			compound_clause
 	|
@@ -867,7 +849,7 @@ size_error_option:	TOK_ON TOK_SIZE TOK_ERROR
 perform_options:	times_option varying_option
 	;
 times_option:	integer TOK_TIMES
-	|	{ ival = 1; 
+	|	{ ival = 1;
 		  Push (SE_Integer);
 		}
 	;
@@ -878,7 +860,7 @@ after_list:	TOK_AFTER loop_condition after_list
 	|
 	;
 loop_condition:	{ GenStartLoop(); }
-		identifier 
+		identifier
 		TOK_FROM loop_iterator
 		{ GenLoopInit(); }
 		loop_condition_part2
@@ -916,7 +898,7 @@ compute_term:	identifier
 	|	integer
 	|	float
 	;
-compute_operator:	TOK_PLUS	
+compute_operator:	TOK_PLUS
 			{ opkind = OP_Addition; Push (SE_Operator); }
 	|		TOK_MINUS
 			{ opkind = OP_Subtraction; Push (SE_Operator); }
@@ -957,7 +939,7 @@ close_method:	TOK_FOR TOK_REMOVAL
 	;
 
 write_from_clause:	TOK_FROM identifier
-	|	{ strcpy (StringBuffer, ""); 
+	|	{ strcpy (StringBuffer, "");
 		  Push (SE_Identifier); }
 	;
 
@@ -965,41 +947,39 @@ call_list:     string
          |     identifier
          ;
 
-using_options: TOK_USING using_args using_identifier
-        | 
-        ;
-
-using_args:    optional_by using_by
+using_options: TOK_USING optional_by using_by id_list
         |
         ;
-
 using_by:      TOK_REFERENCE
         |      TOK_CONTENT
         ;
 
-using_identifier:   identifier using_inde_next
-        ;
-
-using_inde_next:    TOK_COMMA using_identifier
-        |
-        ;
-
-if_args:	optional_then if_args_2
+if_args:	optional_then compound_clause optional_elsif_list optional_else
 	;
-if_args_2:	compound_clause else_list
+optional_else:	TOK_ELSE { GenElse(); } compound_clause
+	|
+	;
+optional_elsif_list:	elsif_list
+	|
+	;
+elsif_list:	TOK_ELSIF elsif_clause elsif_list_pl
+	;
+elsif_list_pl:	elsif_list
+	|
+	;
+elsif_clause:	{ GenStartElsif(); } boolean_list { GenEndIf(); }
+			compound_clause
 	;
 
-initialize_args:	using_identifier replace_option
-	;
 
+initialize_args:	id_list replace_option
+	;
 replace_option:		TOK_REPLACING replace_next
 	|
 	;
-
 replace_next:		replace_what optional_data TOK_BY value replace_next_pl
         ;
-
-replace_next_pl:	optional_comma replace_next	
+replace_next_pl:	optional_comma replace_next
         |
 	;
 
@@ -1014,7 +994,7 @@ id_list:	{ Push (SE_Mark); } id_list_marked
 	;
 id_list_marked: identifier id_list_pl
 	;
-id_list_pl:	optional_comma id_list_marked
+id_list_pl:	TOK_COMMA id_list_marked
 	|
 	;
 

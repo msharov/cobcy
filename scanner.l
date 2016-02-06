@@ -15,8 +15,7 @@
 int CurrentLine = 1;
 long int ival;
 double fval;
-char StringBuffer [STRINGBUFSIZE];
-static char ErrorBuffer [80];
+char StringBuffer [STRINGBUFSIZE] = "";
 
 #ifndef TRUE
 #define TRUE	1
@@ -26,15 +25,14 @@ static char ErrorBuffer [80];
 extern "C" int yylex (void);	\
 int yylex (void)
 
-/*-------------------------------------------------*/
-  void StringToLowercase (char * string);
-/*-------------------------------------------------*/
+static void StringToLowercase (char* string, size_t maxSize);
 
 /* Read everything in lowercase	*/
 #define YY_INPUT(buf,result,max_size) 					\
+	memset (buf, 0, max_size);					\
 	if ((ssize_t)(result = read (fileno(yyin), (char*) buf, max_size)) < 0) \
 	    YY_FATAL_ERROR ("read() in flex scanner failed");		\
-	StringToLowercase (buf);
+	StringToLowercase (buf, max_size);
 
 %}
 %s PICTURE_STATE
@@ -443,23 +441,21 @@ zeros 			{ strcpy (StringBuffer, "_zero_var");
 
 \n		{ ++ CurrentLine; }
 
-.		{ sprintf (ErrorBuffer, "Line %d: parse error on |%s|\n", CurrentLine, yytext); 
-		  WriteError (ErrorBuffer);
+.		{ WriteError ("Line %d: parse error on |%s|\n", CurrentLine, yytext);
 		  if (false)	// Mark yyunput as used to remove warning
 		      yyunput (0, nullptr);
 		}
 
 %%
 
-void StringToLowercase (char* string)
+static void StringToLowercase (char* string, size_t maxSize)
 {
-    auto QuotedText = false;
-    auto slen = strlen (string);
-    for (auto i = 0u; i < slen; ++ i) {
+    auto quotep = false;
+    auto slen = strnlen (string, maxSize);
+    for (auto i = 0u; i < slen; ++i) {
 	if (string[i] == '"')
-	    QuotedText = !QuotedText;
-	else if (!QuotedText)
+	    quotep = !quotep;
+	else if (!quotep)
 	    string[i] = tolower (string[i]);
     }
 }
-

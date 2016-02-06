@@ -70,7 +70,7 @@ void AssociateFileRecord (void)
     if (!s_FileToAssociate || g_Tokens.empty())
 	return;
     auto& e = g_Tokens.back();		// The record is not fully defined at this point, so do not pop
-    DTRACE ("\tAssociating record %s to %s", e.ident.c_str(), s_FileToAssociate->GetFullCName().c_str());
+    DTRACE ("\tAssociating record %s to %s\n", e.ident.c_str(), s_FileToAssociate->GetFullCName().c_str());
     s_FileToAssociate->SetRecord (e.ident);
     s_FileToAssociate = nullptr;	// Only associate the first record. All the others are not associated.
 }
@@ -106,9 +106,9 @@ void GenRead (void)
     if (!fd)
 	return WriteError ("unknown file to read");
 
-    auto fstm = dynamic_cast<CobolFile*>(fd);
+    auto fstm = dynamic_cast<const CobolFile*>(fd);
     if (fd->Kind() == CS_Record || fd->Kind() == CS_Variable)
-	fstm = dynamic_cast<CobolData*>(fd)->GetStream();
+	fstm = dynamic_cast<const CobolData*>(fd)->GetStream();
     else if (fd->Kind() != CS_FileDesc)
 	return WriteError ("cannot read into that");
 
@@ -119,14 +119,14 @@ void GenRead (void)
 }
 
 // This function does setup for GenWrite and GenRewrite
-static auto FileWriteSetup (void)
+static const CobolFile* FileWriteSetup (const CobolData*& toWriteFrom)
 {
     auto src = PopIdentifier();
     auto file = PopIdentifier();
     auto toWrite = LookupIdentifier<CobolSymbol> (file.ident);
-    auto toWriteFrom = g_Symbols.lookup<CobolData>(src.ident);
+    toWriteFrom = g_Symbols.lookup<CobolData> (src.ident);
     DTRACE ("\tWriting record %s to file found using %s\n", toWriteFrom ? toWriteFrom->GetFullCName().c_str() : toWrite->GetFullCName().c_str(), toWrite->GetFullCName().c_str());
-    auto fstm = dynamic_cast<CobolFile*>(toWrite);
+    auto fstm = dynamic_cast<const CobolFile*>(toWrite);
     // Now, the first argument to write can either be a file descriptor,
     //	or the record associated with that file descriptor
     //	The criteria is the Kind function, overloaded from CobolSymbol
@@ -134,31 +134,33 @@ static auto FileWriteSetup (void)
 	WriteError ("unknown destination file");
     else {
 	if (toWrite->Kind() == CS_Record || toWrite->Kind() == CS_Variable)
-	    fstm = dynamic_cast<CobolData*>(toWrite)->GetStream();
+	    fstm = dynamic_cast<const CobolData*>(toWrite)->GetStream();
 	else if (toWrite->Kind() != CS_FileDesc)
 	    WriteError ("cannot write that");
     }
-    return make_pair (fstm, toWriteFrom);
+    return fstm;
 }
 
 void GenWrite (void)
 {
-    auto f = FileWriteSetup();
-    if (!f.first)
+    const CobolData* var;
+    auto f = FileWriteSetup (var);
+    if (!f)
 	return;
-    f.first->GenSetupForAppend (codef);
-    f.first->GenWriteData (codef, f.second);
-    f.first->GenWriteEnd (codef);
+    f->GenSetupForAppend (codef);
+    f->GenWriteData (codef, var);
+    f->GenWriteEnd (codef);
 }
 
 void GenRewrite (void)
 {
-    auto f = FileWriteSetup();
-    if (!f.first)
+    const CobolData* var;
+    auto f = FileWriteSetup (var);
+    if (!f)
 	return;
-    f.first->GenSeek (codef);
-    f.first->GenWriteData (codef, f.second);
-    f.first->GenWriteEnd (codef);
+    f->GenSeek (codef);
+    f->GenWriteData (codef, var);
+    f->GenWriteEnd (codef);
 }
 
 void AssociateRecordsWithFD (void)

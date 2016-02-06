@@ -26,7 +26,7 @@ static void DisplayRecord (WINDOW* win, uint32_t row, char FileBuffer[16], uint3
 void ViewBin (FILE * df)
 {
 uint32_t Row = 0, TopRow = 0;
-uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords = 0;
+uint32_t maxx UNUSED, maxy, MaxVisRecords = 0;
 uint32_t key = 0, i;
 static const char c_UsageString[] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit";
 uint32_t FileLength;
@@ -190,7 +190,7 @@ static void IntToHex (uint32_t num, int dp, char* strbuf)
 
 static void DisplayRecord (WINDOW* win, uint32_t row, char FileBuffer[16], uint32_t offset)
 {
-    int maxx, maxy __attribute__((unused));
+    int maxx, maxy UNUSED;
     getmaxyx (win, maxy, maxx);
     if (maxx < 80) {
 	printf ("Screen too small!\n");

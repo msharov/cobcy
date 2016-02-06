@@ -8,146 +8,101 @@
 #include "semutil.h"
 
 CobolConstant::CobolConstant (void)
+:_kind (CC_Undefined)
+,_ival (0)
+,_fval (0)
+,_cval()
 {
-    CurKind = CC_Undefined;
-    data.cval = nullptr;
 }
 
 CobolConstant::CobolConstant (const char* cval)
+:_kind (CC_String)
+,_ival (0)
+,_fval (0)
+,_cval (cval, strlen(cval))
 {
-    int length;
-    length = strlen (cval);
-    data.cval = new char [length + 1];
-    strncpy (data.cval, cval, length);
-    data.cval [length] = '\x0';
-    CurKind = CC_String;
 }
 
-CobolConstant::CobolConstant (long int ival)
+CobolConstant::CobolConstant (long ival)
+:_kind (CC_Integer)
+,_ival (ival)
+,_fval (0)
+,_cval()
 {
-    data.ival = ival;
-    CurKind = CC_Integer;
 }
 
 CobolConstant::CobolConstant (double fval)
+:_kind (CC_Float)
+,_ival (0)
+,_fval (fval)
+,_cval()
 {
-    data.fval = fval;
-    CurKind = CC_Float;
 }
 
 CobolConstant::CobolConstant (const StackEntry& e)
+: CobolConstant()
 {
-    CurKind = CC_Undefined;
-    data.cval = nullptr;
-    switch (e.kind) {
-	case SE_Bool:
-	case SE_Integer:operator= (e.ival); break;
-	case SE_Float:	operator= (e.fval); break;
-	case SE_String:	operator= (e.ident); break;
-	default:	break;
-    };
+    operator= (e);
 }
 
 CobolConstant& CobolConstant::operator= (const char* cval)
 {
-    int length;
-    length = strlen (cval);
-    if (CurKind == CC_String && data.cval != nullptr)
-	free (data.cval);
-    data.cval = new char [length + 1];
-    strncpy (data.cval, cval, length);
-    data.cval [length] = '\x0';
-    CurKind = CC_String;
+    _kind = CC_String;
+    _cval = cval;
     return *this;
 }
 
-CobolConstant& CobolConstant::operator= (long int ival)
+CobolConstant& CobolConstant::operator= (long ival)
 {
-    if (CurKind == CC_String && data.cval != nullptr) {
-	delete [] data.cval;
-	data.cval = nullptr;
-    }
-    data.ival = ival;
-    CurKind = CC_Integer;
+    _kind = CC_Integer;
+    _ival = ival;
     return *this;
 }
 
 CobolConstant& CobolConstant::operator= (double fval)
 {
-    if (CurKind == CC_String && data.cval != nullptr) {
-	delete [] data.cval;
-	data.cval = nullptr;
-    }
-    data.fval = fval;
-    CurKind = CC_Float;
+    _kind = CC_Float;
+    _fval = fval;
     return *this;
 }
 
-CobolConstant& CobolConstant::operator= (StackEntry * se)
+CobolConstant& CobolConstant::operator= (const StackEntry& e)
 {
-    int length;
-
-    if (CurKind == CC_String && data.cval != nullptr)
-	free (data.cval);
-
-    switch (se->kind) {
-	case SE_String:	length = strlen (se->ident);
-			data.cval = new char [length + 1];
-			strncpy (data.cval, se->ident, length);
-			data.cval [length] = '\x0';
-			CurKind = CC_String;
-			break;
-
-	case SE_Quote:	length = strlen ("\\\"");
-			data.cval = new char [length + 1];
-			strncpy (data.cval, "\\\"", length);
-			data.cval [length] = '\x0';
-			CurKind = CC_String;
-			break;
-
-	case SE_Integer: data.ival = se->ival;
-			 CurKind = CC_Integer;
-			 break;
-
-	case SE_Float: 	data.fval = se->fval;
-			CurKind = CC_Float;
-			break;
-
-	default:		WriteError ("internal: se not a constant");
-				break;
-    }
+    switch (e.kind) {
+	case SE_Bool:
+	case SE_Integer:operator= (e.ival); break;
+	case SE_Float:	operator= (e.fval); break;
+	case SE_String:	operator= (e.ident); break;
+	case SE_Quote:	operator= ("\\\""); break;
+	default:	break;
+    };
     return *this;
 }
 
 void CobolConstant::text_write (ostringstream& os) const
 {
-    switch (CurKind) {
-	case CC_String:	os << "\"" << data.cval << "\"";	break;
-	case CC_Integer:	os << data.ival;	break;
-	case CC_Float:	os << data.fval;	break;
-	default:		WriteError ("constant type unknown for writing");
+    switch (_kind) {
+	case CC_String:		os << "\"" << _cval << "\"";	break;
+	case CC_Integer:	os << _ival;	break;
+	case CC_Float:		os << _fval;	break;
+	default:		WriteError ("constant type %u unknown for writing", _kind);
 				break;
     }
 }
 
-void CobolConstant::GenWrite (ostringstream& os, const char* stream)
+void CobolConstant::GenWrite (ostringstream& os, const char* stream) const
 {
     GenIndent();
-    os << "fprintf (" << stream << ", \"";
-    switch (CurKind) {
-	case CC_String:	os << data.cval;	break;
-	case CC_Integer:	os << data.ival;	break;
-	case CC_Float:	os << data.fval;	break;
-	default:		WriteError ("constant type unknown for writing");
+    if (!strcmp (stream, "stdout"))
+	os << "printf (\"";
+    else
+	os << "fprintf (" << stream << ", \"";
+    switch (_kind) {
+	case CC_String:		os << _cval;	break;
+	case CC_Integer:	os << _ival;	break;
+	case CC_Float:		os << _fval;	break;
+	default:		WriteError ("constant type %u unknown for writing", _kind);
 				break;
     }
     os << "\");\n";
-}
-
-CobolConstant::~CobolConstant (void)
-{
-    if (CurKind == CC_String && data.cval != nullptr) {
-	delete [] data.cval;
-	data.cval = nullptr;
-    }
 }

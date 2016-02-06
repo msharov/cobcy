@@ -7,68 +7,69 @@
 #include "symrec.h"
 
 CobolRecord::CobolRecord (void)
+: _fields()
 {
 }
 
-void CobolRecord::AddChild (CobolData * NewChild)
+void CobolRecord::AddChild (const CobolData* NewChild)
 {
-    ChildList.push_back (NewChild);
+    _fields.push_back (NewChild);
     CSize += NewChild->GetSize();
 }
 
-void CobolRecord::GenDeclareBegin (ostringstream& os)
+void CobolRecord::GenDeclareBegin (ostringstream& os) const
 {
     GenIndent();
     os << "struct {\n";
 }
 
-void CobolRecord::GenDeclareEnd (ostringstream& os)
+void CobolRecord::GenDeclareEnd (ostringstream& os) const
 {
     GenIndent();
     os << "} " << GetCName() << ";\n";
 }
 
-void CobolRecord::GenRead (ostringstream& os, const char* stream)
+void CobolRecord::GenRead (ostringstream& os, const char* stream) const
 {
     #ifndef NDEBUG
 	if (g_Config.GenDebug)
 	    cout << "\tReading record " << *this << " from stream " << stream << "\n";
     #endif
-    foreach (vector<CobolData*>::const_iterator, i, ChildList) {
+    for (auto i : _fields) {
 	#ifndef NDEBUG
 	    if (g_Config.GenDebug)
-		cout << "\t\tReading child " << **i << "\n";
+		cout << "\t\tReading child " << *i << "\n";
 	#endif
-	(*i)->GenRead (os, stream);
+	i->GenRead (os, stream);
     }
 }
 
-void CobolRecord::GenWrite (ostringstream& os, const char* stream)
+void CobolRecord::GenWrite (ostringstream& os, const char* stream) const
 {
     #ifndef NDEBUG
 	if (g_Config.GenDebug)
 	    cout << "\tWriting record " << *this << " to stream " << stream << "\n";
     #endif
-    foreach (vector<CobolData*>::const_iterator, i, ChildList) {
+    for (auto i : _fields) {
 	#ifndef NDEBUG
 	    if (g_Config.GenDebug)
-		cout << "\t\tWriting child " << **i << "\n";
+		cout << "\t\tWriting child " << *i << "\n";
 	#endif
-	(*i)->GenWrite (os, stream);
+	i->GenWrite (os, stream);
     }
 }
 
-void CobolRecord::GenSignature (ostringstream& os)
+void CobolRecord::GenSignature (ostringstream& os) const
 {
     #ifndef NDEBUG
 	if (g_Config.GenDebug)
 	    cout << "\tSigning record " << *this << "\n";
     #endif
-    foreach (vector<CobolData*>::const_iterator, i, ChildList) {
+    for (auto i : _fields) {
 	#ifndef NDEBUG
 	    if (g_Config.GenDebug)
-		cout << "\t\tSigning child " << **i << "\n";
+		cout << "\t\tSigning child " << *i << "\n";
 	#endif
-	(*i)->GenSignature (os);
+	i->GenSignature (os);
     }
 }

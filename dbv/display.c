@@ -28,7 +28,7 @@ void ViewDBF (DBF_FILE * df)
 {
     uint32_t Row = 0, TopRow = 0;
     int32_t Field = 0;
-    uint32_t maxx __attribute__((unused)), maxy, MaxVisRecords = 0;
+    uint32_t maxx UNUSED, maxy, MaxVisRecords = 0;
     uint32_t key = 0, i;
     static const char c_UsageString[81] = " Use arrows, pgup/pgdn, home/end to move; 'q' to quit";
 
@@ -167,7 +167,7 @@ static void DisplayDBFHeader (WINDOW* win, uint32_t row, uint32_t field, DBF_FIL
 {
     wmove (win, row, 0);
     wclrtoeol (win);
-    unsigned x = 0, maxy __attribute__((unused)), maxx;
+    unsigned x = 0, maxy UNUSED, maxx;
     getmaxyx (win, maxy, maxx);
     for (int i = field; i < df->nFields && x+4 < maxx; ++i) {
 	mvwaddch (win, row, x++, ' ');
@@ -190,7 +190,7 @@ static void DisplayDBFRecord (WINDOW* win, uint32_t row, uint32_t field, DBF_FIL
 
     wmove (win, row, 0);
     wclrtoeol (win);
-    unsigned x = 0, maxy __attribute__((unused)), maxx;
+    unsigned x = 0, maxy UNUSED, maxx;
     getmaxyx (win, maxy, maxx);
     for (unsigned i = 0; i < field; ++i)
 	ftext += df->Fields[i].FieldLength;

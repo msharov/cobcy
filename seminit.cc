@@ -12,8 +12,8 @@
 
 //----------------------------------------------------------------------
 
-ofstream 		codef;
-ofstream 		declf;
+ostringstream 		codef;
+ostringstream 		declf;
 vector<StackEntry> 	g_Tokens;
 int 			NestingLevel = 0;
 bool			CodeBegan = false;
@@ -35,7 +35,7 @@ void StartCode (void)
     InitializeVariables();
 
     DTRACE ("DBG: Beginning first paragraph\n");
-    GenIndent(); codef << "int _FirstParagraph (void)\n{\n";
+    GenIndent(); codef << "static int _FirstParagraph (void)\n{\n";
     ++ NestingLevel;
     CodeBegan = true;
 }
@@ -43,10 +43,10 @@ void StartCode (void)
 void EndCode (void)
 {
     DTRACE ("DBG: Finished code, genrating main()\n");
-    codef << "\nint main (void)\n{\n";
+    codef << "int main (void)\n{\n";
     ++ NestingLevel;
 
-    GenIndent(); codef << "_SetVarValues();\n\n";
+    GenIndent(); codef << "_SetVarValues();\n";
     OpenSpecialFiles();		// Generates code if there are any
     GenParagraphCalls();
     CloseSpecialFiles();
@@ -56,9 +56,6 @@ void EndCode (void)
 
 void StartProgram (void)
 {
-    codef.open (g_Config.CodeFile, ios::out| ios::trunc);
-    declf.open (g_Config.DeclFile, ios::out| ios::trunc);
-
     string headerName (g_Config.DeclFile);
     auto slashpos = headerName.rfind ('/');
     if (slashpos != string::npos)
@@ -84,11 +81,6 @@ void StartProgram (void)
 
     // This is the file for forward function declarations, their indices, etc.
     codef << "#include \"" << headerName << "\"\n\n";
-
-    codef << "static char _space_var [201];\n";
-    codef << "static long int _zero_var = 0;\n";
-    codef << "static long int _index = 0;\n";	// Loop iterator
-    codef << "static long int _cpi;\n\n";	// Current Paragraph Index
     assert (g_Symbols.empty());
 
     // Space filler variable
@@ -113,8 +105,8 @@ void StartProgram (void)
 
 void EndProgram (void)
 {
-    declf.flush();
-    codef.flush();
-    declf.close();
-    codef.close();
+    if (ErrorOccured())
+	return;
+    codef.str().write_file (g_Config.CodeFile);
+    declf.str().write_file (g_Config.DeclFile);
 }

@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-CobolLabel*		CurPar = nullptr;
+CobolLabel* CurPar = nullptr;
 
 static vector<CobolLabel*> s_ParagraphList;
 static string s_CurLoopVar;
@@ -83,7 +83,7 @@ void GenEndProc (void)
 {
     // A paragraph finishes previous proc and starts a new one.
     GenIndent();
-    codef << "return 1;\n";
+    codef << "return _po__Next;\n";
     -- NestingLevel;
     GenIndent();
     codef << "}\n\n";
@@ -179,13 +179,8 @@ void GenConnect (void)
 
 void GenStopRun (void)
 {
-    // The point is to make cpi large enough to quit.
-    //	Nesting level is obviously important, since an overflow
-    //	may occur when adding 1 to cpi each iteration...
-    //	But that should not happen until you nest MAXINT paragraphs,
-    //	which is a very big number!
     GenIndent();
-    codef << "return " << INT_MAX << ";\n";
+    codef << "return _pi__Exit;\n";
 }
 
 void GenParagraphCalls (void)
@@ -195,43 +190,40 @@ void GenParagraphCalls (void)
 	<< "    _pi__FirstParagraph,\n";
     for (auto& p : s_ParagraphList)
 	declf << "    _pi_" << *p << ",\n";
-    declf << "    _pi__NParagraphs,\n    _pi__Exit\n};\n";
+    declf << "    _pi__NParagraphs,\n    _pi__Exit,\n    _po__Next = 1\n};\n\n";
+
+    for (auto& p : s_ParagraphList)
+	p->GenPrototype (declf);
 
     // The calling structure is basically a while loop with a switch statement
-    //	inside. There is a current paragraph variable _cpi, which is parsed in
+    //	inside. There is a current paragraph variable cpi, which is parsed in
     //	that switch statement to decide which paragraph to execute. This is
     //	done to support complex calling chains with gotos.
     //	And it is <= because you can call par 10 if there are 10 pars
-    GenIndent(); codef << "_cpi = _pi__FirstParagraph;\n";
-    GenIndent(); codef << "while (_cpi <= _pi__NParagraphs) {\n";
+    GenIndent(); codef << "for (long cpi = _pi__FirstParagraph; cpi < _pi__NParagraphs;) {\n";
     ++ NestingLevel;
 
     // Debugging information is generated with -g switch
     if (g_Config.GenDebug) {
 	GenIndent();
-	codef << "printf (\"DEBUG: _cpi = %ld in %ld paragraphs.\\n\", _cpi, _pi__NParagraphs);\n";
+	codef << "printf (\"DEBUG: cpi = %ld in %ld paragraphs.\\n\", cpi, _pi__NParagraphs);\n";
     }
 
     // This is the switch statement
-    GenIndent(); codef << "switch (_cpi) {\n";
+    GenIndent(); codef << "switch (cpi) {\n";
     ++ NestingLevel;
 
     // Each paragraph call will return the displacement from current
     GenIndent();
-    codef << "case _pi__FirstParagraph:\t_cpi += _FirstParagraph(); break;\n";
+    codef << "case _pi__FirstParagraph:\tcpi += _FirstParagraph(); break;\n";
     for (auto& p : s_ParagraphList) {
 	GenIndent();
-	codef << "case _pi_" << *p << ":\t_cpi += " << *p << "(); break;\n";
+	codef << "case _pi_" << *p << ":\tcpi += " << *p << "(); break;\n";
     }
     s_ParagraphList.clear();
 
     // This should never happen, but if it does, quit gracefully
-    GenIndent(); codef << "default:\n";
-    NestingLevel += 2;
-    GenIndent(); codef << "fprintf (stderr, \"Broken paragraph chain!\\n\");\n";
-    GenIndent(); codef << "_cpi = _pi__Exit;\n";
-    GenIndent(); codef << "break;\n";
-    NestingLevel -= 2;
+    GenIndent(); codef << "default:\tcpi = _pi__Exit; assert (!\"abnormal exit\"); break;\n";
 
     // First close the switch, then while loop
     -- NestingLevel;
@@ -308,4 +300,12 @@ void GenEmptyClause (void)
     GenIndent();
     GenIndent();
     codef << "{}\n";
+}
+
+void GenCall (void)
+{
+    DTRACE ("\tIn GenCall\n");
+    auto eargs = PopStatement();
+    auto eprg = PopIdentifier();
+    NIY ("CALL");
 }

@@ -12,7 +12,7 @@ bvt/SEP	:= "------------------------------------------------------------"
 
 ################ Compilation ###########################################
 
-.PHONY:	check bvt/run bvt/clean
+.PHONY:	check bvt/run bvt/clean bvt/standardize
 
 .SECONDARY: ${bvt/INCS} ${bvt/SRCS}
 
@@ -20,13 +20,18 @@ bvt/all:	${bvt/BVTS}
 
 check:	bvt/run
 bvt/run:	${bvt/BVTS}
-	@(cd bvt; for i in $(notdir ${bvt/BVTS}); do			\
-	    echo "Running $$i";		echo ${bvt/SEP} > $$i.out;	\
-	    cat $$i.h >> $$i.out;	echo ${bvt/SEP} >> $$i.out;	\
-	    cat $$i.c >> $$i.out;	echo ${bvt/SEP} >> $$i.out;	\
-	    ./$$i >> $$i.out;		echo ${bvt/SEP} >> $$i.out;	\
-	    diff $$i.std $$i.out && rm -f $$i.h $$i.c $$i.out;		\
-	done)
+	@for i in $(notdir ${bvt/BVTS}); do\
+	    echo "Running $$i";		echo ${bvt/SEP} > $Obvt/$$i.out;		\
+	    cat $Obvt/$$i.h >> $Obvt/$$i.out;	echo ${bvt/SEP} >> $Obvt/$$i.out;	\
+	    cat $Obvt/$$i.c >> $Obvt/$$i.out;	echo ${bvt/SEP} >> $Obvt/$$i.out;	\
+	    (cd $Obvt; ./$$i >> $$i.out 2>&1);	echo ${bvt/SEP} >> $Obvt/$$i.out;	\
+	    diff bvt/$$i.std $Obvt/$$i.out;\
+	done
+
+bvt/standardize:
+	@for i in $(notdir ${bvt/BVTS}); do\
+	    cp -f $Obvt/$$i.out bvt/$$i.std;\
+	done
 
 ${bvt/BVTS}:	$Obvt/bvt%:	$Obvt/bvt%.o ${COBLIB}
 	@echo "Linking $@ ..."
@@ -43,7 +48,7 @@ $Obvt/%.o:	$Obvt/%.c
 clean:	bvt/clean
 bvt/clean:
 	@if [ -d $Obvt ]; then\
-	    rm -f ${bvt/BVTS} ${bvt/OBJS} ${bvt/DEPS} ${bvt/SRCS} ${bvt/INCS} $Obvt/output-file $Obvt/*.dbf $Obvt/*.ndx $Obvt/.d;\
+	    rm -f ${bvt/BVTS} ${bvt/OBJS} ${bvt/DEPS} ${bvt/SRCS} ${bvt/INCS} $Obvt/output-file $Obvt/*.dbf $Obvt/*.ndx $Obvt/*.out $Obvt/.d;\
 	    rmdir $Obvt;\
 	fi
 

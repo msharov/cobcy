@@ -137,12 +137,8 @@ void CloseScopeLevels (uint32_t LastLevel)
 
 void InitializeVariables (void)
 {
-    codef << "void _SetVarValues (void)\n{\n";
+    codef << "static void _SetVarValues (void)\n{\n";
     ++ NestingLevel;
-    // Initialize predefined variables
-    GenIndent(); codef << "memset (_space_var, ' ', sizeof(_space_var));\n";
-    GenIndent(); codef << "_space_var[sizeof(_space_var)-1] = 0;\n";
-
     // Initialize user-defined variables
     for (auto& i : s_VarInit) {
 	auto attr = g_Symbols.lookup<CobolVar> (i.name.ident);

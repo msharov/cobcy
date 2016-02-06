@@ -32,7 +32,10 @@ void GenMove (void)
 	    dest->GenMove (codef, src);
 	} else {
 	    CobolConstant csrc = esrc;
-	    DTRACE ("\t\tMoving %s to %s\n", csrc.GetFullCName().c_str(), dest->GetFullCName().c_str());
+	    #ifndef NDEBUG
+		if (g_Config.GenDebug)
+		    cerr << "\t\tMoving " << csrc << " to " << *dest << '\n';
+	    #endif
 	    dest->GenMove (codef, csrc);
 	}
     }
@@ -45,12 +48,16 @@ void SetResultRounding (void)
 
 static void GenericArithmetic (bool sourceFirst, char opChar)
 {
-    DTRACE ("In GenericArithmetic\n");
-    auto edest = PopStatement();
-    if (sourceFirst)
-	reverse (edest);
-    auto esrc = PopIdentifier();
-
+    auto egiving = PopIdentifier();
+    vector<StackEntry> edest;
+    StackEntry esrc;
+    if (sourceFirst) {
+	esrc = PopIdentifier();
+	edest = PopStatement();
+    } else {
+	edest = PopStatement();
+	esrc = PopIdentifier();
+    }
     for (auto& d : edest) {
 	auto dest = LookupIdentifier<CobolVar> (d.ident);
 	if (!dest)
@@ -71,25 +78,25 @@ static void GenericArithmetic (bool sourceFirst, char opChar)
 void GenAdd (void)
 {
     DTRACE ("\tIn GenAdd\n");
-    GenericArithmetic (true, '+');
+    GenericArithmetic (false, '+');
 }
 
 void GenSubtract (void)
 {
     DTRACE ("\tIn GenSubtract\n");
-    GenericArithmetic (true, '-');
+    GenericArithmetic (false, '-');
 }
 
 void GenMultiply (void)
 {
     DTRACE ("\tIn GenMultiply\n");
-    GenericArithmetic (false, '*');
+    GenericArithmetic (true, '*');
 }
 
 void GenDivide (void)
 {
     DTRACE ("\tIn GenDivide\n");
-    GenericArithmetic (false, '/');
+    GenericArithmetic (true, '/');
 }
 
 void GenCompute (void)
@@ -100,14 +107,11 @@ void GenCompute (void)
     reverse (prms.begin(), prms.end());
 
     GenIndent();
-    bool first = true;
     for (auto& p : prms) {
 	switch (p.kind) {
 	    case SE_Identifier:
 		// i > 0 because we only want casting on the righthand side
 		//	entry 0 is the variable where stuff will be placed
-		if (!first && RoundResult)
-		    codef << "(double) ";
 		PrintIdentifier (p.ident, codef);
 		break;
 	    case SE_Operator:
@@ -118,24 +122,21 @@ void GenCompute (void)
 		    case OP_Division:		codef << " / "; break;
 		    case OP_LParen:		codef << "(";	break;
 		    case OP_RParen:		codef << ")";	break;
-		    case OP_Equal:		codef << " = "; break;
+		    case OP_Equal:
+			codef << " = ";
+			if (RoundResult)
+			    codef << "_RoundResult (";
+			break;
 		}
 		break;
 	    case SE_Integer:
 	    case SE_Float:
-		if (RoundResult)
-		    codef << "(double) ";
 		PrintConstant (p, codef);
 		break;
 	    default:
 		WriteError ("Invalid expression in COMPUTE");
 		break;
 	}
-
-	// This will place the function call right after the equal sign
-	if (first && RoundResult)
-	    codef << "_RoundResult (";
-	first = false;
     }
 
     // The whole expression will be on one line...

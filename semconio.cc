@@ -64,8 +64,8 @@ void SetAcceptSource (AcceptSourceType NewSrc)
 
 void GenDisplay (void)
 {
+    DTRACE ("\tIn GenDisplay\n");
     auto stmt = PopStatement();
-    DTRACE ("\tIn GenDisplay: %zu things on stack\n", stmt.size());
     reverse (stmt.begin(), stmt.end());
     for (auto& e : stmt) {
 	if (e.kind == SE_Identifier) {
@@ -78,8 +78,7 @@ void GenDisplay (void)
 	    ce.GenWrite (codef, s_DisplayOutput);
 	}
     }
-    GenIndent();
-    codef << "fprintf (" << s_DisplayOutput << ", \"\\n\");\n";
+    CobolConstant("\\n").GenWrite (codef, s_DisplayOutput);
 }
 
 void SetDisplayOutput (void)

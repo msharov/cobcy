@@ -8,24 +8,28 @@
 #include "semcontrol.h"
 
 CobolLabel::CobolLabel (void)
+: Undeclared (true)
 {
-    Undeclared = true;
 }
 
-void CobolLabel::GenDeclare (ostringstream& os)
+void CobolLabel::GenPrototype (ostringstream& os) const
 {
-    os << "int " << *this << " (void)\n";
+    os << "static int " << *this << " (void);\n";
+}
+
+void CobolLabel::GenDeclare (ostringstream& os) const
+{
+    os << "static int " << *this << " (void)\n";
     BeginCompound();
-    os << *this << ":\n";
+    os << *this << ": UNUSED\n";
 }
 
-void CobolLabel::GenJump (ostringstream& os, CobolLabel * dest)
+void CobolLabel::GenJump (ostringstream& os, const CobolLabel* dest) const
 {
     GenIndent();
     // If in jumping to the top of the current paragraph, use goto.
-    if (dest == this) {
+    if (dest == this)
 	os << "goto " << *this << ";\n";
-    }
     else {
 	// Return the difference of indeces of the destination paragraph
 	//	and the current paragraph. This is done so that when
@@ -35,8 +39,4 @@ void CobolLabel::GenJump (ostringstream& os, CobolLabel * dest)
 	os << "_pi_" << *dest << " - ";
 	os << "_pi_" << *this << ";\n";
     }
-}
-
-CobolLabel::~CobolLabel (void)
-{
 }

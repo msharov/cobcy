@@ -11,9 +11,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
+#include <stdbool.h>
 
-int 	_Alphabetic (const char* str);
-int 	_AlphabeticCase (const char* str, int what);
+#define UNUSED	__attribute__((unused))
+
+extern char _space_var [201];
+extern long _zero_var;
+extern long _index;
+
+bool 	_Alphabetic (const char* str);
+bool 	_AlphabeticCase (const char* str, int what);
 void 	_RuntimeError (const char* message);
 void 	_ReadStringVar (FILE * stream, char* var, const char* pic);
 void 	_ReadIntegerVar (FILE * stream, long int * var, const char* pic);
