@@ -12,7 +12,7 @@ Current capabilities include a lot of basic COBOL, but several features,
 like arrays, strings, and record-record MOVEs are still missing.
 
 =========================================================================
--------------------------------------------------------------------------
+
 This was a project of mine back in 1996, which is when the last release
 occured. I dug this up recently on uu.net, and decided to put it up to
 some public place. It might make a decent starting point if you want to
@@ -22,10 +22,10 @@ I do not want to maintain it; I just cleaned it up a bit to get it to
 compile with current gcc and uSTL releases. So tell me if it crashes,
 but forget about new features.
 
-The "alberto" branch is for Alberto Santini's changes. He did some work
-on the project between 1996 and 1999, and made two releases. I ought to
-merge some of that in, when I figure out exactly what he did.
--------------------------------------------------------------------------
+The "alberto" branch is for work done between 1996 and 1999 by Alberto
+Santini (https://github.com/albertosantini). I ought to merge some of
+that in, when I figure out exactly what he did.
+
 =========================================================================
 
 QuickStart:
@@ -43,5 +43,3 @@ run automatically with 'make check'. See documentation in the docs
 directory for more information about the program. If you have a problem,
 run cobcy with -g flag and send me the output of thus generated program,
 the generated C code, and the test file you used.
-
--------------------------------------------------------------------------
