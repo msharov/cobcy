@@ -116,7 +116,7 @@ void _WriteFloatVar (FILE* stream, double var, const char* pic)
 const char* _IntegerToString (long int var, const char* pic)
 {
     char barenum [20];
-    snprintf (barenum, 20, "%lu", var);
+    snprintf (barenum, sizeof(barenum), "%lu", (unsigned long) var);	// printed unsigned; sign added below by picture
     size_t nl = strlen(barenum);
     size_t pl = strlen(pic);
 

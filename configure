@@ -50,7 +50,7 @@ s/@PKG_MINOR@/$PKG_MINOR/g"
 #### The rest of the file is configuration code. Leave it alone. #####
 ######################################################################
 
-die() { rm -f config.sed config.cpu config.cpu.c; exit; }
+die() { rm -f config.sed; exit; }
 sub() { printf "%s\n" "$1">>config.sed; }
 escpath() { echo $1 | sed 's/\//\\\//g'; }
 
@@ -201,7 +201,6 @@ sub "s/@prefix@/${ac_var_prefix:=\/usr\/local}/g
 s/@bindir@/$ac_var_prefix\/bin/g
 s/@datadir@/${ac_var_datadir:=$ac_var_prefix\/share}/g
 s/@sysconfdir@/$ac_var_prefix\/etc/g
-s/@localstatedir@/$ac_var_prefix\/var/g
 s/@includedir@/${ac_var_includedir:=$ac_var_prefix\/include}/g
 s/@oldincludedir@/${ac_var_oldincludedir:=\/usr\/include}/g
 s/@docdir@/${ac_var_docdir:=$ac_var_datadir\/doc\/$PKG_NAME}/g

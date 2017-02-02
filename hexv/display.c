@@ -110,10 +110,7 @@ OneRowType * FileBuffer;
 	}
 	refresh();
 
-	key = 0;
-	key = getch();
-    }
-    while (key != 'q');
+    } while ((key = getch()) != 'q');
 
     free (FileBuffer);
 }
