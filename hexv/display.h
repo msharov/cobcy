@@ -4,7 +4,7 @@
 // This file is free software, distributed under the MIT License.
 
 #pragma once
-#include <ncurses.h>
+#include <curses.h>
 #include "../coblib/cobfunc.h"
 
 void ViewBin (FILE* df);

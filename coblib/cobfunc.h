@@ -16,13 +16,22 @@
 
 #define UNUSED	__attribute__((unused))
 
+#ifndef min
+#define min(a,b)	((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b)	((a) < (b) ? (b) : (a))
+#endif
+
 extern char _space_var [201];
 extern long _zero_var;
 extern long _index;
 
+void*	_AllocateBytes (size_t n) __attribute__((malloc));
+void*	_ReallocateBytes (void* p, size_t n) __attribute__((malloc));
 bool 	_Alphabetic (const char* str);
 bool 	_AlphabeticCase (const char* str, int what);
-void 	_RuntimeError (const char* message);
+void 	_RuntimeError (const char* message, ...) __attribute__((__format__(__printf__,1,2))) __attribute__((noreturn));
 void 	_ReadStringVar (FILE * stream, char* var, const char* pic);
 void 	_ReadIntegerVar (FILE * stream, long int * var, const char* pic);
 void 	_ReadFloatVar (FILE * stream, double * var, const char* pic);

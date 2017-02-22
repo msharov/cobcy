@@ -3,10 +3,8 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#include "dbf.h"
+#include "cobfunc.h"
 #include <time.h>
-#include <string.h>
-#include <stdlib.h>
 #include <sys/types.h>
 
 //----------------------------------------------------------------------
@@ -14,16 +12,13 @@
 static void DBF_SetToday (DBF_Header* head);
 static int DBF_ReadHeader (DBF_FILE* dfd);
 static void DBF_WriteHeader (DBF_FILE* dfd);
-#ifndef max
-#define max(a,b)	((a) < (b) ? (b) : (a))
-#endif
 
 //----------------------------------------------------------------------
 
 /// Opens database in \p filename in given \p mode.
 DBF_FILE* DBF_Open (const char* filename, const char* mode)
 {
-    DBF_FILE* fp = (DBF_FILE*) malloc (sizeof(DBF_FILE));
+    DBF_FILE* fp = _AllocateBytes (sizeof(DBF_FILE));
     strncpy (fp->Filename, filename, sizeof(fp->Filename));
     strncpy (fp->OpenMode, mode, sizeof(fp->OpenMode));
     fp->Filename [sizeof(fp->Filename)-1] = 0;
@@ -41,7 +36,7 @@ DBF_FILE* DBF_Open (const char* filename, const char* mode)
 /// Creates a new database in \p filename with \p nFields described in \p Fields.
 DBF_FILE* DBF_Create (const char* filename, uint16_t nFields, DBF_Field* Fields)
 {
-    DBF_FILE* fp = (DBF_FILE*) malloc (sizeof(DBF_FILE));
+    DBF_FILE* fp = _AllocateBytes (sizeof(DBF_FILE));
     strncpy (fp->Filename, filename, sizeof(fp->Filename));
     fp->Filename [sizeof(fp->Filename)-1] = 0;
     strcpy (fp->OpenMode, "wb");
@@ -69,11 +64,11 @@ DBF_FILE* DBF_Create (const char* filename, uint16_t nFields, DBF_Field* Fields)
 /// Sets the header access date to today.
 static void DBF_SetToday (DBF_Header* h)
 {
-    time_t TodayTime = time (NULL);
-    const struct tm* DateToday = localtime (&TodayTime);
-    h->Date.Year = DateToday->tm_year;
-    h->Date.Month = DateToday->tm_mon;
-    h->Date.Day = DateToday->tm_mday;
+    time_t today = time (NULL);
+    const struct tm* todate = localtime (&today);
+    h->Date.Year = todate->tm_year;
+    h->Date.Month = todate->tm_mon;
+    h->Date.Day = todate->tm_mday;
 }
 
 /// Writes the header to \p dfd.
@@ -114,7 +109,7 @@ static int DBF_ReadHeader (DBF_FILE* dfd)
 
     // Now at 0x20 in the file, the fields.
     dfd->nFields = (dfd->Header.HeaderLength / 32) - 1;
-    dfd->Fields = (DBF_Field*) realloc (dfd->Fields, sizeof(DBF_Field) * dfd->nFields);
+    dfd->Fields = _ReallocateBytes (dfd->Fields, sizeof(DBF_Field) * dfd->nFields);
     if (!dfd->Fields)
 	dfd->nFields = 0;
     for (int i = 0; i < dfd->nFields; ++ i) {
@@ -196,8 +191,8 @@ void DBF_ReadRecord (DBF_FILE* fp, void* data)
 void DBF_DeleteRecord (DBF_FILE* fp)
 {
     fseek (fp->DataDesc, -1, SEEK_CUR);	// Move back one char, since pointing to start of data
-    const char buffer = '*';
-    fwrite (&buffer, 1, 1, fp->DataDesc);
+    static const char delmark = '*';
+    fwrite (&delmark, 1, 1, fp->DataDesc);
 }
 
 /// Removes deleted records from database \p fp.
@@ -213,7 +208,7 @@ void DBF_Pack (DBF_FILE* fp)
     FILE* PackedFile = fopen (fp->Filename, "wb");
     fp->DataDesc = fopen (TempFilename, "rb");
 
-    char* buffer = (char*) malloc (max (fp->Header.HeaderLength + 1, fp->Header.RecordLength));
+    char* buffer = _AllocateBytes (max (fp->Header.HeaderLength + 1, fp->Header.RecordLength));
 
     // Header goes over intact for now
     fread (buffer, 1, fp->Header.HeaderLength + 1, fp->DataDesc);
@@ -228,6 +223,7 @@ void DBF_Pack (DBF_FILE* fp)
 	else
 	    fwrite (buffer, 1, fp->Header.RecordLength, PackedFile);
     }
+    free (buffer);
 
     // Now update the records field at 0x04
     fseek (PackedFile, 0x04, SEEK_SET);
@@ -237,8 +233,6 @@ void DBF_Pack (DBF_FILE* fp)
     fclose (PackedFile);
     fclose (fp->DataDesc);
     fp->DataDesc = fopen (fp->Filename, fp->OpenMode);
-
-    free (buffer);
 }
 
 /// Closes the database \p fp.
@@ -252,4 +246,3 @@ void DBF_Close (DBF_FILE* fp)
 	free (fp);
     }
 }
-

@@ -8,15 +8,9 @@
 // the reason is that index files need read/write access and
 // buffered streams cannot provide that (no, "w+b" does NOT work!)
 
-#include <assert.h>
+#include "cobfunc.h"
+#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include "ndx.h"
 
 //----------------------------------------------------------------------
 
@@ -46,10 +40,8 @@ static void NDX_ReadPage (NDX_FILE* fp, uint32_t PageIndex)
 {
     lseek (fp->FileDesc, PageIndex * NDX_PAGE_SIZE, SEEK_SET);
     ssize_t BytesRead = read (fp->FileDesc, &fp->RecordsInPage, 4);
-    if (BytesRead != 4) {
-	perror ("NDX_ReadPage");
-	exit (1);
-    }
+    if (BytesRead != 4)
+	_RuntimeError ("NDX_ReadPage: %s", strerror(errno));
     for (uint32_t i = 0; i < fp->Info.KeysPerPage; ++i) {
 	NDX_INDEX_ITEM* CurRec = &fp->CurPage[i];
 	read (fp->FileDesc, &CurRec->LeftPage, 4);
@@ -84,9 +76,9 @@ static void NDX_FreePage (NDX_FILE* fp)
 
 static void NDX_AllocatePage (NDX_FILE* fp)
 {
-    fp->CurPage = (NDX_INDEX_ITEM*) calloc (1, fp->Info.KeysPerPage * (2 * sizeof(uint32_t) + fp->Info.KeyLength));
+    fp->CurPage = _AllocateBytes (fp->Info.KeysPerPage * sizeof(NDX_INDEX_ITEM));
     for (uint32_t i = 0; i < fp->Info.KeysPerPage; ++ i)
-	fp->CurPage[i].KeyData = (char*) calloc (1, fp->Info.KeyLength);
+	fp->CurPage[i].KeyData = _AllocateBytes (fp->Info.KeyLength);
 }
 
 NDX_FILE* NDX_Open (const char* filename, const char* mode)
@@ -98,7 +90,7 @@ NDX_FILE* NDX_Open (const char* filename, const char* mode)
     if (fd < 0)
 	return NULL;
 
-    NDX_FILE* fp = (NDX_FILE*) calloc (1, sizeof(NDX_FILE));
+    NDX_FILE* fp = _AllocateBytes (sizeof(NDX_FILE));
     fp->PageLoaded = -1;
     fp->FileDesc = fd;
 
@@ -116,7 +108,7 @@ NDX_FILE* NDX_Create (const char* filename, const char* keyname, int keytype, in
     if (fd < 0)
 	return NULL;
 
-    NDX_FILE* fp = (NDX_FILE*) calloc (1, sizeof(NDX_FILE));
+    NDX_FILE* fp = _AllocateBytes (sizeof(NDX_FILE));
     fp->PageLoaded = -1;
     fp->FileDesc = fd;
 

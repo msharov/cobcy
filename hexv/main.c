@@ -4,7 +4,6 @@
 // This file is free software, distributed under the MIT License.
 
 #include "display.h"
-#include <stdlib.h>
 
 int main (int argc, char ** argv)
 {
@@ -13,10 +12,8 @@ int main (int argc, char ** argv)
 	return EXIT_SUCCESS;
     }
     FILE* df = fopen (argv[1], "rb");
-    if (!df) {
-	printf ("Could not open file %s!\n", argv[1]);
-	return EXIT_FAILURE;
-    }
+    if (!df)
+	_RuntimeError ("could not open file %s", argv[1]);
     DisplayOpen();
     ViewBin (df);
     DisplayClose();

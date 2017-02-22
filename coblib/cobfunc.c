@@ -3,24 +3,31 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <endian.h>
-#include <math.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "cobfunc.h"
-
-#ifndef min
-#define min(a,b)	((a) < (b) ? (a) : (b))
-#endif
+#include <ctype.h>
+#include <stdarg.h>
 
 char _space_var [201] = "                                                                                                                                                                                                        ";
 long _zero_var = 0;
 long _index = 0;
 
 static char _strbuf[201];		// For ---toString routines. This is the buffer
+
+void* _AllocateBytes (size_t n)
+{
+    void* p = calloc (1, n);
+    if (!p)
+	_RuntimeError ("out of memory");
+    return p;
+}
+
+void* _ReallocateBytes (void* p, size_t n)
+{
+    p = realloc (p, n);
+    if (!p)
+	_RuntimeError ("out of memory");
+    return p;
+}
 
 bool _Alphabetic (const char* s)
 {
@@ -46,10 +53,15 @@ bool _AlphabeticCase (const char* str, int what)
     return true;
 }
 
-void _RuntimeError (const char* message)
+void _RuntimeError (const char* message, ...)
 {
-    printf ("\nRuntime error: %s!\n\n", message);
-    exit(1);
+    printf ("\nRuntime error:");
+    va_list args;
+    va_start (args, message);
+    vprintf (message, args);
+    va_end (args);
+    printf ("!\n\n");
+    exit (EXIT_FAILURE);
 }
 
 void _ReadStringVar (FILE* stream, char* var, const char* pic)
@@ -232,15 +244,15 @@ const char* _FloatToString (double var, const char* pic)
     return _strbuf;
 }
 
-void _AssignVarString (char* var1, const char* var2, int p1, int p2)
+void _AssignVarString (char* var1, const char* var2, int sz1, int sz2)
 {
-    if (p2 == 0)
-	p2 = strlen(var2);
-    memset(var1, ' ', p1);
-    var1[p1] = '\x0';
-    strncpy(var1, var2, min(p1, p2));
-    if (p1 > p2)
-	var1[p2] = ' ';
+    if (sz2 == 0)
+	sz2 = strlen(var2);
+    memset (var1, ' ', sz1);
+    var1[sz1] = '\x0';
+    memcpy (var1, var2, min (sz1, sz2));
+    if (sz1 > sz2)
+	var1[sz2] = ' ';
 }
 
 double _RoundResult (double num, const char* pic UNUSED)
@@ -281,17 +293,16 @@ static void _TokenCopy (char* dest, const char** src)
 
 static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
 {
-    char buffer[50];
-
     int nFields = _FieldsInSig(sig);
     *lpnFields = nFields;
 
-    DBF_Field* Fields = (DBF_Field *) calloc (1, nFields * sizeof(DBF_Field));
+    DBF_Field* Fields = _AllocateBytes (nFields * sizeof(DBF_Field));
     const char* cursigpos = sig;
     for (int i = 0; i < nFields; ++i) {
+	char buffer[50];
 	// First token is the name of the field
 	_TokenCopy(buffer, &cursigpos);
-	// Assuming the last character to be set to 0 by calloc
+	// Assuming the last character to be set to 0 by _AllocateBytes
 	strncpy(Fields[i].Name, buffer, DBF_FIELD_NAME_LENGTH - 1);
 
 	// Second token is the character denoting type of field
@@ -311,17 +322,12 @@ static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
 
 void _OpenSequentialFile (FILE** fp, const char* filename, const char* mode)
 {
-    if (!(*fp = fopen (filename, mode))) {
-	char buf [80];
-	snprintf (buf, sizeof(buf), "could not open file '%s'", filename);
-	_RuntimeError (buf);
-    }
+    if (!(*fp = fopen (filename, mode)))
+	_RuntimeError ("could not open file '%s'", filename);
 }
 
 void _OpenRelativeFile (DBF_FILE** fp, const char* filename, const char* sig, const char* mode)
 {
-    char ErrorBuffer[80];
-
     // If opening for OUTPUT, remove the file first
     if (mode[0] == 'w' && mode[1] != '+' && access(filename, 0) == 0)
 	unlink(filename);
@@ -329,28 +335,18 @@ void _OpenRelativeFile (DBF_FILE** fp, const char* filename, const char* sig, co
     // If the file does not exist, use Create call
     if (access(filename, 0) != 0) {
 	// Cannot open file for reading if it does not exist
-	if (mode[0] == 'r') {
-	    sprintf(ErrorBuffer, "file '%s' does not exist", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
+	if (mode[0] == 'r')
+	    _RuntimeError ("file '%s' does not exist", filename);
 	int nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
-	if ((*fp = DBF_Create (filename, nFields, Fields)) == NULL) {
-	    sprintf (ErrorBuffer, "could not create data file '%s'", filename);
-	    _RuntimeError (ErrorBuffer);
-	}
-    } else {
-	if ((*fp = DBF_Open (filename, mode)) == NULL) {
-	    sprintf (ErrorBuffer, "could not open file '%s'", filename);
-	    _RuntimeError (ErrorBuffer);
-	}
-    }
+	if (!(*fp = DBF_Create (filename, nFields, Fields)))
+	    _RuntimeError ("could not create data file '%s'", filename);
+    } else if (!(*fp = DBF_Open (filename, mode)))
+	_RuntimeError ("could not open file '%s'", filename);
 }
 
 void _OpenIndexedFile (DBF_FILE** fp, const char* filename, const char* sig, const char* mode)
 {
-    char ErrorBuffer[80];
-
     // If opening for OUTPUT, remove the file first
     if (mode[0] == 'w' && mode[1] != '+' && access(filename, 0) == 0)
 	unlink(filename);
@@ -358,22 +354,14 @@ void _OpenIndexedFile (DBF_FILE** fp, const char* filename, const char* sig, con
     // If the file does not exist, use Create call
     if (access(filename, 0) != 0) {
 	// Cannot open file for reading if it does not exist
-	if (mode[0] == 'r') {
-	    sprintf(ErrorBuffer, "file '%s' does not exist", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
+	if (mode[0] == 'r')
+	    _RuntimeError ("file '%s' does not exist", filename);
 	int nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
-	if ((*fp = DBF_Create (filename, nFields, Fields)) == NULL) {
-	    sprintf(ErrorBuffer, "could not create data file '%s'", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
-    } else {
-	if ((*fp = DBF_Open (filename, mode)) == NULL) {
-	    sprintf(ErrorBuffer, "could not open data file '%s'", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
-    }
+	if (!(*fp = DBF_Create (filename, nFields, Fields)))
+	    _RuntimeError ("could not create data file '%s'", filename);
+    } else if ((*fp = DBF_Open (filename, mode)) == NULL)
+	_RuntimeError ("could not open data file '%s'", filename);
 }
 
 void _CloseSequentialFile (FILE * fp)
@@ -407,31 +395,21 @@ void _SeekIndexedFile (DBF_FILE* fp, NDX_FILE* fpd, const char* key)
 
 void _OpenIndexFile (NDX_FILE** ifd, const char* filename, const char* sig, const char* mode)
 {
-    char ErrorBuffer[80];
-
     if (mode[0] == 'w' && access (filename,0) == 0)
 	unlink (filename);
 
     // If the file does not exist, use Create call
     if (access(filename, 0) != 0) {
 	// Cannot open file for reading if it does not exist
-	if (mode[0] == 'r') {
-	    sprintf(ErrorBuffer, "file '%s' does not exist", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
+	if (mode[0] == 'r')
+	    _RuntimeError ("file '%s' does not exist", filename);
 	int nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
-	if ((*ifd = NDX_Create (filename, Fields->Name, Fields->Type, Fields->FieldLength)) == NULL) {
-	    sprintf(ErrorBuffer, "could not create data file '%s'", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
+	if (!(*ifd = NDX_Create (filename, Fields->Name, Fields->Type, Fields->FieldLength)))
+	    _RuntimeError ("could not create data file '%s'", filename);
 	free (Fields);
-    } else {
-	if ((*ifd = NDX_Open(filename, mode)) == NULL) {
-	    sprintf(ErrorBuffer, "could not open data file '%s'", filename);
-	    _RuntimeError(ErrorBuffer);
-	}
-    }
+    } else if ((*ifd = NDX_Open(filename, mode)) == NULL)
+	_RuntimeError ("could not open data file '%s'", filename);
 }
 
 void _CloseIndexFile (NDX_FILE** ifd)

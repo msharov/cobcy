@@ -1,17 +1,8 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "display.h"
-
-//----------------------------------------------------------------------
-
-#ifndef min
-#define min(a,b)	((a) < (b) ? (a) : (b))
-#endif
+#include <ctype.h>
 
 //----------------------------------------------------------------------
 
