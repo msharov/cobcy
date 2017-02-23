@@ -19,17 +19,17 @@ ${dbv/EXE}:	${dbv/OBJS} ${COBLIB}
 .PHONY:		dbv/install dbv/uninstall dbv/clean
 
 ifdef BINDIR
-dbv/EXEI	:= ${BINDIR}/$(notdir ${dbv/EXE})
+dbv/EXEI	:= ${BINDIR}/dbv
 install:	dbv/install
 dbv/install:	${dbv/EXEI}
 ${dbv/EXEI}:	${dbv/EXE}
 	@echo "Installing $@ ..."
-	@${INSTALLBIN} $< $@
+	@${INSTALLEXE} $< $@
 uninstall:	dbv/uninstall
 dbv/uninstall:
 	@if [ -f ${dbv/EXEI} ]; then\
-	    echo "Removing ${dbv/EXEI} ..."\
-	    rm -f ${dbv/EXEI}\
+	    echo "Removing ${dbv/EXEI} ...";\
+	    rm -f ${dbv/EXEI};\
 	fi
 endif
 

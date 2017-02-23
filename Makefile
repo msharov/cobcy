@@ -68,9 +68,11 @@ ${EXEI}:	${EXE}
 	@${INSTALLEXE} $< $@
 
 uninstall:
-	@echo "Removing ${EXEI} ..."
-	@rm -f ${EXEI}
-	@${RMPATH} ${BINDIR}
+	@if [ -f ${EXEI} ]; then\
+	    echo "Removing ${EXEI} ...";\
+	    rm -f ${EXEI};\
+	    ${RMPATH} ${BINDIR};\
+	fi
 endif
 
 ################ Maintenance ###########################################

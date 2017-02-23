@@ -30,8 +30,10 @@ ${COBLIBI}:	${COBLIB}
 	@${INSTALLLIB} $< $@
 uninstall:	coblib/uninstall
 coblib/uninstall:
-	@echo "Removing ${COBLIBI} ..."
-	@rm -f ${COBLIBI}
+	@if [ -f ${COBLIBI} ]; then\
+	    echo "Removing ${COBLIBI} ...";\
+	    rm -f ${COBLIBI};\
+	fi
 endif
 ifdef INCDIR
 LIDIR		:= ${INCDIR}/coblib
@@ -43,9 +45,11 @@ ${coblib/INCSI}:	${LIDIR}/%.h: coblib/%.h
 	@${INSTALLDATA} $< $@
 coblib/uninstall:	coblib/uninstall-incs
 coblib/uninstall-incs:
-	@echo "Removing ${LIDIR}/ ..."
-	@rm -f ${coblib/INCSI}
-	@${RMPATH} ${LIDIR}
+	@if [ -d ${LIDIR} ]; then\
+	    echo "Removing ${LIDIR}/ ...";\
+	    rm -f ${coblib/INCSI};\
+	    ${RMPATH} ${LIDIR};\
+	fi
 endif
 
 ################ Housekeeping ##########################################

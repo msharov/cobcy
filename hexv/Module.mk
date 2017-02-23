@@ -19,12 +19,12 @@ ${hexv/EXE}:	${hexv/OBJS} ${COBLIB}
 .PHONY:		hexv/install hexv/uninstall hexv/clean
 
 ifdef BINDIR
-hexv/EXEI	:= ${BINDIR}/$(notdir ${hexv/EXE})
+hexv/EXEI	:= ${BINDIR}/hexv
 install:	hexv/install
 hexv/install:	${hexv/EXEI}
 ${hexv/EXEI}:	${hexv/EXE}
 	@echo "Installing $@ ..."
-	@${INSTALLBIN} $< $@
+	@${INSTALLEXE} $< $@
 uninstall:	hexv/uninstall
 hexv/uninstall:
 	@if [ -f ${hexv/EXEI} ]; then\
