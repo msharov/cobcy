@@ -5,8 +5,6 @@
 
 #pragma once
 #include "../coblib/cobfunc.h"
-#include <ncurses.h>
 
 void ViewDBF (DBF_FILE* df);
 void DisplayOpen (void);
-void DisplayClose (void);

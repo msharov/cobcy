@@ -11,12 +11,12 @@ int main (int argc, char ** argv)
 	printf ("Usage: %s <file>\n", argv[0]);
 	return EXIT_SUCCESS;
     }
+    _InstallSignalHandlers();
     FILE* df = fopen (argv[1], "rb");
     if (!df)
 	_RuntimeError ("could not open file %s", argv[1]);
     DisplayOpen();
     ViewBin (df);
-    DisplayClose();
     fclose (df);
     return EXIT_SUCCESS;
 }

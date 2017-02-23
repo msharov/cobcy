@@ -46,6 +46,7 @@ void EndCode (void)
     codef << "int main (void)\n{\n";
     ++ NestingLevel;
 
+    GenIndent(); codef << "_InstallSignalHandlers();\n";
     GenIndent(); codef << "_SetVarValues();\n";
     OpenSpecialFiles();		// Generates code if there are any
     GenParagraphCalls();

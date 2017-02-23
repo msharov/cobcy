@@ -2,10 +2,12 @@
 // This file is free software, distributed under the MIT License.
 
 #include "display.h"
+#include <curses.h>
 #include <ctype.h>
 
 //----------------------------------------------------------------------
 
+static void DisplayClose (void);
 static void SetAttrNormal (WINDOW* win);
 static void SetAttrHighlight (WINDOW* win);
 static void SetAttrHeader (WINDOW* win);
@@ -109,6 +111,7 @@ OneRowType * FileBuffer;
 void DisplayOpen (void)
 {
     initscr();
+    atexit (DisplayClose);
     noecho();
     cbreak();
     curs_set (0);
@@ -122,8 +125,10 @@ void DisplayOpen (void)
     }
 }
 
-void DisplayClose (void)
+static void DisplayClose (void)
 {
+    if (isendwin())
+	return;
     echo();
     nocbreak();
     curs_set (1);

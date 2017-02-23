@@ -3,8 +3,10 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
+#define _GNU_SOURCE
 #include "cobfunc.h"
 #include <ctype.h>
+#include <signal.h>
 #include <stdarg.h>
 
 char _space_var [201] = "                                                                                                                                                                                                        ";
@@ -28,6 +30,37 @@ void* _ReallocateBytes (void* p, size_t n)
 	_RuntimeError ("out of memory");
     return p;
 }
+
+#define S(s) (1<<(s))
+enum {
+    sigset_Quit	= S(SIGINT)|S(SIGQUIT)|S(SIGTERM)|S(SIGPWR),
+    sigset_Die	= S(SIGILL)|S(SIGABRT)|S(SIGBUS)|S(SIGFPE)
+		|S(SIGSYS)|S(SIGSEGV)|S(SIGALRM)|S(SIGXCPU)
+};
+enum { qc_ShellSignalQuitOffset = 128 };
+
+static void __OnFatalSignal (int sig)
+{
+    static volatile bool s_bOnce = false;
+    if (!s_bOnce) {
+	s_bOnce = true;
+	psignal (sig, "[S] Fatal error");
+	// The exit code should be success when terminated by user
+	int exitcode = EXIT_SUCCESS;
+	if (!(S(sig) & sigset_Quit))
+	    exitcode = qc_ShellSignalQuitOffset+sig;
+	exit (exitcode);
+    }
+    _Exit (qc_ShellSignalQuitOffset+sig);
+}
+
+void _InstallSignalHandlers (void)
+{
+    for (unsigned sig = 0; sig < NSIG; ++sig)
+	if ((sigset_Quit|sigset_Die) & S(sig))
+	    signal (sig, __OnFatalSignal);
+}
+#undef S
 
 bool _Alphabetic (const char* s)
 {
@@ -55,12 +88,13 @@ bool _AlphabeticCase (const char* str, int what)
 
 void _RuntimeError (const char* message, ...)
 {
-    printf ("\nRuntime error:");
+    fflush (stdout);
+    fprintf (stderr, "\nRuntime error:");
     va_list args;
     va_start (args, message);
-    vprintf (message, args);
+    vfprintf (stderr, message, args);
     va_end (args);
-    printf ("!\n\n");
+    fprintf (stderr, "!\n\n");
     exit (EXIT_FAILURE);
 }
 

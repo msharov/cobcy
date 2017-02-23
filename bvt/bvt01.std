@@ -38,6 +38,7 @@ static int _FirstParagraph (void)
 
 int main (void)
 {
+    _InstallSignalHandlers();
     _SetVarValues();
     for (long cpi = _pi__FirstParagraph; cpi < _pi__NParagraphs;) {
 	switch (cpi) {

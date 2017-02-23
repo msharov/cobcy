@@ -29,6 +29,7 @@ extern long _index;
 
 void*	_AllocateBytes (size_t n) __attribute__((malloc));
 void*	_ReallocateBytes (void* p, size_t n) __attribute__((malloc));
+void	_InstallSignalHandlers (void);
 bool 	_Alphabetic (const char* str);
 bool 	_AlphabeticCase (const char* str, int what);
 void 	_RuntimeError (const char* message, ...) __attribute__((__format__(__printf__,1,2))) __attribute__((noreturn));

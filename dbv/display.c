@@ -1,9 +1,8 @@
 // Copyright (C) 1995-2008 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
-#include <string.h>
-#include <stdlib.h>
 #include "display.h"
+#include <curses.h>
 
 //----------------------------------------------------------------------
 
@@ -100,9 +99,25 @@ void ViewDBF (DBF_FILE * df)
     } while ((key = getch()) != 'q');
 }
 
+static void DisplayClose (void)
+{
+    if (isendwin())
+	return;
+    echo();
+    nocbreak();
+    curs_set (1);
+    keypad (stdscr, false);
+    leaveok (stdscr, false);
+    attrset (A_NORMAL);
+    clear();
+    refresh();
+    endwin();
+}
+
 void DisplayOpen (void)
 {
     initscr();
+    atexit (DisplayClose);
     noecho();
     cbreak();
     curs_set (0);
@@ -114,19 +129,6 @@ void DisplayOpen (void)
 	init_pair (2, COLOR_YELLOW, COLOR_MAGENTA);
 	init_pair (3, COLOR_BLUE, COLOR_WHITE);
     }
-}
-
-void DisplayClose (void)
-{
-    echo();
-    nocbreak();
-    curs_set (1);
-    keypad (stdscr, false);
-    leaveok (stdscr, false);
-    attrset (A_NORMAL);
-    clear();
-    refresh();
-    endwin();
 }
 
 static void SetAttrNormal (WINDOW * win)

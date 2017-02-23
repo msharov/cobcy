@@ -11,10 +11,10 @@ int main (int argc, const char* const* argv)
 	printf ("Usage: %s <file.dbf>\n", argv[0]);
 	return 0;
     }
+    _InstallSignalHandlers();
     DBF_FILE* df = DBF_Open (argv[1], "rb");
     DisplayOpen();
     ViewDBF (df);
-    DisplayClose();
     DBF_Close (df);
     return 0;
 }
