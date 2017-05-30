@@ -161,12 +161,12 @@ void _WriteFloatVar (FILE* stream, double var, const char* pic)
 
 const char* _IntegerToString (long int var, const char* pic)
 {
-    char barenum [20];
-    snprintf (barenum, sizeof(barenum), "%lu", (unsigned long) var);	// printed unsigned; sign added below by picture
-    size_t nl = strlen(barenum);
-    size_t pl = strlen(pic);
+    unsigned long uvar = var > 0 ? var : -var;
+    char barenum [32];
+    snprintf (barenum, sizeof(barenum), "%lu", uvar);	// printed unsigned; sign added below by picture
+    const size_t nl = strlen(barenum), pl = strlen(pic);
 
-    size_t j = 0, fl = 0, sp = 0;
+    size_t j = 0, fl = 0;
     // Calculate number of filler zeroes on the left
     for (size_t i = 0; i < pl; ++i)
 	if (pic[i] == '9' || pic[i] == 'z' || pic[i] == '*')
@@ -176,46 +176,42 @@ const char* _IntegerToString (long int var, const char* pic)
     if (fl < nl)
 	j = nl - fl;
 
+    char* sp = _strbuf;
     for (size_t i = 0; i < pl; ++i) {
 	if (strchr (".,/0$", pic[i]))
-	    _strbuf[sp++] = pic[i];
+	    *sp++ = pic[i];
 	else if (pic[i] == 'b')
-	    _strbuf[sp++] = ' ';
+	    *sp++ = ' ';
 	else if (pic[i] == 'z' || pic[i] == '*')
-	    _strbuf[sp++] = '0';
+	    *sp++ = '0';
 	else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
 	    if (var > 0 && pic[i] == '-')
-		_strbuf[sp++] = '+';
+		*sp++ = '+';
 	    else if (var < 0)
-		_strbuf[sp++] = '-';
+		*sp++ = '-';
 	    else
-		_strbuf[sp++] = ' ';
+		*sp++ = ' ';
 	} else if (pic[i] == '9') {
 	    if (fl <= nl)
-		_strbuf[sp++] = barenum[j++];
+		*sp++ = barenum[j++];
 	    else
-		_strbuf[sp++] = ' ';
+		*sp++ = ' ';
 	    --fl;
 	} else
-	    _strbuf[sp++] = (fl - 1 <= nl) ? pic[i] : ' ';
+	    *sp++ = (fl - 1 <= nl) ? pic[i] : ' ';
     }
-    _strbuf[sp] = '\x0';
+    *sp = 0;
     return _strbuf;
 }
 
 const char* _FloatToString (double var, const char* pic)
 {
-    char format_s[10];
-    char barenum[20];
-    int fbp = 0, fap = 0, pl;
-    int i, j = 0;
-    int FoundPoint = 0;
-    int sp = 0;
-
-    pl = strlen(pic);
+    const size_t piclen = strlen(pic);
 
     // Calculate number of filler zeroes on the left
-    for (i = 0; i < pl; ++i) {
+    unsigned short fbp = 0, fap = 0;
+    bool FoundPoint = false;
+    for (size_t i = 0; i < piclen; ++i) {
 	if (pic[i] == '9' || pic[i] == '0' || pic[i] == 'z' || pic[i] == '*') {
 	    if (FoundPoint)
 		++fap;
@@ -223,58 +219,53 @@ const char* _FloatToString (double var, const char* pic)
 		++fbp;
 	}
 	else if (pic[i] == 'v')
-	    FoundPoint = 1;
+	    FoundPoint = true;
     }
 
-    snprintf (format_s, sizeof(format_s), "%%%d.%df", fbp, fap);
+    char format_s[16];
+    snprintf (format_s, sizeof(format_s), "%%%hu.%huf", fbp, fap);
+    char barenum[32];
     snprintf (barenum, sizeof(barenum), format_s, var);
 
     // sprintf will print correct number of digits after point, but
     // only as many as needed before the point. We thus need to reset
     // the index variable j to the real starting point.
-    j = strlen(barenum) - (fbp + 1 + fap);
+    int j = strlen(barenum) - (fbp + 1 + fap);
+    char* sp = _strbuf;
 
-    for (i = 0; i < pl; ++i) {
+    for (size_t i = 0; i < piclen; ++i) {
 	if (pic[i] == '9') {
-	    if (j >= 0)
-		_strbuf[sp++] = barenum[j];
-	    else
-		_strbuf[sp++] = ' ';
+	    *sp++ = (j >= 0 ? barenum[j] : ' ');
 	    ++j;
-	}
-	else if (pic[i] == '.')
-	    _strbuf[sp++] = '.';
+	} else if (pic[i] == '.')
+	    *sp++ = '.';
 	else if (pic[i] == ',')
-	    _strbuf[sp++] = ',';
+	    *sp++ = ',';
 	else if (pic[i] == '/')
-	    _strbuf[sp++] = '/';
+	    *sp++ = '/';
 	else if (pic[i] == 'b')
-	    _strbuf[sp++] = ' ';
+	    *sp++ = ' ';
 	else if (pic[i] == '0')
-	    _strbuf[sp++] = '0';
+	    *sp++ = '0';
 	else if (pic[i] == '+' || pic[i] == 's' || pic[i] == '-') {
 	    if (var > 0 && pic[i] == '-')
-		_strbuf[sp++] = '+';
+		*sp++ = '+';
 	    else if (var < 0)
-		_strbuf[sp++] = '-';
+		*sp++ = '-';
 	    else
-		_strbuf[sp++] = ' ';
-	}
-	else if (pic[i] == 'z' || pic[i] == '*') {
-	    _strbuf[sp++] = '0';
+		*sp++ = ' ';
+	} else if (pic[i] == 'z' || pic[i] == '*') {
+	    *sp++ = '0';
 	    ++j;
-	}
-	else if (pic[i] == 'v') {
-	    _strbuf[sp++] = '.';
+	} else if (pic[i] == 'v') {
+	    *sp++ = '.';
 	    ++j;
-	}
-	else if (pic[i] == '$')
-	    _strbuf[sp++] = '$';
+	} else if (pic[i] == '$')
+	    *sp++ = '$';
 	else
-	    _strbuf[sp++] = pic[i];
+	    *sp++ = pic[i];
     }
-    _strbuf[sp] = '\x0';
-
+    *sp = 0;
     return _strbuf;
 }
 
@@ -314,15 +305,15 @@ static int _FieldsInSig (const char*sig)
 // char** is for.
 static void _TokenCopy (char* dest, const char** src)
 {
-    const char* sptr = *src;		/* These are added just for readability, */
-    char* dptr = dest;		/* like defines                  */
+    const char* sptr = *src;
+    char* dptr = dest;
     char c;
     while ((c = *sptr) != '\x0' && c == ' ')
 	++sptr;
     while ((c = *sptr) != '\x0' && c != ' ')
 	*dptr++ = *sptr++;
-    *dptr = '\x0';		/* Null terminate the string */
-    *src = sptr;		/* Update the passed source pointer */
+    *dptr = '\x0';
+    *src = sptr;
 }
 
 static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
@@ -450,4 +441,3 @@ void _CloseIndexFile (NDX_FILE** ifd)
 {
     NDX_Close (ifd);
 }
-

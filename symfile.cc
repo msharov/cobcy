@@ -34,7 +34,7 @@ void CobolFile::SetAccessMode (AccessModeType mode)
     // This is not yet complete, since I am not sure what AM_Dynamic should be
     switch (Organization) {
 	case ORG_Sequential:
-	    NewlineFlag = true;
+	    NewlineFlag = true;	// fallthrough
 	case ORG_Line_sequential:
 	    if (mode != AM_Sequential)
 		WriteWarning ("access mode reset to sequential");
