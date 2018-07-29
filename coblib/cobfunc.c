@@ -285,9 +285,9 @@ double _RoundResult (double num, const char* pic UNUSED)
     return (long)(num + 0.5);
 }
 
-static int _FieldsInSig (const char*sig)
+static unsigned _FieldsInSig (const char* sig)
 {
-    size_t IsToken = 0, nTokens = 0;
+    unsigned IsToken = 0, nTokens = 0;
     for (size_t i = 0; i < strlen(sig); ++i) {
 	if (sig[i] == ' ')
 	    IsToken = 0;
@@ -316,14 +316,14 @@ static void _TokenCopy (char* dest, const char** src)
     *src = sptr;
 }
 
-static DBF_Field* _SigToFields (const char* sig, int* lpnFields)
+static DBF_Field* _SigToFields (const char* sig, unsigned* lpnFields)
 {
-    int nFields = _FieldsInSig(sig);
+    unsigned nFields = _FieldsInSig(sig);
     *lpnFields = nFields;
 
     DBF_Field* Fields = _AllocateBytes (nFields * sizeof(DBF_Field));
     const char* cursigpos = sig;
-    for (int i = 0; i < nFields; ++i) {
+    for (unsigned i = 0; i < nFields; ++i) {
 	char buffer[50];
 	// First token is the name of the field
 	_TokenCopy(buffer, &cursigpos);
@@ -362,7 +362,7 @@ void _OpenRelativeFile (DBF_FILE** fp, const char* filename, const char* sig, co
 	// Cannot open file for reading if it does not exist
 	if (mode[0] == 'r')
 	    _RuntimeError ("file '%s' does not exist", filename);
-	int nFields;
+	unsigned nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
 	if (!(*fp = DBF_Create (filename, nFields, Fields)))
 	    _RuntimeError ("could not create data file '%s'", filename);
@@ -381,7 +381,7 @@ void _OpenIndexedFile (DBF_FILE** fp, const char* filename, const char* sig, con
 	// Cannot open file for reading if it does not exist
 	if (mode[0] == 'r')
 	    _RuntimeError ("file '%s' does not exist", filename);
-	int nFields;
+	unsigned nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
 	if (!(*fp = DBF_Create (filename, nFields, Fields)))
 	    _RuntimeError ("could not create data file '%s'", filename);
@@ -428,7 +428,7 @@ void _OpenIndexFile (NDX_FILE** ifd, const char* filename, const char* sig, cons
 	// Cannot open file for reading if it does not exist
 	if (mode[0] == 'r')
 	    _RuntimeError ("file '%s' does not exist", filename);
-	int nFields;
+	unsigned nFields;
 	DBF_Field* Fields = _SigToFields (sig, &nFields);
 	if (!(*ifd = NDX_Create (filename, Fields->Name, Fields->Type, Fields->FieldLength)))
 	    _RuntimeError ("could not create data file '%s'", filename);

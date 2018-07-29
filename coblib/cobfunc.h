@@ -6,6 +6,7 @@
 // Cobol function library.
 
 #pragma once
+#define _DEFAULT_SOURCE
 #include "dbf.h"
 #include "ndx.h"
 #include <string.h>
@@ -33,18 +34,18 @@ void	_InstallSignalHandlers (void);
 bool 	_Alphabetic (const char* str);
 bool 	_AlphabeticCase (const char* str, int what);
 void 	_RuntimeError (const char* message, ...) __attribute__((__format__(__printf__,1,2))) __attribute__((noreturn));
-void 	_ReadStringVar (FILE * stream, char* var, const char* pic);
-void 	_ReadIntegerVar (FILE * stream, long int * var, const char* pic);
-void 	_ReadFloatVar (FILE * stream, double * var, const char* pic);
-void 	_WriteStringVar (FILE * stream, const char* var, const char* pic);
-void 	_WriteIntegerVar (FILE * stream, long int var, const char* pic);
-void 	_WriteFloatVar (FILE * stream, double var, const char* pic);
+void 	_ReadStringVar (FILE* stream, char* var, const char* pic);
+void 	_ReadIntegerVar (FILE* stream, long int* var, const char* pic);
+void 	_ReadFloatVar (FILE* stream, double* var, const char* pic);
+void 	_WriteStringVar (FILE* stream, const char* var, const char* pic);
+void 	_WriteIntegerVar (FILE* stream, long int var, const char* pic);
+void 	_WriteFloatVar (FILE* stream, double var, const char* pic);
 const char* _IntegerToString (long int var, const char* pic);
 const char* _FloatToString (double var, const char* pic);
 long	_StringToInteger (const char* string);
 double	_StringToFloat (const char* string);
 void	_AssignVarString (char* var1, const char* var2, int p1, int p2);
-void	_OpenSequentialFile (FILE ** fp, const char* filename, const char* mode);
+void	_OpenSequentialFile (FILE** fp, const char* filename, const char* mode);
 void	_OpenRelativeFile (DBF_FILE** fp, const char* filename, const char* sig, const char* mode);
 void	_OpenIndexedFile (DBF_FILE** fpd, const char* filename, const char* sig, const char* mode);
 void	_CloseSequentialFile (FILE* fp);

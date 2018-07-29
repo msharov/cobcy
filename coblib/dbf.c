@@ -19,10 +19,8 @@ static void DBF_WriteHeader (DBF_FILE* dfd);
 DBF_FILE* DBF_Open (const char* filename, const char* mode)
 {
     DBF_FILE* fp = _AllocateBytes (sizeof(DBF_FILE));
-    strncpy (fp->Filename, filename, sizeof(fp->Filename));
-    strncpy (fp->OpenMode, mode, sizeof(fp->OpenMode));
-    fp->Filename [sizeof(fp->Filename)-1] = 0;
-    fp->OpenMode [sizeof(fp->OpenMode)-1] = 0;
+    snprintf (fp->Filename, sizeof(fp->Filename), "%s", filename);
+    snprintf (fp->OpenMode, sizeof(fp->OpenMode), "%s", mode);
     if ((fp->DataDesc = fopen (filename, mode)) && !DBF_ReadHeader (fp))
 	DBF_SeekToFirst (fp);
     else {
@@ -37,21 +35,20 @@ DBF_FILE* DBF_Open (const char* filename, const char* mode)
 DBF_FILE* DBF_Create (const char* filename, uint16_t nFields, DBF_Field* Fields)
 {
     DBF_FILE* fp = _AllocateBytes (sizeof(DBF_FILE));
-    strncpy (fp->Filename, filename, sizeof(fp->Filename));
-    fp->Filename [sizeof(fp->Filename)-1] = 0;
+    snprintf (fp->Filename, sizeof(fp->Filename), "%s", filename);
     strcpy (fp->OpenMode, "wb");
     fp->nFields = nFields;
     fp->Fields = Fields;
     fp->Header.Version = '\x03';			// dBASE IV, no memo field
     fp->Header.nRecords = 0;
-    fp->Header.HeaderLength = 32 + nFields * 32;	// Fields take up 32 bytes each, and everything else is 32 bytes together
+    fp->Header.HeaderLength = 32 + nFields * 32;	// Field descriptions take up 32 bytes each, and everything else is 32 bytes together
     fp->Header.RecordLength = 0;
-    for (int i = 0; i < nFields; ++i)
+    for (unsigned i = 0; i < nFields; ++i)
 	fp->Header.RecordLength += Fields[i].FieldLength;
-    ++ fp->Header.RecordLength;	// for reserved byte
+    ++fp->Header.RecordLength;	// for reserved byte at the end
 
     // All header info is now set, create the actual file
-    if ((fp->DataDesc = fopen (filename, "wb")))
+    if ((fp->DataDesc = fopen (fp->Filename, fp->OpenMode)))
 	DBF_WriteHeader (fp);
     else {
 	fprintf (stderr, "DBF: Could not open '%s' for writing!\n", filename);
@@ -78,23 +75,20 @@ static void DBF_WriteHeader (DBF_FILE* dfd)
     fseek (dfd->DataDesc, 0, SEEK_SET);
 
     // First, the static data.
-    fwrite (&dfd->Header, 1, 12, dfd->DataDesc);
+    fwrite (&dfd->Header, 1, sizeof(dfd->Header), dfd->DataDesc);
 
-    // Reserved 20 bytes are all zero
-    char dummy [20];
-    memset (dummy, 0, 20);
-    fwrite (dummy, 1, 20, dfd->DataDesc);
+    // Reserved 20 zero bytes
+    static const char zeroes[20] = {};
+    fwrite (zeroes, 1, 20, dfd->DataDesc);
 
     // Now at 0x20 in the file, start writing fields.
-    const uint32_t nFields = (dfd->Header.HeaderLength / 32) - 1;
-    for (uint32_t i = 0; i < nFields; ++ i) {
+    const unsigned nFields = (dfd->Header.HeaderLength / 32) - 1;
+    for (unsigned i = 0; i < nFields; ++i) {
 	fwrite (&dfd->Fields[i], 1, 18, dfd->DataDesc);
-	fwrite (dummy, 1, 14, dfd->DataDesc);	// The rest are reserved or internal use
+	fwrite (zeroes, 1, 14, dfd->DataDesc);	// Reserved 14 zeroes
     }
 
-    // And terminate the header
-    dummy[0] = HEADER_END_CHAR;
-    fwrite (dummy, 1, 1, dfd->DataDesc);
+    fputc (HEADER_END_CHAR, dfd->DataDesc);
 }
 
 /// Reads the header into \p dfd.
@@ -102,23 +96,22 @@ static int DBF_ReadHeader (DBF_FILE* dfd)
 {
     fseek (dfd->DataDesc, 0, SEEK_SET);
     // First, the static data.
-    fread (&dfd->Header, 1, 12, dfd->DataDesc);
+    fread (&dfd->Header, 1, sizeof(dfd->Header), dfd->DataDesc);
     if (dfd->Header.Version != 0x03 && dfd->Header.Version != 0x83)
-	return 1;	// Incompatible version error
-    fseek (dfd->DataDesc, 20, SEEK_CUR); // Reserved 20 bytes are all zero
+	return 1;	// incompatible version
+    fseek (dfd->DataDesc, 20, SEEK_CUR); // skip 20 reserved bytes
 
     // Now at 0x20 in the file, the fields.
     dfd->nFields = (dfd->Header.HeaderLength / 32) - 1;
     dfd->Fields = _ReallocateBytes (dfd->Fields, sizeof(DBF_Field) * dfd->nFields);
-    if (!dfd->Fields)
-	dfd->nFields = 0;
-    for (int i = 0; i < dfd->nFields; ++ i) {
+    for (unsigned i = 0; i < dfd->nFields; ++i) {
 	fread (&dfd->Fields[i], 1, 18, dfd->DataDesc);
-	fseek (dfd->DataDesc, 14, SEEK_CUR); // Reserved 14 bytes are all zero
+	fseek (dfd->DataDesc, 14, SEEK_CUR); // skip 14 reserved bytes
 	if (feof (dfd->DataDesc))
-	    return 2;	/* Premature end of file */
+	    return 2;	// premature end of file
     }
-    fseek (dfd->DataDesc, 1, SEEK_CUR); // And terminate the header
+    if (HEADER_END_CHAR != fgetc (dfd->DataDesc))
+	return 3;	// header not terminated
     return 0;
 }
 
@@ -156,20 +149,18 @@ void DBF_SeekToLast (DBF_FILE* fp)
 }
 
 /// This will append a blank record and point fp to it.
-void DBF_AppendRecord (DBF_FILE * fp)
+void DBF_AppendRecord (DBF_FILE* fp)
 {
     // Go to the end of the file and write a new record filled with zeroes
     fseek (fp->DataDesc, 0, SEEK_END);
-    char fc = ' '; // The status character is a space
-    fwrite (&fc, 1, 1, fp->DataDesc);
-    fc = '\x0';
-    for (int i = 0; i < fp->Header.RecordLength; ++ i)
-	fwrite (&fc, 1, 1, fp->DataDesc);
+    fputc (' ', fp->DataDesc);	// ' ' status indicates used record
+    for (unsigned i = 0; i < fp->Header.RecordLength; ++i)
+	fputc (0, fp->DataDesc);	// write zeroed record
 
-    // And increment number of records
+    // Increment number of records
     ++fp->Header.nRecords;
     fseek (fp->DataDesc, 0x04, SEEK_SET);
-    fwrite (&fp->Header.nRecords, 1, 2, fp->DataDesc);
+    fwrite (&fp->Header.nRecords, 1, sizeof(fp->Header.nRecords), fp->DataDesc);
 
     // Finally, position file pointer at the beginning of this record
     DBF_SeekToLast (fp);
@@ -190,48 +181,39 @@ void DBF_ReadRecord (DBF_FILE* fp, void* data)
 /// Deletes current record.
 void DBF_DeleteRecord (DBF_FILE* fp)
 {
-    fseek (fp->DataDesc, -1, SEEK_CUR);	// Move back one char, since pointing to start of data
-    static const char delmark = '*';
-    fwrite (&delmark, 1, 1, fp->DataDesc);
+    // Pointing to start of data, so move back 1 to the status char
+    fseek (fp->DataDesc, -1, SEEK_CUR);
+    fputc ('*', fp->DataDesc);
 }
 
 /// Removes deleted records from database \p fp.
 void DBF_Pack (DBF_FILE* fp)
 {
-    char TempFilename [sizeof(fp->Filename)];
-    strcpy (TempFilename, fp->Filename);
-    strcat (TempFilename, ".bak");
+    char tmpfilename [PATH_MAX];
+    snprintf (tmpfilename, sizeof(tmpfilename), "%s.XXXXXX", fp->Filename);
+    int fd = mkstemp (tmpfilename);
+    if (fd < 0)
+	return;
+    DBF_FILE outfp = *fp;
+    outfp.DataDesc = fdopen (fd, "wb");
+    if (!outfp.DataDesc)
+	return;
 
-    fclose (fp->DataDesc);
-    rename (fp->Filename, TempFilename);
-
-    FILE* PackedFile = fopen (fp->Filename, "wb");
-    fp->DataDesc = fopen (TempFilename, "rb");
-
-    char* buffer = _AllocateBytes (max (fp->Header.HeaderLength + 1, fp->Header.RecordLength));
-
-    // Header goes over intact for now
-    fread (buffer, 1, fp->Header.HeaderLength + 1, fp->DataDesc);
-    fwrite (buffer, 1, fp->Header.HeaderLength + 1, PackedFile);
-
-    // Now delete records starting with '*'
-    uint32_t nPackedRecords = fp->Header.nRecords;
-    for (uint32_t i = 0; i < fp->Header.nRecords; ++ i) {
-	fread (buffer, 1, fp->Header.RecordLength, fp->DataDesc);
-	if (buffer[0] == '*')
-	    -- nPackedRecords;
+    DBF_WriteHeader (&outfp);
+    DBF_SeekToFirst (fp);
+    char* recordbuf = _AllocateBytes (fp->Header.RecordLength);
+    for (unsigned i = 0; i < fp->Header.nRecords; ++i) {
+	DBF_ReadRecord (fp, recordbuf);
+	if (recordbuf[0] == '*')
+	    --outfp.Header.nRecords;
 	else
-	    fwrite (buffer, 1, fp->Header.RecordLength, PackedFile);
+	    DBF_RewriteRecord (&outfp, recordbuf);
     }
-    free (buffer);
+    DBF_WriteHeader (&outfp);	// rewrite number of records
 
-    // Now update the records field at 0x04
-    fseek (PackedFile, 0x04, SEEK_SET);
-    fwrite (&nPackedRecords, 1, 2, PackedFile);
-
-    // Close files, reopen fp
-    fclose (PackedFile);
+    fclose (outfp.DataDesc);
     fclose (fp->DataDesc);
+    rename (tmpfilename, fp->Filename);
     fp->DataDesc = fopen (fp->Filename, fp->OpenMode);
 }
 
@@ -243,6 +225,7 @@ void DBF_Close (DBF_FILE* fp)
 	    fclose (fp->DataDesc);
 	if (fp->Fields)
 	    free (fp->Fields);
+	memset (fp, 0, sizeof(DBF_FILE));
 	free (fp);
     }
 }

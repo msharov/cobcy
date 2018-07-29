@@ -8,6 +8,7 @@
 ///
 
 #pragma once
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -34,13 +35,13 @@ typedef struct {
     uint8_t		DecimalPlaces;
 } DBF_Field;
 
-typedef struct {
-    char		Filename [256];
+typedef struct _DBF_FILE {
     FILE*		DataDesc;
     DBF_Field*		Fields;
     DBF_Header		Header;
     uint16_t		nFields;
-    char		OpenMode [5];
+    char		OpenMode [6];
+    char		Filename [PATH_MAX - (sizeof(FILE*)+sizeof(DBF_Field*)+sizeof(DBF_Header)+8)];
 } DBF_FILE;
 
 //----------------------------------------------------------------------
