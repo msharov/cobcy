@@ -1,35 +1,36 @@
 ################ Source files ##########################################
 
-hexv/EXE	:= $Ohexv/hexv
-hexv/SRCS	:= $(wildcard hexv/*.c)
-hexv/OBJS	:= $(addprefix $O,$(hexv/SRCS:.c=.o))
-hexv/LIBS	:= ${COBLIB} -lncurses
-hexv/DEPS	:= ${hexv/OBJS:.o=.d}
+hexv/exe	:= $Ohexv/hexv
+hexv/srcs	:= $(wildcard hexv/*.c)
+hexv/objs	:= $(addprefix $O,$(hexv/srcs:.c=.o))
+hexv/deps	:= ${hexv/objs:.o=.d}
 
 ################ Compilation ###########################################
 
 all:		hexv/all
-hexv/all:	${hexv/EXE}
-${hexv/EXE}:	${hexv/OBJS} ${COBLIB}
+hexv/all:	${hexv/exe}
+${hexv/exe}:	${hexv/objs} ${liba}
 	@echo "Linking $@ ..."
-	@${LD} ${LDFLAGS} -o $@ $^ ${hexv/LIBS}
+	@${CC} ${ldflags} -o $@ $^ ${libs}
 
 ################ Installation ##########################################
 
 .PHONY:		hexv/install hexv/uninstall hexv/clean
 
-ifdef BINDIR
-hexv/EXEI	:= ${BINDIR}/hexv
-install:	hexv/install
-hexv/install:	${hexv/EXEI}
-${hexv/EXEI}:	${hexv/EXE}
+ifdef bindir
+hexv/exei	:= ${exed}/$(notdir ${hexv/exe})
+
+${hexv/exei}:	${hexv/exe} | ${exed}
 	@echo "Installing $@ ..."
-	@${INSTALLEXE} $< $@
+	@${INSTALL_PROGRAM} $< $@
+
+install:	hexv/install
+hexv/install:	${hexv/exei}
 uninstall:	hexv/uninstall
 hexv/uninstall:
-	@if [ -f ${hexv/EXEI} ]; then\
-	    echo "Removing ${hexv/EXEI} ...";\
-	    rm -f ${hexv/EXEI};\
+	@if [ -f ${hexv/exei} ]; then\
+	    echo "Removing ${hexv/exei} ...";\
+	    rm -f ${hexv/exei};\
 	fi
 endif
 
@@ -37,14 +38,11 @@ endif
 
 clean:		hexv/clean
 hexv/clean:
-	@if [ -d $Ohexv ]; then\
-	    rm -f ${hexv/EXE} ${hexv/OBJS} ${hexv/DEPS} $Ohexv/.d;\
-	    rmdir $Ohexv;\
+	@if [ -d ${builddir}/hexv ]; then\
+	    rm -f ${hexv/exe} ${hexv/objs} ${hexv/deps} $Ohexv/.d;\
+	    rmdir ${builddir}/hexv;\
 	fi
 
-$Ohexv/.d:	$O.d
-	@[ -d $Ohexv ] || mkdir $Ohexv
-	@touch $@
+${hexv/objs}:	Makefile hexv/Module.mk ${confs} $Ohexv/.d
 
-${hexv/OBJS}:	${MKDEPS} hexv/Module.mk $Ohexv/.d
--include ${hexv/DEPS}
+-include ${hexv/deps}

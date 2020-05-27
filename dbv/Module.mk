@@ -1,35 +1,36 @@
 ################ Source files ##########################################
 
-dbv/EXE		:= $Odbv/dbv
-dbv/SRCS	:= $(wildcard dbv/*.c)
-dbv/OBJS	:= $(addprefix $O,$(dbv/SRCS:.c=.o))
-dbv/LIBS	:= ${COBLIB} -lncurses
-dbv/DEPS	:= ${dbv/OBJS:.o=.d}
+dbv/exe		:= $Odbv/dbv
+dbv/srcs	:= $(wildcard dbv/*.c)
+dbv/objs	:= $(addprefix $O,$(dbv/srcs:.c=.o))
+dbv/deps	:= ${dbv/objs:.o=.d}
 
 ################ Compilation ###########################################
 
 all:		dbv/all
-dbv/all:	${dbv/EXE}
-${dbv/EXE}:	${dbv/OBJS} ${COBLIB}
+dbv/all:	${dbv/exe}
+${dbv/exe}:	${dbv/objs} ${liba}
 	@echo "Linking $@ ..."
-	@${LD} ${LDFLAGS} -o $@ $^ ${dbv/LIBS}
+	@${CC} ${ldflags} -o $@ $^ ${libs}
 
 ################ Installation ##########################################
 
 .PHONY:		dbv/install dbv/uninstall dbv/clean
 
-ifdef BINDIR
-dbv/EXEI	:= ${BINDIR}/dbv
-install:	dbv/install
-dbv/install:	${dbv/EXEI}
-${dbv/EXEI}:	${dbv/EXE}
+ifdef bindir
+dbv/exei	:= ${exed}/$(notdir ${dbv/exe})
+
+${dbv/exei}:	${dbv/exe} | ${exed}
 	@echo "Installing $@ ..."
-	@${INSTALLEXE} $< $@
+	@${INSTALL_PROGRAM} $< $@
+
+install:	dbv/install
+dbv/install:	${dbv/exei}
 uninstall:	dbv/uninstall
 dbv/uninstall:
-	@if [ -f ${dbv/EXEI} ]; then\
-	    echo "Removing ${dbv/EXEI} ...";\
-	    rm -f ${dbv/EXEI};\
+	@if [ -f ${dbv/exei} ]; then\
+	    echo "Removing ${dbv/exei} ...";\
+	    rm -f ${dbv/exei};\
 	fi
 endif
 
@@ -37,14 +38,11 @@ endif
 
 clean:		dbv/clean
 dbv/clean:
-	@if [ -d $Odbv ]; then\
-	    rm -f ${dbv/EXE} ${dbv/OBJS} ${dbv/DEPS} $Odbv/.d;\
-	    rmdir $Odbv;\
+	@if [ -d ${builddir}/dbv ]; then\
+	    rm -f ${dbv/exe} ${dbv/objs} ${dbv/deps} $Odbv/.d;\
+	    rmdir ${builddir}/dbv;\
 	fi
 
-$Odbv/.d:	$O.d
-	@[ -d $Odbv ] || mkdir $Odbv
-	@touch $@
+${dbv/objs}:	Makefile dbv/Module.mk ${confs} $Odbv/.d
 
-${dbv/OBJS}:	${MKDEPS} dbv/Module.mk $Odbv/.d
--include ${dbv/DEPS}
+-include ${dbv/deps}

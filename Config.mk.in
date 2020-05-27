@@ -1,45 +1,43 @@
-################ Build options #######################################
-
-NAME		:= @PKG_NAME@
-MAJOR		:= @PKG_MAJOR@
-MINOR		:= @PKG_MINOR@
-
-#DEBUG		:= 1
+name		:= @pkg_name@
 
 ################ Programs ############################################
 
 CXX		:= @CXX@
-LD		:= @CC@
+CC		:= @CC@
 AR		:= @AR@
 RANLIB		:= @RANLIB@
 FLEX		:= @FLEX@
 BISON		:= @BISON@
 INSTALL		:= @INSTALL@
-
-INSTALLEXE	:= ${INSTALL} -D -p -m 755 -s
-INSTALLDATA	:= ${INSTALL} -D -p -m 644
-INSTALLLIB	:= ${INSTALLDATA}
-RMPATH		:= rmdir -p --ignore-fail-on-non-empty
+INSTALL_DATA	:= ${INSTALL} -m 644
+INSTALL_PROGRAM	:= ${INSTALL} -m 755 -s
 
 ################ Destination #########################################
 
-BINDIR		:= @bindir@
-INCDIR		:= @includedir@
-LIBDIR		:= @libdir@
+prefix		:= @prefix@
+bindir		:= @bindir@
+libdir		:= @libdir@
+includedir	:= @includedir@
+datadir		:= @datadir@
+docdir		:= @docdir@
+pkgconfigdir	:= @pkgconfigdir@
+TMPDIR		:= @TMPDIR@
+builddir	:= @builddir@/${name}
+O		:= .o/
 
 ################ Compiler options ####################################
 
-WARNOPTS	:= -Wall -Wextra -Wshadow -Wredundant-decls -Wcast-qual -Wpointer-arith -Wwrite-strings
-CFLAGS		:= -std=c99 -march=native ${WARNOPTS} @CUSTOMINCDIR@
-LDFLAGS		:= @CUSTOMLIBDIR@
-LIBS		:= @libustl@ @libsupc++@ @libfl@
-ifdef DEBUG
-    CFLAGS	+= -O0 -g
-    LDFLAGS	+= -rdynamic
+#debug		:= 1
+libs		:= @pkglibs@ -lfl
+ifdef debug
+    cflags	:= -O0 -ggdb3
+    ldflags	:= -g -rdynamic
 else
-    CFLAGS	+= -Os -g0 -DNDEBUG=1 -ffunction-sections -fdata-sections
-    LDFLAGS	+= -s -Wl,-gc-sections
+    cflags	:= -Os -g0 -DNDEBUG=1
+    ldflags	:= -s
 endif
-CXXFLAGS	:= $(subst c99,c++14,${CFLAGS})
-BUILDDIR	:= @builddir@/${NAME}
-O		:= .o/
+CFLAGS		:= -Wall -Wextra -Wredundant-decls -Wshadow
+cflags		+= -std=c99 @pkgcflags@
+cxxflags	:= $(subst std=c99,std=c++14,${cflags}) ${CXXFLAGS}
+cflags		+= ${CFLAGS}
+ldflags		+= @pkgldflags@ ${LDFLAGS}

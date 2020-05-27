@@ -6,7 +6,9 @@
 // Cobol function library.
 
 #pragma once
-#define _DEFAULT_SOURCE
+#ifndef _DEFAULT_SOURCE
+    #define _DEFAULT_SOURCE
+#endif
 #include "dbf.h"
 #include "ndx.h"
 #include <string.h>

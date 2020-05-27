@@ -1,0 +1,9 @@
+prefix=@prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @pkg_name@
+Description: Cobcy COBOL-to-C compiler support library.
+Version: @pkg_major@.@pkg_minor@
+Libs: -L${libdir} -Wl,-gc-sections -l@pkg_name@
+Cflags: -I${includedir} -ffunction-sections -fdata-sections

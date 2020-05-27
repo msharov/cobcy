@@ -33,7 +33,7 @@ void* _ReallocateBytes (void* p, size_t n)
 
 #define S(s) (1<<(s))
 enum {
-    sigset_Quit	= S(SIGINT)|S(SIGQUIT)|S(SIGTERM)|S(SIGPWR),
+    sigset_Quit	= S(SIGINT)|S(SIGQUIT)|S(SIGTERM),
     sigset_Die	= S(SIGILL)|S(SIGABRT)|S(SIGBUS)|S(SIGFPE)
 		|S(SIGSYS)|S(SIGSEGV)|S(SIGALRM)|S(SIGXCPU)
 };
